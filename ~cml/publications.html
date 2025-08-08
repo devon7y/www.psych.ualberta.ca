@@ -1,0 +1,662 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Computational Memory Lab</title>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<link href="style.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+/* Additional styles for publications navigation */
+.publications-container {
+	display: flex;
+	gap: 30px;
+	position: relative;
+}
+
+.publications-nav {
+	position: sticky;
+	top: 90px;
+	height: fit-content;
+	width: 200px;
+	flex-shrink: 0;
+}
+
+.year-nav {
+	background: var(--bg-light, #f8f9fa);
+	border-radius: 10px;
+	padding: 20px;
+	margin-bottom: 20px;
+	border: 1px solid var(--border-light, #e1e8ed);
+}
+
+.year-nav h3 {
+	font-size: 1.1rem;
+	margin-bottom: 15px;
+	color: var(--primary-color, #2c5aa0);
+}
+
+.year-nav select {
+	width: 100%;
+	padding: 8px;
+	border: 1px solid var(--border-light, #e1e8ed);
+	border-radius: 5px;
+	background: white;
+	color: var(--text-dark, #2c3e50);
+	font-size: 0.9rem;
+    cursor: pointer;
+}
+
+/* This will remove the old list-based styles which are no longer needed */
+.year-nav ul, .year-nav li, .year-nav a {
+    /* You can remove the old rules for these elements */
+}
+
+.year-nav a:hover,
+.year-nav a.active {
+	background: var(--accent-color, #4a90e2);
+	color: white;
+}
+
+.author-filter {
+	background: var(--bg-light, #f8f9fa);
+	border-radius: 10px;
+	padding: 20px;
+	border: 1px solid var(--border-light, #e1e8ed);
+}
+
+.author-filter h3 {
+	font-size: 1.1rem;
+	margin-bottom: 15px;
+	color: var(--primary-color, #2c5aa0);
+}
+
+.author-filter select {
+	width: 100%;
+	padding: 8px;
+	border: 1px solid var(--border-light, #e1e8ed);
+	border-radius: 5px;
+	background: white;
+	color: var(--text-dark, #2c3e50);
+	font-size: 0.9rem;
+}
+
+.author-filter button {
+	margin-top: 10px;
+	width: 100%;
+	padding: 8px;
+	background: var(--neural-gradient, linear-gradient(135deg, #2c5aa0 0%, #00a86b 100%));
+	color: white;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	font-weight: 500;
+	transition: all 0.3s ease;
+}
+
+.author-filter button:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 5px 15px rgba(44, 90, 160, 0.3);
+}
+
+.publications-content {
+	flex: 1;
+}
+
+.year-section {
+	scroll-margin-top: 100px;
+}
+
+.filter-info {
+	background: linear-gradient(120deg, #ffeaa7 0%, #fdcb6e 100%);
+	padding: 15px 20px;
+	border-radius: 5px;
+	margin-bottom: 20px;
+	display: none;
+}
+
+.filter-info.active {
+	display: block;
+}
+
+.filter-info button {
+	background: #2c3e50;
+	color: white;
+	border: none;
+	padding: 5px 15px;
+	border-radius: 3px;
+	margin-left: 10px;
+	cursor: pointer;
+}
+
+.publication-item.hidden {
+	display: none;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+	.author-filter select,
+    .year-nav select { /* Applied the style to both select menus */
+		background: var(--bg-white, #232937);
+		color: var(--text-dark, #e1e8ed);
+        border-color: #5a6c7d;
+	}
+
+	.filter-info {
+		background: linear-gradient(120deg, rgba(255, 234, 167, 0.1) 0%, rgba(253, 203, 110, 0.1) 100%);
+		color: #ffeaa7;
+	}
+}
+
+/* Mobile responsiveness */
+@media (max-width: 968px) {
+	.publications-container {
+		flex-direction: column;
+	}
+	
+	.publications-nav {
+		position: relative;
+		top: 0;
+		width: 100%;
+	}
+	
+	.year-nav ul {
+		display: flex;
+		flex-wrap: wrap;
+		max-height: none;
+	}
+	
+	.year-nav li {
+		margin: 5px;
+	}
+}
+</style>
+</head>
+<body class="page-publications">
+<div id="header-wrapper">
+	<div id="header">
+		<div id="menu">
+			<ul>
+				<li><a href="index.html" class="first">Home</a></li>
+				<li class="current_page_item"><a href="research.html">Research</a></li>
+				<li><a href="publications.html">Publications</a></li>
+				<li><a href="courses.html">Courses</a></li>
+				<li><a href="team.html">Our Team</a></li>
+			
+				<li><a href="contact.html">Contact Us</a></li>
+			</ul>
+		</div>
+		<!-- end #menu -->
+		<div id="search">
+			<form method="get" action="">
+				<fieldset>
+					<input type="text" name="s" id="search-text" size="15" />
+					<input type="submit" id="search-submit" value="GO" />
+				</fieldset>
+			</form>
+		</div>
+		<!-- end #search -->
+	</div>
+</div>
+<!-- end #header -->
+<!-- end #header-wrapper -->
+<div id="logo">
+	<h1><a href="#"> Computational Memory Lab </a></h1>
+	<p><em>  <a href="http://templated.co" rel="nofollow"> </a></em></p>
+</div>
+<hr />
+<!-- end #logo -->
+<div id="page">
+	<div id="page-bgtop">
+		<div id="content">
+			<div class="post">
+				<!--<p class="meta"><span class="date">Sunday, April 26, 2009</span> 7:27 AM Posted by <a href="#">Someone</a></p>-->
+				<h2 class="title"><a href="#">Papers</a></h2>
+				<div class="entry">
+					<div class="publications-container">
+						<!-- Navigation sidebar -->
+						<div class="publications-nav">
+							<div class="year-nav">
+							    <h3>Jump to Year</h3>
+							    <select id="yearSelectNav" onchange="jumpToYear(this)">
+							        <option value="">Select a year...</option>
+							        <option value="#year-in-press">In press</option>
+							        <option value="#year-2025">2025</option>
+							        <option value="#year-2024">2024</option>
+							        <option value="#year-2023">2023</option>
+							        <option value="#year-2022">2022</option>
+							        <option value="#year-2021">2021</option>
+							        <option value="#year-2020">2020</option>
+							        <option value="#year-2019">2019</option>
+							        <option value="#year-2017">2017</option>
+							        <option value="#year-2016">2016</option>
+							        <option value="#year-2015">2015</option>
+							        <option value="#year-2014">2014</option>
+							        <option value="#year-2012">2012</option>
+							        <option value="#year-2011">2011</option>
+							        <option value="#year-2010">2010</option>
+							        <option value="#year-2009">2009</option>
+							        <option value="#year-2008">2008</option>
+							        <option value="#year-2007">2007</option>
+							        <option value="#year-2006">2006</option>
+							        <option value="#year-2005">2005</option>
+							        <option value="#year-2004">2004</option>
+							        <option value="#year-2003">2003</option>
+							        <option value="#year-2002">2002</option>
+							        <option value="#year-2001">2001</option>
+							        <option value="#year-2000">2000</option>
+							        <option value="#year-1999">1999</option>
+							    </select>
+							</div>
+							
+							<div class="author-filter">
+								<h3>Filter by Author</h3>
+								<select id="authorSelect">
+									<option value="">All authors</option>
+								</select>
+								<button onclick="filterByAuthor()">Apply Filter</button>
+								<button onclick="clearFilter()">Clear Filter</button>
+							</div>
+						</div>
+						
+						<!-- Publications content -->
+						<div class="publications-content">
+							<div class="filter-info" id="filterInfo">
+								<strong>Filtered by: <span id="filterAuthor"></span></strong>
+								<button onclick="clearFilter()">Clear</button>
+							</div>
+							
+							<br><br>
+					<h3 id="year-in-press" class="year-section">In press</h3>
+			
+					<p class="publication-item"><h4><a href="papers/Caplan_and_Guitard_in_press_JEPLMC.pdf"><b>Caplan, J. B. and Guitard, D. (in press). Inverted list-strength effects in recognition. Journal of Experimental Psychology: Learning, Memory, and Cognition.</a> <a><a href="https://osf.io/swvpt"> [Experiment 1 Data]</a> <a><a href="https://osf.io/h5u9g"> [Experiment 2 Data]</a> <a><a href="https://osf.io/swvpt"> [Model Code]</a>
+
+						    
+							  <br><br><br>
+<h3 id="year-2025" class="year-section">2025</h3>
+
+
+					<p class="publication-item"><h4><a href="papers/Pawluk_et_al_2025.pdf"><b>Pawluk, K., Shalamberidze, T. and Caplan, J. B. (2025). Making oscillation detection more robust. Journal of Neuroscience Methods, 422(110510).</a>  </a><a href="https://github.com/kapawluk/optimized-BOSC">[BOSC scripts]</a></h4>
+
+<p class="publication-item"><h4><a href="papers/Shalamberidze_et_al_2025.pdf"><b>Shalamberidze, T., Nash, K. and Caplan, J. B. (2025). Rhythmic activity in resting state EEG predicts trait anxiety. Imaging Neuroscience, 3(IMAG.a.44).</a></h4>
+						
+
+ <br><br><br> <h3 id="year-2024" class="year-section">2024</h3>
+
+<p class="publication-item"><h4><a href="papers/Loprinzi_and_Caplan_2024.pdf"><b>Loprinzi, P. D. and Caplan, J. B. (2024). Lack of effects of acute exercise intensity on mnemonic discrimination. Quarterly Journal of Experimental Psychology, 78(3), 534-545.</a><a><a href="https://osf.io/gj8he/"> [Experimental Data]</a><br>
+						    
+<p class="publication-item"><h4><a href="papers/Caplan_and_Guitard_2024_Experimental_Psychology.pdf"><b>Caplan, J. B. and Guitard, D. (2024). A feature-space theory of the production effect in recognition.  Experimental Psychology, 71(1), 64-82.</a><a><a href="https://osf.io/7x52q"> [Model Code]</a><br>
+					
+<p class="publication-item"><h4><a href="papers/Caplan_and_Guitard_2024_JML.pdf"><b>Caplan, J. B. and Guitard, D. (2024). Stimulus duration and recognition memory: an attentional subsetting account. Journal of Memory and Language, 139(104556).</a> <a href="https://osf.io/39cz8">[Experimental Data and Code]</a><br>
+
+<p class="publication-item"><h4><a href="papers/Shafaghat_Ardebili_et_al_in_press.pdf"><b>Shafaghat Ardebili, A., Liu, Y. S., Caplan, J. B. (2024). The emergence of all-or-none retrieval of chunks in verbal serial recall. Memory & Cognition, 52(2), 352-372.</a><a href="https://osf.io/hf2ka"> [Experimental Data] </a><br><br><br>				
+							    
+
+
+<h3 id="year-2023" class="year-section">2023</h3>
+
+						<p class="publication-item"><h4><a href="papers/Caplan_in_press_JMP.pdf"><b>Caplan, J. B. (2023). Sparse attentional subsetting of item features and list-composition effects on recognition memory. Journal of Mathematical Psychology, 116(102802).</a><br>
+
+						<p class="publication-item"><h4><a href="papers/Thomas_Caplan_inPress.pdf"><b>Thomas, J. J., Caplan, J. B. (2023). Modelling constituent order despite symmetric associations in memory. Journal of Mathematical Psychology, 115, 102774.</a> <a href="https://osf.io/r3ywf/"> [Model Code] </a><br>
+
+						<p class="publication-item"><h4><a href="papers/Thomas_et_al_2023.pdf"><b>Thomas, J. J., Ayuno, K. C., Kluger, F. E., Caplan, J. B. (2023). The relationship between interactive‐imagery instructions and association memory. Memory & Cognition, 51, 371-390</a> <a href="https://osf.io/x78gp/"> [Experimental Data] </a><br><br><br>
+
+<h3 id="year-2022" class="year-section">2022</h3>
+
+					<p class="publication-item"><h4><a href="papers/Caplan_et_al_2022a.pdf"> Caplan, J. B., Chakravarty, S., and Dittmann, N. L. (2022). Associative recognition without hippocampal associations. Psychological Review. 129(6), 1249-1280</a> <a href="https://osf.io/b3hce/?view_only=c857f150ae6a41878a74434fc4959daf"><b> [Model Code] </a> <br>
+
+
+						<p class="publication-item"><h4><a href="papers/Caplan_et_al_2022b.pdf"><b>Caplan, J. B., Hennies, N., Sommer, T. (2022). Competition between associations in memory. Journal of Cognitive Neuroscience, 34(11), 2144–2167.  </a><br>
+
+							<p class="publication-item"><h4><a href="papers/Caplan_et_al_2022c.pdf"> Caplan, J. B., Shafaghat Ardebili, A., Liu, Y. S. (2022). Chaining models of serial recall can produce positional errors. Journal of Mathematical Psychology, 109, 102677. </a> <a href="https://osf.io/sf2kq/?view_only=5e3fcad5df1442ba9c9697e8e6883121"><b> [Model Code] </a> <br>
+
+						<p class="publication-item"><h4><a href="papers/Kluger_et_al_2022.pdf"> Kluger, F. E., Oladimeji, D. M., Tan, Y., Brown, N. R., and Caplan, J. B. (2022). Mnemonic scaffolds vary in effectiveness for serial recall. Memory, 30(7), 869–894. </a> <a href="https://osf.io/ktnpj/?view_only=d81700ffe06c4c15a2c5b2d767002ff0"><b> [Experimental Data] </a> <br>
+
+					    <p class="publication-item"><h4><a href="papers/Liu_and_Caplan_2022.pdf"> Liu, Y. S., and Caplan, J. B. (2022). Judgments of alphabetical order and mechanisms of congruity effects. Canadian Journal of Experimental Psychology, 76(4), 283–301. </a> <a href="https://osf.io/fsc8r/?view\_only=983f87c245f548f9b9c8f159c0b25fdd"><b> [Experimental Data and Model Code] </a> <br><br><br>
+
+
+
+								<h3 id="year-2021" class="year-section">2021</h3>
+
+								<p class="publication-item"><h4><a href="papers/Sahadevan_et_al_2021.pdf"> Sahadevan, S. S., Chen, Y. Y., and Caplan, J. B. (2021). Imagery-based strategies for memory for associations. Memory, 29(10), 1275-1295. </a><br>
+
+								<p class="publication-item"><h4><a href="papers/Crawford_et_al_2021.pdf">Crawford, L., Caplan, J. B. and Loprinzi, P. D. (2021). The impact of acute exercise timing on memory interference. Perceptual and Motor Skills, 128(3), 1215–1234. </a><br>
+
+
+							<p class="publication-item"><h4><a href="papers/Fujiwara_et_al_2021.pdf">Fujiwara, E., Madan, C. R., Caplan, J. B., Sommer, T. (2021). Emotional arousal impairs association-memory: Roles of prefrontal cortex regions. Learning and Memory, 28(3), 76–81. </a><br><br> 
+
+								<h3 id="year-2020" class="year-section">2020</h3>
+
+							
+								<p class="publication-item"><h4><a href="papers/Chakravarty_et_al_2020.pdf">Chakravarty, S., Chen, Y. Y. and Caplan, J. B. (2020). Predicting memory from study-related brain activity. Journal of Neurophysiology, 124(6), 2060-2075. </a> <br>
+								
+								<p class="publication-item"><h4><a href="papers/Liu_and_Caplan_2020.pdf">Liu, Y. S., Caplan, J. B. (2020). Temporal grouping and direction of serial recall. Memory and Cognition, 48(7), 1295-1315. </a> <a href="https://osf.io/evmct/?view_only=be14d124209442f8882e476f812965b6"><b> [Experimental Data and Model Code] </a> <br>
+
+								<p class="publication-item"><h4><a href="papers/Caplan_et_al_2020.pdf">Caplan, J. B., Xu, K., Chakravarty, S. and Jones, K. E. (2020). Adding a bias to vector models of association memory provides item memory for free. Journal of Mathematical Psychology, 97, 102358.<a href="https://osf.io/h8s6p/"><b> [Model Code]</a> <br>
+
+							    <p class="publication-item"><h4><a href="papers/Pahwa_et_al_2020.pdf">Pahwa, A., Miller, D. J., Caplan, J. B. and Collins, D. F. (2020). Performance on an associative memory test decreases 8 hours after cardiovascular exercise. Journal of Sport & Exercise Psychology, 42(3), 219-226. </a> <br><br>
+
+
+									<h3 id="year-2019" class="year-section">2019</h3>
+
+									<p class="publication-item"><h4><a href="papers/Burton_et_al_2019.pdf">Burton, R. L., Lek, I., Dixon, R. A. and Caplan, J. B. (2019). Associative interference and its resolution in older and younger adults. Psychology and Aging, 34(4), 558-571.<br>
+
+
+									<p class="publication-item"><h4><a href="papers/Caplan_et_al_2019.pdf">Caplan, J. B., Legge, E. L. G., Cheng, B., and Madan, C. R. (2019). Effectiveness of the method of loci is only minimally related to factors that should influence imagined navigation. Quarterly Journal of Experimental Psychology, 72(10), 2541–2553. [<a href="https://osf.io/yvtp2/">Experimental Data]</a> <br>
+
+								        <p class="publication-item"><h4><a href="papers/Caplan_et_al_2019d.pdf"> Caplan, J. B., Sommer, T., Madan, C. R. and Fujiwara, E. (2019). Reduced association-memory for negative information: impact of confidence and interactive imagery during study. Cognition and Emotion, 33(8), 1745-1753. </a><br>
+
+
+									<p class="publication-item"><h4><a href="papers/Chakravarty_et_al_2019.pdf">Chakravarty, S., Fujiwara, E., Madan, C. R., Tomlinson, S. E., Ober, I. and Caplan, J. B. (2019). Value bias of verbal memory. Journal of Memory and Language, 107, 25–39. [<a href="https://data.mendeley.com/datasets/99ydd8dxkm/2">Experimental Data]</a><br>
+
+									<p class="publication-item"><h4><a href="papers/Rodriguez_Dominguez_and_Caplan_2019.pdf">Rodríguez Domínguez, U. and Caplan, J. B. (2019). A hexagonal Fourier model of grid cells. Hippocampus, 29, 37–45. [<a href="papers/Rodriguez_Caplan_2019_suppl.pdf">Supplementary materials][<a href="https://onlinelibrary.wiley.com/toc/10981063/2019/29/1">Featured cover]</a><br><br>
+									
+
+									<h3 id="year-2017" class="year-section">2017</h3>
+									<p class="publication-item"><h4><a href="papers/Kato_and_Caplan_2017b.pdf">Kato, K. and Caplan, J. B. (2017). Order of items within associations. Journal of Memory and Language, 97, 81-102.</a><br>
+
+									<p class="publication-item"><h4><a href="papers/Madan_et_al_2017.pdf">Madan, C. R., Fujiwara, E., Caplan, J. B. and Sommer, T. (2017). Emotional arousal impairs association-memory: roles of amygdala and hippocampus. NeuroImage, 156, 14–28.</a><br>
+
+									<p class="publication-item"><h4><a href="papers/Klingmuller_et_al_2017.pdf">Klingm&uumlller A., Caplan, J. B. and Sommer, T. (2017). Intrusions in episodic memory: reconsolidation or interference? Learning and Memory. 24(5), 216–224.</a><br>
+
+									<p class="publication-item"><h4><a href="papers/Kato_and_Caplan_2017a.pdf">Kato, K. and Caplan, J. B. (2017). The brain's representations may be compatible with convolution-based memory models. Canadian Journal of Experimental Psychology, 71(4), 299-312.</a><br>
+
+
+									<p class="publication-item"><h4><a href="papers/Chen_and_Caplan_2017.pdf">Chen, Y. Y. and Caplan, J. B. (2017). Rhythmic activity and individual variability in recognition memory: theta oscillations correlate with performance whereas alpha oscillations correlate with ERPs. Journal of Cognitive Neuroscience, 29(1), 183–202.</a><br>
+
+									<p class="publication-item"><h4><a href="papers/Burton_et_al_2017.pdf">Burton, R. L., Lek, I. and Caplan, J. B. (2017). Associative independence revisited: competition between conflicting associations can be resolved or even reversed in one trial. Quarterly Journal of Experimental Psychology, 70(4), 832-857.</a><br>
+
+									<p class="publication-item"><h4><a href="papers/Madan_et_al_2017c.pdf">Madan, C. R., Ludvig, E. A. And Spetch, M. L. (2017). The role of memory in distinguishing risky decisions from experience and description. The Quarterly Journal of Experimental Psychology, 70(10, 2048–2059.</a><br><br>
+
+									<h3 id="year-2016" class="year-section">2016</h3>
+
+									<p class="publication-item"><h4><a href="papers/Caplan_and_Madan_2016.pdf">Caplan, J. B. and Madan, C. R. (2016). Word-imageability enhances association-memory by increasing hippocampal engagement. Journal of Cognitive Neuroscience, 28(10), 1522–1538.</a><br><br>
+
+									<h3 id="year-2015" class="year-section">2015</h3>
+										
+										<h4 class="publication-item"><a href="papers/Talmi_et_al_2015.pdf">Talmi, D., Caplan, J. B., Richards, B. & Moscovitch, M. (2015). Long-term recency in anterograde amnesia. PLoS ONE, 10(6), e0124084.</a><br><br>
+
+										<p class="publication-item"><a href="papers/Caplan_et_al_2015a.pdf">Caplan, J. B., Bottomley, M., Kang, P., & Dixon, R. A. (2015). Distinguishing rhythmic from non-rhythmic brain activity during rest in healthy neurocognitive aging. NeuroImage, 112, 341-352. </a><br><br>
+
+										<p class="publication-item"><a href="papers/Caplan_2015a.pdf">Caplan, J. B. (2015). Order-memory and association-memory. Canadian Journal of Experimental Psychology, 69(3), 221-232.</a> <br><br>
+
+										<p class="publication-item"><a href="papers/Caplan_et_al_2015b.pdf">Caplan, J. B., Madan, C. R., & Bedwell, D. J. (2015). Item properties may influence item-item associations in serial recall. Psychonomic Bulletin & Review, 22(2), 483-489.</a> <br><br></h4>
+
+										<h3 id="year-2014" class="year-section">2014</h3><br>
+
+										<h4 class="publication-item"><a href="papers/Chen_et_al_2014.pdf">Chen, Y. Y., Lithgow, K., Hemmerich, J. A., & Caplan, J. B. (2014). Is what goes in what comes out? Encoding and retrieval event-related potentials together determine memory outcome. Experimental Brain Research, 232(1), 3175-3190.</a> <br><br>
+
+										<p class="publication-item"><a href="papers/Liu_et_al_2014.pdf">Liu , Y. S., Chan, M. & Caplan, J. B. (2014). Generality of a congruity effect in judgements of relative order. Memory & Cognition, 42(7), 1086-1105.</a>  <a href="https://osf.io/5xvah">[Experimental Data]</a><br> <br><br>
+
+										<p class="publication-item"><a href="papers/Cruikshank_et_al_2014.pdf">Cruikshank, L. C., Caplan, J. B., & Singhal, A. (2014). A perception-based ERP reveals that the magnitude of delay matters for memory-guided reaching. Experimental Brain Research, 232(7), 2087-2094.</a><br><br>
+
+										<p class="publication-item"><a href="papers/Caplan_et_al_2014b.pdf">Caplan, J. B., Boulton, K. L., & Gagné, C. L. (2014). Associative asymmetry of compound words. Journal of Experimental Psychology: Learning, Memory, & Cognition, 40(4), 1163-1171.</a><br><br>
+										<p class="publication-item"><a href="papers/Caplan_et_al_2014a.pdf">Caplan, J. B., Rehani, M., & Andrews, J. C. (2014). Associations compete directly in memory. Quarterly Journal of Experimental Psychology, 67(5), 955-978.</a><br><br>
+
+										<p class="publication-item"><a href="papers/Masuda_et_al_2014.pdf">Masuda, T., Russell, M. J., Chen, Y. Y., Hioki, K., & Caplan, J. B. (2014). N400 incongruity effect in an episodic memory task reveals different strategies for handling relevant contextual information for Japanese than European Canadians. Cognitive Neuroscience, 5(1), 17-25.</a><br><br></h4>
+
+										<h3 id="year-2012" class="year-section">2012</h3><br>
+
+										<h4 class="publication-item"><a href="papers/Cruikshank_et_al_2012b.pdf">Cruikshank, L. C, Caplan, J. B., & Singhal, A. (2012). Human electrophysiological reflections of the recruitment of perceptual processing during actions that engage memory. Journal of Vision, 12(6), 1-13.</a><br><br>
+
+										<p class="publication-item"><a href="papers/Legge_et_al_2012.pdf">Legge, E. L. G., Madan, C. R., Ng, E. T., & Caplan, J. B. (2012). Building a memory palace in minutes: Equivalent memory performance using virtual versus conventional environments with the Method of Loci. Acta Psychologica, 141(3), 380-390.</a><br><br>
+
+										<p class="publication-item"><a href="papers/Madan_et_al_2012b.pdf">Madan, C. R., Fujiwara, E., Gerson, B. C., & Caplan, J. B. (2012). High reward makes items easier to remember, but harder to bind to a new temporal context. Frontiers in Integrative Neuroscience, 6, 61.</a> <br><br>
+
+										<p class="publication-item"><a href="papers/Madan_et_al_2012.pdf">Madan, C. R., Caplan, J. B., Lau, C. S. M., & Fujiwara, E. (2012). Emotional arousal does not enhance association-memory. Journal of Memory and Language, 66, 695-716.</a><br><br>
+
+										<p class="publication-item"><a href="papers/Cruikshank_et_al_2012a.pdf">Cruikshank, L. C., Singhal, A., Hueppelsheuser, M. & Caplan, J. B. (2012). Theta oscillations reflect a putative neural mechanism for human sensorimotor integration. Journal of Neurophysiology, 107(1) 65-77.</a><br><br>
+
+										<p class="publication-item"><a href="papers/Hughes_et_al_2012_Hippocampus.pdf">Hughes, A. M., Whitten, T. A., Caplan, J. B. & Dickson, C. T. (2012). BOSC: A Better OSCillation detection method, extracts both sustained and transient rhythms from rat hippocampal recordings. Hippocampus, 22(6), 1417-1428.</a><br><br></h4>
+
+										<h3 id="year-2011" class="year-section">2011</h3><br>
+
+										<h4 class="publication-item"><a href="papers/Rehani_and_Caplan_2011.pdf">Rehani, M., & Caplan, J. B. (2011). Interference and the representation of order within associations. Quarterly Journal of Experimental Psychology, 64(7), 1409-1429.</a><br><br>
+
+										<p class="publication-item"><a href="papers/Whitten_et_al_2011.pdf">Whitten, T. A., Hughes, A. M., Dickson, C. T., & Caplan, J. B. (2011). A better oscillation detection method robustly extracts EEG rhythms across brain state changes: The human alpha rhythm as a test case. NeuroImage, 54(2), 860-874. </a><a href="papers/BOSC_scripts.zip">[BOSC scripts]</a><br><br></h4>
+
+										<h3 id="year-2010" class="year-section">2010</h3><br>
+
+										<h4 class="publication-item"><a href="papers/Madan_et_al_2010.pdf">Madan, C. R., Glaholt, M. G., & Caplan, J. B. (2010). The influence of item properties on association-memory. Journal of Memory and Language, 63, 46-63.</a><br><br>
+
+										<p class="publication-item"><a href="papers/Jacobs_et_al_2010.pdf">Jacobs, J., Korolev, I. O., Caplan, J. B., Ekstrom, A. D., Litt, B., Baltuch, G., Fried, I., Schulze-Bonhage, A., Madsen, J. R., & Kahana, M. J. (2010). Right-lateralized brain oscillations in human spatial navigation. Journal of Cognitive Neuroscience, 22(5), 824-836.</a><br><br></h4>
+
+										<h3 id="year-2009" class="year-section">2009</h3><br>
+
+										<h4 class="publication-item"><a href="papers/Chan_et_al_2009.pdf">Chan, M., Ross, B., Earle, G., & Caplan, J. B. (2009). Precise instructions determine participants' memory search strategy in judgments of relative order in short lists. Psychonomics Bulletin & Review, 16(5), 945-951.</a> <br><br>
+
+										<p class="publication-item"><a href="papers/Caplan_et_al_2009.pdf">Caplan, J. B. , Glaholt, M. G. and McIntosh, A. R. (2009). EEG activity underlying successful study of associative and order information. Journal of Cognitive Neuroscience, 21(7), 1346-1364.</a><br><br></h4>
+
+										<h3 id="year-2008" class="year-section">2008</h3><br>
+
+										<h4 class="publication-item"><a href="papers/Talmi_et_al_2008.pdf">Talmi, D., Anderson, A. K., Riggs, L., Caplan, J. B. and Moscovitch, M. (2008) Immediate memory consequences of the effect of emotion on attention to pictures. Learning & Memory, 15(3), 172-182.</a><br><br></h4>
+
+										<h3 id="year-2007" class="year-section">2007</h3><br>
+
+										<h4 class="publication-item"><a href="papers/Caplan_and_Glaholt_2007.pdf">Caplan, J. B. & Glaholt, M. G. (2007). The roles of EEG oscillations in learning relational information. NeuroImage, 38(3), 604-616.</a><br><br>
+
+										<p class="publication-item"><a href="papers/Newman_et_al_2007.pdf">Newman, E. L., Caplan, J. B., Kirschen, M. P., Korolev, I. O., Sekuler, R. and Kahana, M. J. (2007). Learning your way around town: How virtual taxicab drivers learn to use both layout and landmark information. Cognition, 104(2), 231-253.</a><br><br>
+
+										<p class="publication-item"><a href="papers/Caplan_et_al_2007a.pdf">Caplan, J. B., McIntosh, A. R. and De Rosa, E. (2007) Two distinct functional networks for successful resolution of proactive interference, Cerebral Cortex, 17(7), 1650-1663.</a><br><br></h4>
+
+										<h3 id="year-2006" class="year-section">2006</h3><br>
+
+										<h4 class="publication-item"><a href="papers/Caplan_et_al_2006a.pdf">Caplan, J. B., Glaholt, M. G. and McIntosh, A. R. (2006). Linking associative and list memory: pairs versus triples, Journal of Experimental Psychology: Learning, Memory & Cognition, 32(6), 1244-1265.</a><br><br>
+
+										<p class="publication-item"><a href="papers/Caplan_et_al_2006.pdf">Caplan, J. B., Luks, T. L., Simpson, G. V., Glaholt, M. and McIntosh, A. R. (2006). Parallel networks operating across attentional deployment and motion processing: A multi-seed partial least squares fMRI study, NeuroImage, 29(4), 1192-1202.</a><br><br></h4>
+
+										<h3 id="year-2005" class="year-section">2005</h3><br>
+
+										<h4 class="publication-item"><a href="papers/Caplan_2005.pdf">Caplan, J. B. (2005). Associative isolation: unifying associative and order paradigms. The Journal of Mathematical Psychology, 49}(5), 383-402.</a><br><br>
+
+										<p class="publication-item"><a href="papers/Ekstrom_et_al_2005.pdf">Ekstrom, A. D., Caplan, J. B., Shattuck, K., Fried, I. and Kahana, M. J. (2005). Human hippocampal theta activity during virtual navigation, Hippocampus, 15(7), 881-889.</a><br><br></h4>
+
+										<h3 id="year-2004" class="year-section">2004</h3><br>
+
+										<h4 class="publication-item"><a href="papers/Caplan_2004.pdf">Caplan, J. B. (2004) Unifying models of paired associates and serial learning: insights from simulating a chaining model. NeuroComputing, 58-60, 739-743.</a><br><br></h4>
+
+										<h3 id="year-2003" class="year-section">2003</h3><br>
+
+										<h4 class="publication-item"><a href="papers/Howard_et_al_2003.pdf">Howard, M. W., Rizzuto, D. S., Caplan, J. B., Madsen, J. R., Lisman J., Aschenbrenner-Scheibe, R., Schulze-Bonhage, A. and Kahana, M. J. (2003) Gamma oscillations correlate with working memory load in humans. Cerebral Cortex, 13}(12), 1369-1374.</a><br><br>
+
+										<p class="publication-item"><a href="papers/Ekstrom_et_al_2003.pdf">Ekstrom, A. D., Kahana, M. J., Caplan, J. B., Fields, T. A., Isham, E. A., Newman, E. L. and Fried, I. (2003) Cellular networks underlying human spatial navigation. Nature, 425(6954), 184-188.</a> <br><br>
+										<p class="publication-item"><a href="papers/Caplan_et_al_2003.pdf">Caplan, J. B., Madsen, J. R., Schulze-Bonhage, A., Aschenbrenner-Scheibe, R., Newman, E. L. and Kahana, M. J. (2003) Human theta oscillations related to sensorimotor integration and spatial learning. Journal of Neuroscience, 23(11), 4726-4736.</a><br><br></h4>
+
+										<h3 id="year-2002" class="year-section">2002</h3><br>
+
+										<h4 class="publication-item"><a href="papers/Kahana_and_Caplan_2002.pdf">Kahana, M. J. and Caplan, J. B. (2002) Associative asymmetry in probed recall of serial lists. Memory & Cognition, 30(6), 841-849.</a> <br><br></h4>
+
+										<h3 id="year-2001" class="year-section">2001</h3><br>
+
+
+										<h4 class="publication-item"><a href="papers/Caplan_et_al_2001.pdf">Caplan, J. B., Kahana, M. J., Raghavachari, S. and Madsen, J. R. (2001) Distinct patterns of brain oscillations underlie two basic parameters of human maze learning. Journal of Neurophysiology, 86(1), 368-380.</a> <br><br>
+
+										<p class="publication-item"><a href="papers/Raghavachari_et_al_2001.pdf">Raghavachari, S., Kahana, M. J., Rizzuto, D. S., Caplan, J. B., Kirschen, M. P., Bourgeois, B., Madsen, J. R. and Lisman, J. E. (2001) Gating of human theta oscillations by a working memory task. Journal of Neuroscience, 21(9), 3175-3183.</a> <br><br></h4>
+
+										<h3 id="year-2000" class="year-section">2000</h3><br>
+
+										<h4 class="publication-item"><a href="papers/Caplan_et_al_2000.pdf">Caplan, J. B., Kahana, M. J., Sekuler, R., Kirschen, M. and Madsen, J. R. (2000) Task dependence of human theta: the case for multiple cognitive functions. NeuroComputing, 32-33, 659-665.</a> <br><br></h4>
+
+										<h3 id="year-1999" class="year-section">1999</h3><br>
+
+										<h4 class="publication-item"><a href="papers/Kahana_et_al_1999b.pdf">Kahana, M. J., Caplan, J. B., Sekuler, R. and Madsen, J. (1999) Using intracranial recordings to study theta: Response to J. O'Keefe and N. Burgess (1999). trends in Cognitive Science, 3(11), 406-407.</a> <br><br>
+
+										<p class="publication-item"><a href="papers/Kahana_et_al_1999.pdf">Kahana, M. J., Sekuler, R, Caplan, J. B., Kirschen, M. and Madsen, J. (1999) Human theta oscillations exhibit task dependence during virtual maze navigation. Nature, 399(6738), 781-784.</a><br><br></h4>
+
+						</h4></p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- end #content -->
+		<div style="clear: both;">&nbsp;</div>
+	</div>
+	<!-- end #page -->
+	<div id="footer">
+		<p>&copy; CML. All rights reserved. <!--Design by <a href="http://templated.co" rel="nofollow">TEMPLATED</a>--></p>
+	</div>
+	<!-- end #footer -->
+</div>
+
+<script>
+// Extract unique authors from publications
+
+function jumpToYear(selectElement) {
+    const targetId = selectElement.value;
+    if (targetId) {
+        const target = document.querySelector(targetId);
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+}
+
+function extractAuthors() {
+	const publications = document.querySelectorAll('.publication-item');
+	const authorsSet = new Set();
+	
+	publications.forEach(pub => {
+		const text = pub.innerText;
+		// Extract authors (before the year in parentheses)
+		const match = text.match(/^[^(]+/);
+		if (match) {
+			const authorsText = match[0];
+			// Split by common delimiters and clean up
+			const authors = authorsText.split(/[,&]|and/)
+				.map(a => a.trim())
+				.filter(a => a.length > 0)
+				.map(a => {
+					// Remove trailing periods and clean up
+					return a.replace(/\.$/, '').replace(/\s+/g, ' ').trim();
+				});
+			
+			authors.forEach(author => {
+				// Filter out common non-author strings
+				if (author && !author.match(/^\d/) && author.length > 2) {
+					authorsSet.add(author);
+				}
+			});
+		}
+	});
+	
+	return Array.from(authorsSet).sort();
+}
+
+// Populate author dropdown
+function populateAuthorDropdown() {
+	const authors = extractAuthors();
+	const select = document.getElementById('authorSelect');
+	
+	// Clear existing options except the first
+	while (select.options.length > 1) {
+		select.remove(1);
+	}
+	
+	// Add authors to dropdown
+	authors.forEach(author => {
+		const option = document.createElement('option');
+		option.value = author;
+		option.textContent = author;
+		select.appendChild(option);
+	});
+}
+
+// Filter publications by selected author
+function filterByAuthor() {
+	const select = document.getElementById('authorSelect');
+	const selectedAuthor = select.value;
+	
+	if (!selectedAuthor) {
+		clearFilter();
+		return;
+	}
+	
+	const publications = document.querySelectorAll('.publication-item');
+	let visibleCount = 0;
+	
+	publications.forEach(pub => {
+		const text = pub.innerText;
+		if (text.includes(selectedAuthor)) {
+			pub.classList.remove('hidden');
+			visibleCount++;
+		} else {
+			pub.classList.add('hidden');
+		}
+	});
+	
+	// Show filter info
+	const filterInfo = document.getElementById('filterInfo');
+	const filterAuthor = document.getElementById('filterAuthor');
+	filterInfo.classList.add('active');
+	filterAuthor.textContent = `${selectedAuthor} (${visibleCount} publications)`;
+	
+	// Scroll to top of publications
+	document.querySelector('.publications-content').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Clear filter
+function clearFilter() {
+	const publications = document.querySelectorAll('.publication-item');
+	publications.forEach(pub => {
+		pub.classList.remove('hidden');
+	});
+	
+	// Hide filter info
+	document.getElementById('filterInfo').classList.remove('active');
+	
+	// Reset dropdown
+	document.getElementById('authorSelect').value = '';
+}
+
+// Highlight active year in navigation
+function updateActiveYear() {
+	const yearSections = document.querySelectorAll('.year-section');
+	const yearLinks = document.querySelectorAll('.year-nav a');
+	
+	// Remove all active classes
+	yearLinks.forEach(link => link.classList.remove('active'));
+	
+	// Find which year section is in view
+	let currentYear = null;
+	yearSections.forEach(section => {
+		const rect = section.getBoundingClientRect();
+		if (rect.top <= 150 && rect.bottom > 150) {
+			currentYear = section.id;
+		}
+	});
+	
+	// Add active class to corresponding link
+	if (currentYear) {
+		const activeLink = document.querySelector(`.year-nav a[href="#${currentYear}"]`);
+		if (activeLink) {
+			activeLink.classList.add('active');
+		}
+	}
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+	populateAuthorDropdown();
+	
+	// Add scroll listener for active year highlighting
+	window.addEventListener('scroll', updateActiveYear);
+	updateActiveYear(); // Initial call
+	
+	// Smooth scrolling for year navigation
+	document.querySelectorAll('.year-nav a').forEach(link => {
+		link.addEventListener('click', function(e) {
+			e.preventDefault();
+			const targetId = this.getAttribute('href').substring(1);
+			const target = document.getElementById(targetId);
+			if (target) {
+				target.scrollIntoView({ behavior: 'smooth' });
+			}
+		});
+	});
+});
+</script>
+
+</body>
+</html>
