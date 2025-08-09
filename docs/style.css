@@ -499,11 +499,11 @@ hr {
   align-items: center;
 }
 
-.team-member-grid img {
+.post .team-member-grid img {
 	width: 100%;
 	aspect-ratio: 1 / 1;
 	object-fit: cover;
-  border-radius: 10px;
+  border-radius: 30px;
 }
 
 .post .entry pre {
