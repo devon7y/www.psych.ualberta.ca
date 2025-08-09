@@ -35,16 +35,14 @@ body {
   color: var(--text-dark);
   background: var(--bg-light);
   background-image: url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), radial-gradient(circle at 20% 80%, rgba(44, 90, 160, 0.1) 0%, transparent 25%), radial-gradient(circle at 80% 20%, rgba(0, 168, 107, 0.1) 0%, transparent 25%);
-  background-repeat: repeat, repeat, repeat, repeat, repeat, repeat, repeat, repeat, repeat, repeat, no-repeat, no-repeat;
+  background-repeat: repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, no-repeat, no-repeat;
   background-size: 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, cover, cover;
   background-position: 0 0, 250px 100px, 100px 200px, 350px 300px, 50px 400px, 300px 500px, 150px 600px, 400px 700px, 200px 800px, 450px 900px, 0 0, 0 0; /* Staggered rows */
   transition: background-color 0.3s ease, color 0.3s ease, filter 0.3s ease; /* Add filter transition */
-  filter: brightness(0.8); /* Initial brightness, slightly darker */
+  filter: brightness(1.0); /* Initial brightness, slightly darker */
 }
 
-body:hover {
-  filter: brightness(1.0); /* Brighter on hover */
-}
+
 
 img {
     opacity: 1;
