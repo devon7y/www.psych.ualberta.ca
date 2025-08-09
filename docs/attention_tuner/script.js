@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsSummary = document.getElementById('results-summary');
     const resultsChart = document.getElementById('results-chart');
     const resultsExplanation = document.getElementById('results-explanation');
+    const playAgainBtn = document.getElementById('play-again-btn');
+    const clearResultsBtn = document.getElementById('clear-results-btn');
 
     // Word lists
     const words = [
@@ -33,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let listType = ''; // 'pure-strong', 'pure-weak', or 'mixed'
     let studyList = [];
     let recognitionList = [];
-    let userResponses = [];
+    let userResponses = JSON.parse(localStorage.getItem('attentionTunerResults')) || [];
 
     // --- Event Listeners ---
     pureStrongBtn.addEventListener('click', () => startGame('pure-strong'));
@@ -202,21 +204,22 @@ document.addEventListener('DOMContentLoaded', () => {
             word: item.word,
             strength: item.strength,
             response: response,
-            correct: (item.strength !== 'lure' && response === true) || (item.strength === 'lure' && response === false)
+            correct: (item.strength !== 'lure' && response === true) || (item.strength === 'lure' && response === false),
+            listType: listType // Add the listType to the stored response
         });
     }
 
     function showResults() {
         // Calculate performance metrics
-        const strong_pure_correct = userResponses.filter(r => r.strength === 'strong' && listType === 'pure-strong' && r.correct).length;
-        const strong_mixed_correct = userResponses.filter(r => r.strength === 'strong' && listType === 'mixed' && r.correct).length;
-        const weak_mixed_correct = userResponses.filter(r => r.strength === 'weak' && listType === 'mixed' && r.correct).length;
-        const weak_pure_correct = userResponses.filter(r => r.strength === 'weak' && listType === 'pure-weak' && r.correct).length;
+        const strong_pure_correct = userResponses.filter(r => r.strength === 'strong' && r.listType === 'pure-strong' && r.correct).length;
+        const strong_mixed_correct = userResponses.filter(r => r.strength === 'strong' && r.listType === 'mixed' && r.correct).length;
+        const weak_mixed_correct = userResponses.filter(r => r.strength === 'weak' && r.listType === 'mixed' && r.correct).length;
+        const weak_pure_correct = userResponses.filter(r => r.strength === 'weak' && r.listType === 'pure-weak' && r.correct).length;
 
-        const total_strong_pure = userResponses.filter(r => r.strength === 'strong' && listType === 'pure-strong').length;
-        const total_strong_mixed = userResponses.filter(r => r.strength === 'strong' && listType === 'mixed').length;
-        const total_weak_mixed = userResponses.filter(r => r.strength === 'weak' && listType === 'mixed').length;
-        const total_weak_pure = userResponses.filter(r => r.strength === 'weak' && listType === 'pure-weak').length;
+        const total_strong_pure = userResponses.filter(r => r.strength === 'strong' && r.listType === 'pure-strong').length;
+        const total_strong_mixed = userResponses.filter(r => r.strength === 'strong' && r.listType === 'mixed').length;
+        const total_weak_mixed = userResponses.filter(r => r.strength === 'weak' && r.listType === 'mixed').length;
+        const total_weak_pure = userResponses.filter(r => r.strength === 'weak' && r.listType === 'pure-weak').length;
 
         const strong_pure_accuracy = total_strong_pure > 0 ? (strong_pure_correct / total_strong_pure) * 100 : 0;
         const strong_mixed_accuracy = total_strong_mixed > 0 ? (strong_mixed_correct / total_strong_mixed) * 100 : 0;
@@ -255,7 +258,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         resultsExplanation.textContent = 'Notice anything strange? You were likely more accurate at recognizing \'strong\' words when they were in a list with other strong words (pure list) than when they were mixed with weak words. This is the inverted list-strength effect! It happens because when your brain expects only deep, meaningful information, it narrows its focus. When it expects a mix of shallow and deep information, it widens its focus, making it harder to pinpoint the specific deep features of the strong words.';
+
+        // Save results to local storage
+        localStorage.setItem('attentionTunerResults', JSON.stringify(userResponses));
     }
+
+    // --- Event Listeners for new buttons ---
+    playAgainBtn.addEventListener('click', () => {
+        // Reset game state
+        studyPhase.style.display = 'none';
+        distractorPhase.style.display = 'none';
+        recognitionPhase.style.display = 'none';
+        resultsPhase.style.display = 'none';
+        startScreen.style.display = 'block';
+        currentPhase = 'start';
+        studyList = [];
+        recognitionList = [];
+        // userResponses is preserved for aggregation
+        distractorAnswer.value = ''; // Clear previous answer
+        attentionSpotlight.style.display = 'none'; // Hide spotlight
+    });
+
+    clearResultsBtn.addEventListener('click', () => {
+        localStorage.removeItem('attentionTunerResults');
+        userResponses = []; // Clear in-memory results as well
+        location.reload(); // Reload the page to reflect cleared state
+    });
+
+    // --- Init ---
+    // The game now starts on button click
 
     // --- Init ---
     // The game now starts on button click
