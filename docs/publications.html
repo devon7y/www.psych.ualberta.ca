@@ -48,17 +48,6 @@
     cursor: pointer;
 }
 
-/* This will remove the old list-based styles which are no longer needed */
-.year-nav ul, .year-nav li, .year-nav a {
-    /* You can remove the old rules for these elements */
-}
-
-.year-nav a:hover,
-.year-nav a.active {
-	background: var(--accent-color, #4a90e2);
-	color: white;
-}
-
 .author-filter {
 	background: var(--bg-light, #f8f9fa);
 	border-radius: 10px;
@@ -137,12 +126,12 @@
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
 	.author-filter select,
-    .year-nav select { /* Applied the style to both select menus */
+    .year-nav select {
 		background: var(--bg-white, #232937);
 		color: var(--text-dark, #e1e8ed);
         border-color: #5a6c7d;
 	}
-
+	
 	.filter-info {
 		background: linear-gradient(120deg, rgba(255, 234, 167, 0.1) 0%, rgba(253, 203, 110, 0.1) 100%);
 		color: #ffeaa7;
@@ -160,16 +149,6 @@
 		top: 0;
 		width: 100%;
 	}
-	
-	.year-nav ul {
-		display: flex;
-		flex-wrap: wrap;
-		max-height: none;
-	}
-	
-	.year-nav li {
-		margin: 5px;
-	}
 }
 </style>
 </head>
@@ -183,11 +162,9 @@
 				<li><a href="publications.html">Publications</a></li>
 				<li><a href="courses.html">Courses</a></li>
 				<li><a href="team.html">Our Team</a></li>
-			
 				<li><a href="contact.html">Contact Us</a></li>
 			</ul>
 		</div>
-		<!-- end #menu -->
 		<div id="search">
 			<form method="get" action="">
 				<fieldset>
@@ -196,58 +173,55 @@
 				</fieldset>
 			</form>
 		</div>
-		<!-- end #search -->
-	</div>
+		</div>
 </div>
-<!-- end #header -->
-<!-- end #header-wrapper -->
 <div id="logo">
-	<h1><a href="#"> Computational Memory Lab </a></h1>
-	<p><em>  <a href="http://templated.co" rel="nofollow"> </a></em></p>
+  <img src="cml_logo.svg" alt="CML Logo" class="cml-logo">
+  <div class="logo-text-wrapper">
+    <h1>Computational Memory Lab</h1>
+    <p>Studying human memory through computation, behaviour, and brain imaging.</p>
+  </div>
 </div>
 <hr />
-<!-- end #logo -->
 <div id="page">
 	<div id="page-bgtop">
 		<div id="content">
 			<div class="post">
-				<!--<p class="meta"><span class="date">Sunday, April 26, 2009</span> 7:27 AM Posted by <a href="#">Someone</a></p>-->
 				<h2 class="title"><a href="#">Papers</a></h2>
 				<div class="entry">
 					<div class="publications-container">
-						<!-- Navigation sidebar -->
 						<div class="publications-nav">
 							<div class="year-nav">
-							    <h3>Jump to Year</h3>
-							    <select id="yearSelectNav" onchange="jumpToYear(this)">
-							        <option value="">Select a year...</option>
-							        <option value="#year-in-press">In press</option>
-							        <option value="#year-2025">2025</option>
-							        <option value="#year-2024">2024</option>
-							        <option value="#year-2023">2023</option>
-							        <option value="#year-2022">2022</option>
-							        <option value="#year-2021">2021</option>
-							        <option value="#year-2020">2020</option>
-							        <option value="#year-2019">2019</option>
-							        <option value="#year-2017">2017</option>
-							        <option value="#year-2016">2016</option>
-							        <option value="#year-2015">2015</option>
-							        <option value="#year-2014">2014</option>
-							        <option value="#year-2012">2012</option>
-							        <option value="#year-2011">2011</option>
-							        <option value="#year-2010">2010</option>
-							        <option value="#year-2009">2009</option>
-							        <option value="#year-2008">2008</option>
-							        <option value="#year-2007">2007</option>
-							        <option value="#year-2006">2006</option>
-							        <option value="#year-2005">2005</option>
-							        <option value="#year-2004">2004</option>
-							        <option value="#year-2003">2003</option>
-							        <option value="#year-2002">2002</option>
-							        <option value="#year-2001">2001</option>
-							        <option value="#year-2000">2000</option>
-							        <option value="#year-1999">1999</option>
-							    </select>
+                                <h3>Jump to Year</h3>
+                                <select id="yearSelectNav" onchange="jumpToYear(this)">
+                                    <option value="">Select a year...</option>
+                                    <option value="#year-in-press">In press</option>
+                                    <option value="#year-2025">2025</option>
+                                    <option value="#year-2024">2024</option>
+                                    <option value="#year-2023">2023</option>
+                                    <option value="#year-2022">2022</option>
+                                    <option value="#year-2021">2021</option>
+                                    <option value="#year-2020">2020</option>
+                                    <option value="#year-2019">2019</option>
+                                    <option value="#year-2017">2017</option>
+                                    <option value="#year-2016">2016</option>
+                                    <option value="#year-2015">2015</option>
+                                    <option value="#year-2014">2014</option>
+                                    <option value="#year-2012">2012</option>
+                                    <option value="#year-2011">2011</option>
+                                    <option value="#year-2010">2010</option>
+                                    <option value="#year-2009">2009</option>
+                                    <option value="#year-2008">2008</option>
+                                    <option value="#year-2007">2007</option>
+                                    <option value="#year-2006">2006</option>
+                                    <option value="#year-2005">2005</option>
+                                    <option value="#year-2004">2004</option>
+                                    <option value="#year-2003">2003</option>
+                                    <option value="#year-2002">2002</option>
+                                    <option value="#year-2001">2001</option>
+                                    <option value="#year-2000">2000</option>
+                                    <option value="#year-1999">1999</option>
+                                </select>
 							</div>
 							
 							<div class="author-filter">
@@ -260,7 +234,6 @@
 							</div>
 						</div>
 						
-						<!-- Publications content -->
 						<div class="publications-content">
 							<div class="filter-info" id="filterInfo">
 								<strong>Filtered by: <span id="filterAuthor"></span></strong>
@@ -490,19 +463,185 @@
 				</div>
 			</div>
 		</div>
-		<!-- end #content -->
 		<div style="clear: both;">&nbsp;</div>
 	</div>
-	<!-- end #page -->
 	<div id="footer">
-		<p>&copy; CML. All rights reserved. <!--Design by <a href="http://templated.co" rel="nofollow">TEMPLATED</a>--></p>
+		<p>&copy; CML. All rights reserved. </p>
 	</div>
-	<!-- end #footer -->
-</div>
+	</div>
 
 <script>
-// Extract unique authors from publications
+// --- FINAL AND CORRECTED SCRIPT ---
 
+/**
+ * Reusable helper function to parse an author string into a list of authors.
+ * This is the single source of truth for author parsing.
+ * @param {string} authorString - The raw string of authors, e.g., "Chan, M. & Ross, B."
+ * @returns {string[]} An array of correctly parsed author names.
+ */
+function parseAuthorsFromString(authorString) {
+    if (!authorString) {
+        return [];
+    }
+    
+    // 1. Standardize all separators ("and", "&") to a comma.
+    const standardizedString = authorString.replace(/ and | & /g, ',');
+
+    // 2. Split into a "flat" list of all name fragments.
+    const fragments = standardizedString.split(',').map(f => f.trim());
+
+    // 3. Intelligently recombine the pieces.
+    const finalAuthors = fragments.reduce((acc, currentFragment) => {
+        if (!currentFragment) {
+            return acc;
+        }
+        
+        // A fragment is only initials if it contains a period or is a single capital letter.
+        const isInitials = currentFragment.includes('.') || /^[A-Z]$/.test(currentFragment);
+
+        if (acc.length === 0 || !isInitials) {
+            acc.push(currentFragment); // Add as a new author.
+        } else {
+            acc[acc.length - 1] += `, ${currentFragment}`; // Append initials to the last author.
+        }
+        
+        return acc;
+    }, []);
+
+    return finalAuthors;
+}
+
+
+/**
+ * Extracts all unique author names from the page and populates the dropdown.
+ * Uses the reusable parsing helper function.
+ */
+function extractAuthors() {
+    const publications = document.querySelectorAll('.publication-item');
+    const authorsSet = new Set();
+
+    publications.forEach(pub => {
+        const text = pub.innerText;
+        const authorsTextMatch = text.match(/^(.*?)\s+\((?:\d{4}|in press)\)/);
+        const authorString = authorsTextMatch ? authorsTextMatch[1] : '';
+        
+        const parsedAuthors = parseAuthorsFromString(authorString);
+        
+        parsedAuthors.forEach(author => {
+            authorsSet.add(author);
+        });
+    });
+
+    return Array.from(authorsSet).sort();
+}
+
+/**
+ * Filters the visible publications based on the selected author.
+ * Now directly manipulates style.display for robust hiding/showing.
+ */
+function filterByAuthor() {
+    const select = document.getElementById('authorSelect');
+    const selectedAuthor = select.value;
+
+    if (!selectedAuthor) {
+        clearFilter();
+        return;
+    }
+
+    const publications = document.querySelectorAll('.publication-item');
+    let visibleCount = 0;
+
+    publications.forEach(pub => {
+        const text = pub.innerText;
+        const authorsTextMatch = text.match(/^(.*?)\s+\((?:\d{4}|in press)\)/);
+        const authorString = authorsTextMatch ? authorsTextMatch[1] : '';
+        
+        // Parse the authors for this specific publication.
+        const authorsInPub = parseAuthorsFromString(authorString);
+
+        // Check if the selected author is in the list for this publication.
+        if (authorsInPub.includes(selectedAuthor)) {
+            pub.style.display = ''; // Show the element
+            visibleCount++;
+        } else {
+            pub.style.display = 'none'; // Hide the element
+        }
+    });
+    
+    // Update year section visibility and filter info.
+    updateUiAfterFilter(selectedAuthor, visibleCount);
+}
+
+/**
+ * Populates the author select dropdown on page load.
+ */
+function populateAuthorDropdown() {
+    const authors = extractAuthors();
+    const select = document.getElementById('authorSelect');
+    
+    while (select.options.length > 1) {
+        select.remove(1);
+    }
+    
+    authors.forEach(author => {
+        const option = document.createElement('option');
+        option.value = author;
+        option.textContent = author;
+        select.appendChild(option);
+    });
+}
+
+/**
+ * Updates the UI elements (year sections, filter info) after a filter is applied.
+ * @param {string} selectedAuthor - The author that was filtered by.
+ * @param {number} visibleCount - The number of publications visible after filtering.
+ */
+function updateUiAfterFilter(selectedAuthor, visibleCount) {
+    const yearSections = document.querySelectorAll('.year-section');
+    yearSections.forEach(section => {
+        let hasVisiblePublications = false;
+        // Check subsequent siblings to see if any are visible.
+        for (let el = section.nextElementSibling; el; el = el.nextElementSibling) {
+            if (el.classList.contains('year-section')) break; // Stop at the next year section.
+            // Check if the element is a publication-item AND its display is not 'none'.
+            if (el.classList.contains('publication-item') && el.style.display !== 'none') {
+                hasVisiblePublications = true;
+                break;
+            }
+        }
+        section.style.display = hasVisiblePublications ? '' : 'none';
+    });
+
+    const filterInfo = document.getElementById('filterInfo');
+    const filterAuthor = document.getElementById('filterAuthor');
+    filterInfo.classList.add('active');
+    filterAuthor.textContent = `${selectedAuthor} (${visibleCount} publications)`;
+
+    document.querySelector('.publications-content').scrollIntoView({ behavior: 'smooth' });
+}
+
+
+/**
+ * Clears the author filter and shows all publications.
+ */
+function clearFilter() {
+    const publications = document.querySelectorAll('.publication-item');
+    publications.forEach(pub => {
+        pub.style.display = ''; // Reset the display style to show the element.
+    });
+
+    const yearSections = document.querySelectorAll('.year-section');
+    yearSections.forEach(section => {
+        section.style.display = ''; // Also reset the year sections.
+    });
+
+    document.getElementById('filterInfo').classList.remove('active');
+    document.getElementById('authorSelect').value = '';
+}
+
+/**
+ * Jumps to the selected year section.
+ */
 function jumpToYear(selectElement) {
     const targetId = selectElement.value;
     if (targetId) {
@@ -513,148 +652,9 @@ function jumpToYear(selectElement) {
     }
 }
 
-function extractAuthors() {
-	const publications = document.querySelectorAll('.publication-item');
-	const authorsSet = new Set();
-	
-	publications.forEach(pub => {
-		const text = pub.innerText;
-		// Extract authors (before the year in parentheses)
-		const match = text.match(/^[^(]+/);
-		if (match) {
-			const authorsText = match[0];
-			// Split by common delimiters and clean up
-			const authors = authorsText.split(/[,&]|and/)
-				.map(a => a.trim())
-				.filter(a => a.length > 0)
-				.map(a => {
-					// Remove trailing periods and clean up
-					return a.replace(/\.$/, '').replace(/\s+/g, ' ').trim();
-				});
-			
-			authors.forEach(author => {
-				// Filter out common non-author strings
-				if (author && !author.match(/^\d/) && author.length > 2) {
-					authorsSet.add(author);
-				}
-			});
-		}
-	});
-	
-	return Array.from(authorsSet).sort();
-}
-
-// Populate author dropdown
-function populateAuthorDropdown() {
-	const authors = extractAuthors();
-	const select = document.getElementById('authorSelect');
-	
-	// Clear existing options except the first
-	while (select.options.length > 1) {
-		select.remove(1);
-	}
-	
-	// Add authors to dropdown
-	authors.forEach(author => {
-		const option = document.createElement('option');
-		option.value = author;
-		option.textContent = author;
-		select.appendChild(option);
-	});
-}
-
-// Filter publications by selected author
-function filterByAuthor() {
-	const select = document.getElementById('authorSelect');
-	const selectedAuthor = select.value;
-	
-	if (!selectedAuthor) {
-		clearFilter();
-		return;
-	}
-	
-	const publications = document.querySelectorAll('.publication-item');
-	let visibleCount = 0;
-	
-	publications.forEach(pub => {
-		const text = pub.innerText;
-		if (text.includes(selectedAuthor)) {
-			pub.classList.remove('hidden');
-			visibleCount++;
-		} else {
-			pub.classList.add('hidden');
-		}
-	});
-	
-	// Show filter info
-	const filterInfo = document.getElementById('filterInfo');
-	const filterAuthor = document.getElementById('filterAuthor');
-	filterInfo.classList.add('active');
-	filterAuthor.textContent = `${selectedAuthor} (${visibleCount} publications)`;
-	
-	// Scroll to top of publications
-	document.querySelector('.publications-content').scrollIntoView({ behavior: 'smooth' });
-}
-
-// Clear filter
-function clearFilter() {
-	const publications = document.querySelectorAll('.publication-item');
-	publications.forEach(pub => {
-		pub.classList.remove('hidden');
-	});
-	
-	// Hide filter info
-	document.getElementById('filterInfo').classList.remove('active');
-	
-	// Reset dropdown
-	document.getElementById('authorSelect').value = '';
-}
-
-// Highlight active year in navigation
-function updateActiveYear() {
-	const yearSections = document.querySelectorAll('.year-section');
-	const yearLinks = document.querySelectorAll('.year-nav a');
-	
-	// Remove all active classes
-	yearLinks.forEach(link => link.classList.remove('active'));
-	
-	// Find which year section is in view
-	let currentYear = null;
-	yearSections.forEach(section => {
-		const rect = section.getBoundingClientRect();
-		if (rect.top <= 150 && rect.bottom > 150) {
-			currentYear = section.id;
-		}
-	});
-	
-	// Add active class to corresponding link
-	if (currentYear) {
-		const activeLink = document.querySelector(`.year-nav a[href="#${currentYear}"]`);
-		if (activeLink) {
-			activeLink.classList.add('active');
-		}
-	}
-}
-
-// Initialize on page load
+// Initialize on page load.
 document.addEventListener('DOMContentLoaded', function() {
-	populateAuthorDropdown();
-	
-	// Add scroll listener for active year highlighting
-	window.addEventListener('scroll', updateActiveYear);
-	updateActiveYear(); // Initial call
-	
-	// Smooth scrolling for year navigation
-	document.querySelectorAll('.year-nav a').forEach(link => {
-		link.addEventListener('click', function(e) {
-			e.preventDefault();
-			const targetId = this.getAttribute('href').substring(1);
-			const target = document.getElementById(targetId);
-			if (target) {
-				target.scrollIntoView({ behavior: 'smooth' });
-			}
-		});
-	});
+    populateAuthorDropdown();
 });
 </script>
 

@@ -1,61 +1,25 @@
 /* Modern Design for Computational Memory Lab
    Inspired by neuroscience and cognitive research themes
-   Created 2025 - with Dark Mode Support */
+   Created 2025 - Dark Mode Only */
 
 :root {
-  /* Light Mode Colors */
-  --primary-color: #2c5aa0;
-  --accent-color: #4a90e2;
-  --neural-green: #00a86b;
-  --text-dark: #2c3e50;
-  --text-light: #5a6c7d;
-  --bg-light: #f8f9fa;
-  --bg-white: #ffffff;
-  --border-light: #e1e8ed;
-  --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --gradient-2: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%);
-  --neural-gradient: linear-gradient(135deg, #2c5aa0 0%, #00a86b 100%);
-  
-  /* Additional colors for various elements */
-  --header-bg: #ffffff;
-  --sidebar-bg: #f8f9fa;
-  --footer-bg: #2c3e50;
-  --footer-text: #f8f9fa;
-  --code-bg: #f4f4f4;
-  --shadow-color: rgba(0,0,0,0.1);
-  --shadow-hover: rgba(0,0,0,0.08);
-}
-
-/* Dark Mode Colors */
-@media (prefers-color-scheme: dark) {
-  :root {
     --primary-color: #5b8fd9;
     --accent-color: #7cb3f1;
     --neural-green: #00d68f;
     --text-dark: #e1e8ed;
     --text-light: #a8b3bd;
-    --bg-light: #1a1f2e;
-    --bg-white: #232937;
+    --bg-light: #15171F;
+    --bg-white: #1A1E29;
     --border-light: #3a4254;
     --neural-gradient: linear-gradient(135deg, #5b8fd9 0%, #00d68f 100%);
     
-    --header-bg: #232937;
+    --header-bg: #1A1E29;
     --sidebar-bg: #1a1f2e;
     --footer-bg: #0f1419;
     --footer-text: #e1e8ed;
     --code-bg: #2d3447;
-    --shadow-color: rgba(0,0,0,0.3);
-    --shadow-hover: rgba(0,0,0,0.2);
-  }
-  
-  /* Adjust image brightness in dark mode */
-  img {
-    opacity: 0.9;
-  }
-  
-  img:hover {
-    opacity: 1;
-  }
+    --shadow-color: rgba(0,0,0,0.5);
+    --shadow-hover: rgba(0,0,0,0.4);
 }
 
 * {
@@ -71,9 +35,18 @@ body {
   color: var(--text-dark);
   background: var(--bg-light);
   background-image: 
-    radial-gradient(circle at 20% 80%, rgba(44, 90, 160, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(0, 168, 107, 0.03) 0%, transparent 50%);
+    radial-gradient(circle at 20% 80%, rgba(44, 90, 160, 0.1) 0%, transparent 25%),
+    radial-gradient(circle at 80% 20%, rgba(0, 168, 107, 0.1) 0%, transparent 25%);
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+img {
+    opacity: 1;
+}
+
+.cml-logo, .cml-logo:hover {
+    opacity: 1;
+    transition: none;
 }
 
 /* Typography */
@@ -253,25 +226,40 @@ body.page-contact #menu li:nth-child(6) a:before {
   position: relative;
   background: none;
   height: auto;
+  display: flex; /* Added to enable flexbox */
+  justify-content: center; /* Centers the whole group horizontally */
+  align-items: center; /* Aligns the logo and text vertically in the middle */
+  gap: 30px; /* Space between the logo and text */
 }
 
-/* Gradient line after logo - thinner and more separated */
-#logo::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px; /* Thin line */
-  background: var(--neural-gradient);
+.logo-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Left-justifies the text */
 }
 
+/* Custom styles for the logo image */
+.cml-logo {
+  height: 120px;
+  width: auto;
+}
+
+/* Styling for the title */
+#logo h1 {
+  font-size: 3.5rem;
+  margin: 0;
+  animation: fadeInUp 0.8s ease;
+  line-height: 1.1;
+}
+
+/* Styling for the subtitle */
 #logo p {
   color: var(--text-light);
   font-size: 1.1rem;
   font-style: italic;
-  text-align: center;
-  margin-bottom: 0; /* Remove bottom margin to control spacing */
+  text-align: left;
+  margin: 0;
+  padding-top: 5px;
 }
 
 #logo::before {
@@ -279,30 +267,11 @@ body.page-contact #menu li:nth-child(6) a:before {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(44, 90, 160, 0.05) 0%, transparent 70%);
+  width: 750px;
+  height: 750px;
+  background: radial-gradient(circle, rgba(91, 143, 217, 0.1) 0%, transparent 70%);
   transform: translate(-50%, -50%);
   z-index: -1;
-}
-
-@media (prefers-color-scheme: dark) {
-  #logo::before {
-    background: radial-gradient(circle, rgba(91, 143, 217, 0.08) 0%, transparent 70%);
-  }
-}
-
-#logo h1 {
-  font-size: 3.5rem;
-  margin-bottom: 10px;
-  animation: fadeInUp 0.8s ease;
-}
-
-#logo p {
-  color: var(--text-light);
-  font-size: 1.1rem;
-  font-style: italic;
-  text-align: center;
 }
 
 /* Remove the hr element completely */
@@ -315,8 +284,8 @@ hr {
   max-width: 1200px;
   margin: 0 auto;
   background: var(--bg-white);
-  border-radius: 15px;
-  box-shadow: 0 10px 40px var(--shadow-hover);
+  border-radius: 50px;
+  box-shadow: 0 10px 60px var(--shadow-color);
   margin-bottom: 40px;
   transition: background-color 0.3s ease;
 }
@@ -327,7 +296,8 @@ hr {
   display: flex;
   gap: 60px;
   transition: background-color 0.3s ease;
-  overflow: visible;
+  border-radius: 50px;
+  overflow: hidden;
 }
 
 #content {
@@ -427,17 +397,10 @@ hr {
 #sidebar li li {
   padding: 12px 0 12px 25px;
   border-bottom: 1px solid var(--border-light);
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%234a90e2' viewBox='0 0 16 16'%3E%3Cpath d='M6 12l4-6H7V4l-4 6h3z'/%3E%3C/svg%3E") no-repeat left center;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237cb3f1' viewBox='0 0 16 16'%3E%3Cpath d='M6 12l4-6H7V4l-4 6h3z'/%3E%3C/svg%3E") no-repeat left center;
   background-size: 14px;
   transition: all 0.3s ease;
   margin: 0;
-}
-
-@media (prefers-color-scheme: dark) {
-  #sidebar li li {
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237cb3f1' viewBox='0 0 16 16'%3E%3Cpath d='M6 12l4-6H7V4l-4 6h3z'/%3E%3C/svg%3E") no-repeat left center;
-    background-size: 14px;
-  }
 }
 
 #sidebar li li:hover {
@@ -466,6 +429,8 @@ hr {
   position: relative;
   overflow: hidden;
   transition: background-color 0.3s ease;
+  border-bottom-left-radius: 50px;
+  border-bottom-right-radius: 50px;
 }
 
 #footer::before {
@@ -490,6 +455,21 @@ hr {
 }
 
 /* Team Page Styles */
+.team-member-grid {
+	display: grid;
+	grid-template-columns: 30% 1fr;
+	gap: 40px;
+	margin-bottom: 20px;
+  align-items: center;
+}
+
+.team-member-grid img {
+	width: 100%;
+	aspect-ratio: 1 / 1;
+	object-fit: cover;
+  border-radius: 10px;
+}
+
 .post .entry pre {
   font-family: 'Inter', sans-serif;
   white-space: pre-wrap;
@@ -529,21 +509,13 @@ hr {
 
 /* Special styling for course prerequisites */
 p[style*="color:red"] {
-  background: linear-gradient(120deg, #ffeaa7 0%, #fdcb6e 100%);
+  background: linear-gradient(120deg, rgba(255, 234, 167, 0.1) 0%, rgba(253, 203, 110, 0.1) 100%);
   padding: 10px 20px;
   border-radius: 5px;
   border-left: 4px solid #fdcb6e;
-  color: #2d3436 !important;
+  color: #ffeaa7 !important;
   font-weight: 500;
   margin: 20px 0;
-}
-
-@media (prefers-color-scheme: dark) {
-  p[style*="color:red"] {
-    background: linear-gradient(120deg, rgba(255, 234, 167, 0.1) 0%, rgba(253, 203, 110, 0.1) 100%);
-    border-left: 4px solid #fdcb6e;
-    color: #ffeaa7 !important;
-  }
 }
 
 /* Animations */
@@ -616,6 +588,15 @@ p[style*="color:red"] {
   
   h2 {
     font-size: 1.5rem;
+  }
+
+  .team-member-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .team-member-grid img {
+    margin-bottom: 0;
   }
 }
 

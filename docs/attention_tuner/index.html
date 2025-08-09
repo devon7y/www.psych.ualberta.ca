@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attention Tuner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="start-screen" class="phase-container">
+            <h1>Attention Tuner</h1>
+            <p>Select a list type to begin:</p>
+            <button id="pure-strong-btn">Pure Strong</button>
+            <button id="pure-weak-btn">Pure Weak</button>
+            <button id="mixed-btn">Mixed</button>
+        </div>
+        <div id="study-phase" class="phase-container" style="display: none;">
+            <h1>Study Phase</h1>
+            <div id="word-display"></div>
+        </div>
+        <div id="distractor-phase" class="phase-container" style="display: none;">
+            <h1>Distractor Task</h1>
+            <p>Time left: <span id="timer">10</span></p>
+            <p id="distractor-problem"></p>
+            <input type="text" id="distractor-answer">
+            <button id="submit-answer">Submit</button>
+        </div>
+        <div id="recognition-phase" class="phase-container" style="display: none;">
+            <h1>Recognition Test</h1>
+            <div id="recognition-word"></div>
+            <div id="attention-spotlight"></div>
+            <button id="yes-button">Yes</button>
+            <button id="no-button">No</button>
+        </div>
+        <div id="results-phase" class="phase-container" style="display: none;">
+            <h1>Results</h1>
+            <div id="results-summary"></div>
+            <div id="results-chart"></div>
+            <p id="results-explanation"></p>
+        </div>
+    </div>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
