@@ -34,10 +34,16 @@ body {
   line-height: 1.6;
   color: var(--text-dark);
   background: var(--bg-light);
-  background-image: 
-    radial-gradient(circle at 20% 80%, rgba(44, 90, 160, 0.1) 0%, transparent 25%),
-    radial-gradient(circle at 80% 20%, rgba(0, 168, 107, 0.1) 0%, transparent 25%);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  background-image: url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), radial-gradient(circle at 20% 80%, rgba(44, 90, 160, 0.1) 0%, transparent 25%), radial-gradient(circle at 80% 20%, rgba(0, 168, 107, 0.1) 0%, transparent 25%);
+  background-repeat: repeat, repeat, repeat, repeat, repeat, repeat, repeat, repeat, repeat, repeat, no-repeat, no-repeat;
+  background-size: 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, cover, cover;
+  background-position: 0 0, 250px 100px, 100px 200px, 350px 300px, 50px 400px, 300px 500px, 150px 600px, 400px 700px, 200px 800px, 450px 900px, 0 0, 0 0; /* Staggered rows */
+  transition: background-color 0.3s ease, color 0.3s ease, filter 0.3s ease; /* Add filter transition */
+  filter: brightness(0.8); /* Initial brightness, slightly darker */
+}
+
+body:hover {
+  filter: brightness(1.0); /* Brighter on hover */
 }
 
 img {
@@ -58,14 +64,14 @@ h1, h2, h3, h4 {
   line-height: 1.2;
 }
 
-h1 { 
-  font-size: 3rem; 
+h1 {
+  font-size: 3rem;
   color: var(--primary-color);
   text-transform: none;
 }
 
-h2 { 
-  font-size: 2rem; 
+h2 {
+  font-size: 2rem;
   color: var(--primary-color);
   text-transform: none;
   position: relative;
@@ -85,13 +91,13 @@ h2:after {
   border-radius: 2px;
 }
 
-h3 { 
-  font-size: 1.5rem; 
+h3 {
+  font-size: 1.5rem;
   color: var(--accent-color);
 }
 
-h4 { 
-  font-size: 1.2rem; 
+h4 {
+  font-size: 1.2rem;
   color: var(--text-dark);
 }
 
@@ -165,7 +171,6 @@ a:hover {
   letter-spacing: 0.5px;
   transition: all 0.3s ease;
   position: relative;
-  text-transform: none;
 }
 
 #menu a:before {
@@ -182,6 +187,7 @@ a:hover {
 
 #menu a:hover:before {
   width: 80%;
+  background: #E1E8EC;
 }
 
 /* Fix for current page indicator - only apply to actual current page */
@@ -210,6 +216,7 @@ body.page-courses #menu li:nth-child(4) a:before,
 body.page-team #menu li:nth-child(5) a:before,
 body.page-contact #menu li:nth-child(6) a:before {
   width: 80%;
+  background: #E1E8EC;
 }
 
 /* Remove search section completely */
