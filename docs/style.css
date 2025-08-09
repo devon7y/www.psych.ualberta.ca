@@ -3,8 +3,8 @@
    Created 2025 - Dark Mode Only */
 
 :root {
-    --primary-color: #5b8fd9;
-    --accent-color: #7cb3f1;
+    --primary-color: #7cb3f1;
+    --accent-color: #5b8fd9;
     --neural-green: #00d68f;
     --text-dark: #e1e8ed;
     --text-light: #a8b3bd;
@@ -34,12 +34,12 @@ body {
   line-height: 1.6;
   color: var(--text-dark);
   background: var(--bg-light);
-  background-image: url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), radial-gradient(circle at 20% 80%, rgba(44, 90, 160, 0.1) 0%, transparent 25%), radial-gradient(circle at 80% 20%, rgba(0, 168, 107, 0.1) 0%, transparent 25%);
-  background-repeat: repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, no-repeat, no-repeat;
-  background-size: 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, cover, cover;
-  background-position: 0 0, 250px 100px, 100px 200px, 350px 300px, 50px 400px, 300px 500px, 150px 600px, 400px 700px, 200px 800px, 450px 900px, 0 0, 0 0; /* Staggered rows */
+  background-image: url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), url('theta_wave.svg'), radial-gradient(circle at 20% 80%, rgba(44, 90, 160, 0.1) 0%, transparent 25%), radial-gradient(circle at 80% 20%, rgba(0, 168, 107, 0.1) 0%, transparent 25%);
+  background-repeat: repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, repeat-x, no-repeat, no-repeat;
+  background-size: 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, 500px 100px, cover, cover;
+  background-position: 0px 0px, 50px 100px, 100px 200px, 150px 300px, 200px 400px, 250px 500px, 300px 600px, 350px 700px, 400px 800px, 450px 900px, 0px 1000px, 50px 1100px, 100px 1200px, 150px 1300px, 200px 1400px, 250px 1500px, 300px 1600px, 350px 1700px, 400px 1800px, 450px 1900px, 0px 2000px, 50px 2100px, 100px 2200px, 150px 2300px, 200px 2400px, 250px 2500px, 300px 2600px, 350px 2700px, 400px 2800px, 450px 2900px, 0px 3000px, 50px 3100px, 100px 3200px, 150px 3300px, 200px 3400px, 250px 3500px, 300px 3600px, 350px 3700px, 400px 3800px, 450px 3900px, 0px 4000px, 50px 4100px, 100px 4200px, 150px 4300px, 200px 4400px, 250px 4500px, 300px 4600px, 350px 4700px, 400px 4800px, 450px 4900px, 0 0, 0 0;
   transition: background-color 0.3s ease, color 0.3s ease, filter 0.3s ease; /* Add filter transition */
-  filter: brightness(1.0); /* Initial brightness, slightly darker */
+  filter: brightness(1.0); /* Initial brightness, always bright */
 }
 
 
