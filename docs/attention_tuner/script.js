@@ -1,9 +1,489 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const words = [
+        "ABSENCE",
+        "ACCORD",
+        "ACCOUNT",
+        "ACID",
+        "ACRE",
+        "AFFAIR",
+        "AGENT",
+        "AMOUNT",
+        "ANCHOR",
+        "ANGEL",
+        "ANGLE",
+        "APPLE",
+        "ARMOR",
+        "ARRAY",
+        "ARROW",
+        "ARTIST",
+        "ASPECT",
+        "ATTACK",
+        "AUTHOR",
+        "AUTUMN",
+        "BABY",
+        "BANNER",
+        "BARGAIN",
+        "BARREL",
+        "BASIN",
+        "BASIS",
+        "BASKET",
+        "BATTLE",
+        "BEAUTY",
+        "BEAVER",
+        "BEDROOM",
+        "BEGGAR",
+        "BEING",
+        "BELIEF",
+        "BERRY",
+        "BLANKET",
+        "BLESSING",
+        "BODY",
+        "BOTTOM",
+        "BOUNDARY",
+        "BUBBLE",
+        "BUILDING",
+        "BULLET",
+        "BUREAU",
+        "BUSHEL",
+        "BUSINESS",
+        "BUTCHER",
+        "BUTTER",
+        "BUTTON",
+        "CABIN",
+        "CABLE",
+        "CAMPAIGN",
+        "CANAL",
+        "CANDLE",
+        "CANDY",
+        "CANNON",
+        "CANOE",
+        "CANVAS",
+        "CAPTAIN",
+        "CAPTIVE",
+        "CARBON",
+        "CAREER",
+        "CARPET",
+        "CARRIAGE",
+        "CASTLE",
+        "CATTLE",
+        "CELLAR",
+        "CENTER",
+        "CHAIRMAN",
+        "CHAMBER",
+        "CHANNEL",
+        "CHAPEL",
+        "CHAPTER",
+        "CHERRY",
+        "CHIMNEY",
+        "CIRCLE",
+        "CIRCUIT",
+        "CITY",
+        "CLIMATE",
+        "CLOSET",
+        "CLOTHING",
+        "CLUSTER",
+        "COFFEE",
+        "COLLAR",
+        "COLLEGE",
+        "COLONEL",
+        "COLOUR",
+        "COLUMN",
+        "COMMERCE",
+        "COMPASS",
+        "COMPOUND",
+        "COMRADE",
+        "CONCERT",
+        "CONGRESS",
+        "CONQUEST",
+        "CONTENTS",
+        "CONTEST",
+        "CONTRACT",
+        "COPY",
+        "CORNER",
+        "COSTUME",
+        "COTTAGE",
+        "COTTON",
+        "COUNTRY",
+        "COUNTY",
+        "COUPLE",
+        "COURAGE",
+        "COUSIN",
+        "CREATURE",
+        "CREDIT",
+        "CRYSTAL",
+        "CULTURE",
+        "CURRENT",
+        "CUSTOM",
+        "DANGER",
+        "DARKNESS",
+        "DAUGHTER",
+        "DAYLIGHT",
+        "DEALER",
+        "DEGREE",
+        "DESPAIR",
+        "DETAIL",
+        "DEVICE",
+        "DEVIL",
+        "DIAMOND",
+        "DIET",
+        "DINNER",
+        "DISEASE",
+        "DISTANCE",
+        "DISTRICT",
+        "DOLLAR",
+        "DOORWAY",
+        "DOUBLE",
+        "DRAGON",
+        "DUTY",
+        "EAGLE",
+        "ECHO",
+        "EFFECT",
+        "EFFORT",
+        "ELBOW",
+        "ELDER",
+        "EMPIRE",
+        "ENGINE",
+        "ERRAND",
+        "ESTATE",
+        "EVENING",
+        "EVENT",
+        "EXCESS",
+        "EXTENT",
+        "FABRIC",
+        "FACTOR",
+        "FAILURE",
+        "FARMER",
+        "FATHER",
+        "FEATHER",
+        "FEATURE",
+        "FEELING",
+        "FEVER",
+        "FIGURE",
+        "FINGER",
+        "FLAVOR",
+        "FOLLY",
+        "FOOTBALL",
+        "FOREHEAD",
+        "FOREST",
+        "FORTUNE",
+        "FOUNTAIN",
+        "FRONTIER",
+        "FUNERAL",
+        "FURY",
+        "FUTURE",
+        "GARDEN",
+        "GARMENT",
+        "GENIUS",
+        "GESTURE",
+        "GODDESS",
+        "GOODBYE",
+        "HABIT",
+        "HAMMER",
+        "HARBOUR",
+        "HARNESS",
+        "HARVEST",
+        "HATRED",
+        "HEAVEN",
+        "HELMET",
+        "HERALD",
+        "HERO",
+        "HIGHWAY",
+        "HORROR",
+        "HOTEL",
+        "HUNTER",
+        "HUSBAND",
+        "ILLNESS",
+        "IMAGE",
+        "INCOME",
+        "INSECT",
+        "INSTANT",
+        "INTEREST",
+        "IRON",
+        "ISLAND",
+        "JACKET",
+        "JERSEY",
+        "JEWEL",
+        "JOURNAL",
+        "JOURNEY",
+        "JUDGMENT",
+        "JUSTICE",
+        "KEEPER",
+        "KINDNESS",
+        "KINGDOM",
+        "KITCHEN",
+        "KITTEN",
+        "LADY",
+        "LANGUAGE",
+        "LAUGHTER",
+        "LAWYER",
+        "LAYER",
+        "LEADER",
+        "LEARNING",
+        "LEATHER",
+        "LECTURE",
+        "LEGEND",
+        "LEMON",
+        "LETTER",
+        "LEVEL",
+        "LILY",
+        "LIMIT",
+        "LINEN",
+        "LION",
+        "LIQUID",
+        "LIQUOR",
+        "LOVER",
+        "LUMBER",
+        "LUNCHEON",
+        "MACHINE",
+        "MADAM",
+        "MAIDEN",
+        "MAJOR",
+        "MAKER",
+        "MANNER",
+        "MARBLE",
+        "MARKET",
+        "MARRIAGE",
+        "MASTER",
+        "MATTER",
+        "MAYOR",
+        "MEADOW",
+        "MEANING",
+        "MEANTIME",
+        "MEETING",
+        "MEMBER",
+        "MERCHANT",
+        "MERCY",
+        "MERIT",
+        "MESSAGE",
+        "METAL",
+        "METHOD",
+        "MILLION",
+        "MINUTE",
+        "MIRROR",
+        "MISCHIEF",
+        "MISSION",
+        "MISTAKE",
+        "MISTRESS",
+        "MIXTURE",
+        "MODEL",
+        "MOISTURE",
+        "MOMENT",
+        "MONARCH",
+        "MONEY",
+        "MONKEY",
+        "MONSTER",
+        "MOTHER",
+        "MOTION",
+        "MOTIVE",
+        "MOTOR",
+        "MOUNTAIN",
+        "MOVIE",
+        "MUSCLE",
+        "MUSIC",
+        "NATION",
+        "NAVY",
+        "NEEDLE",
+        "NEPHEW",
+        "NOTHING",
+        "NOTION",
+        "NOVEL",
+        "NUMBER",
+        "OBJECT",
+        "OCEAN",
+        "ODOR",
+        "OFFENCE",
+        "OLIVE",
+        "ONION",
+        "OPERA",
+        "ORANGE",
+        "ORCHARD",
+        "ORGAN",
+        "OUTLINE",
+        "OVEN",
+        "OWNER",
+        "OYSTER",
+        "PACKAGE",
+        "PAINTER",
+        "PAINTING",
+        "PALACE",
+        "PAPER",
+        "PARCEL",
+        "PARENT",
+        "PARLOR",
+        "PARTNER",
+        "PARTY",
+        "PASSION",
+        "PASTURE",
+        "PATENT",
+        "PATIENCE",
+        "PATIENT",
+        "PATTERN",
+        "PAYMENT",
+        "PENNY",
+        "PEPPER",
+        "PERFUME",
+        "PERSON",
+        "PICTURE",
+        "PIGEON",
+        "PILLOW",
+        "PILOT",
+        "PISTOL",
+        "PITCHER",
+        "PLANET",
+        "PLATFORM",
+        "PLAYER",
+        "PLEASURE",
+        "POCKET",
+        "POEM",
+        "POLICE",
+        "PONY",
+        "POWDER",
+        "PRAIRIE",
+        "PRAYER",
+        "PRESSURE",
+        "PRINCESS",
+        "PRISON",
+        "PROBLEM",
+        "PRODUCT",
+        "PROGRAM",
+        "PROJECT",
+        "PROSPECT",
+        "PROVINCE",
+        "PUPIL",
+        "PURSUIT",
+        "PUZZLE",
+        "QUARTER",
+        "QUESTION",
+        "RABBIT",
+        "RAILWAY",
+        "RATTLE",
+        "READING",
+        "REASON",
+        "RECEIPT",
+        "RECORD",
+        "REFUGE",
+        "RELIEF",
+        "RESEARCH",
+        "RESORT",
+        "RESOURCE",
+        "RIBBON",
+        "RICHES",
+        "RIDER",
+        "RIFLE",
+        "RIVAL",
+        "RIVER",
+        "ROBBER",
+        "ROBIN",
+        "RUBBER",
+        "SADDLE",
+        "SAILOR",
+        "SALAD",
+        "SANDWICH",
+        "SCATTER",
+        "SCHOLAR",
+        "SCIENCE",
+        "SEASON",
+        "SECTION",
+        "SENATE",
+        "SENTENCE",
+        "SERIES",
+        "SERVANT",
+        "SERVICE",
+        "SHELTER",
+        "SHEPHERD",
+        "SHERIFF",
+        "SHIPPING",
+        "SHOWER",
+        "SICKNESS",
+        "SILENCE",
+        "SILVER",
+        "SINGER",
+        "SINGLE",
+        "SISTER",
+        "SLIPPER",
+        "SOLDIER",
+        "SORROW",
+        "SPARROW",
+        "SPEAKER",
+        "SPIDER",
+        "SPIRIT",
+        "SQUIRREL",
+        "STANDARD",
+        "STANZA",
+        "STATION",
+        "STATUS",
+        "STEAMER",
+        "STOCKING",
+        "STOMACH",
+        "STORY",
+        "STUDENT",
+        "SUBJECT",
+        "SUCCESS",
+        "SUGAR",
+        "SULPHUR",
+        "SUMMER",
+        "SUNSET",
+        "SUPPER",
+        "SURFACE",
+        "SURVEY",
+        "SYSTEM",
+        "TABLE",
+        "TALENT",
+        "TEACHER",
+        "TEMPER",
+        "TEMPLE",
+        "THEATER",
+        "THEORY",
+        "THUNDER",
+        "TICKET",
+        "TIGER",
+        "TIMBER",
+        "TOTAL",
+        "TRAFFIC",
+        "TRAINING",
+        "TRAITOR",
+        "TREASURE",
+        "TRIBUTE",
+        "TRIUMPH",
+        "TROUBLE",
+        "TUNE",
+        "TURKEY",
+        "TWILIGHT",
+        "UNCLE",
+        "UNION",
+        "UNIT",
+        "VALLEY",
+        "VALUE",
+        "VAPOR",
+        "VELVET",
+        "VESSEL",
+        "VICTIM",
+        "VILLAGE",
+        "VIRTUE",
+        "VOYAGE",
+        "WAGON",
+        "WATER",
+        "WEAKNESS",
+        "WEAPON",
+        "WEDDING",
+        "WIDOW",
+        "WILLOW",
+        "WINDOW",
+        "WINTER",
+        "WISDOM",
+        "WITNESS",
+        "WOMEN",
+        "WORKER",
+        "WORSHIP",
+        "WRINKLE",
+        "WRITER",
+        "WRITING"
+    ];
+
     const startScreen = document.getElementById('start-screen');
-    const pureStrongBtn = document.getElementById('pure-strong-btn');
-    const pureWeakBtn = document.getElementById('pure-weak-btn');
-    const mixedBtn = document.getElementById('mixed-btn');
+    
     const studyPhase = document.getElementById('study-phase');
+    const submitAnswer = document.getElementById('submit-answer');
     const distractorPhase = document.getElementById('distractor-phase');
     const recognitionPhase = document.getElementById('recognition-phase');
     const resultsPhase = document.getElementById('results-phase');
@@ -12,7 +492,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const distractorAnswer = document.getElementById('distractor-answer');
     const timerDisplay = document.getElementById('timer');
     const recognitionWord = document.getElementById('recognition-word');
-    const attentionSpotlight = document.getElementById('attention-spotlight');
     const yesButton = document.getElementById('yes-button');
     const noButton = document.getElementById('no-button');
     const resultsSummary = document.getElementById('results-summary');
@@ -21,41 +500,83 @@ document.addEventListener('DOMContentLoaded', () => {
     const playAgainBtn = document.getElementById('play-again-btn');
     const clearResultsBtn = document.getElementById('clear-results-btn');
 
-    // Word lists
-    const words = [
-        'apple', 'banana', 'carrot', 'dog', 'elephant',
-        'flower', 'guitar', 'house', 'ice cream', 'jungle',
-        'kangaroo', 'lemon', 'mountain', 'notebook', 'ocean',
-        'pencil', 'queen', 'river', 'sun', 'tree',
-        'umbrella', 'violin', 'water', 'xylophone', 'yacht', 'zebra'
-    ];
+    
 
     // Game state
     let currentPhase = 'start';
+    let experimentOrder = ['pure-strong', 'pure-weak', 'mixed'];
+    let currentExperimentIndex = 0;
     let listType = ''; // 'pure-strong', 'pure-weak', or 'mixed'
     let studyList = [];
     let recognitionList = [];
+    let lureList = [];
     let userResponses = JSON.parse(localStorage.getItem('attentionTunerResults')) || [];
-
-    // --- Event Listeners ---
-    pureStrongBtn.addEventListener('click', () => startGame('pure-strong'));
-    pureWeakBtn.addEventListener('click', () => startGame('pure-weak'));
-    mixedBtn.addEventListener('click', () => startGame('mixed'));
+    let preSampledWords = [];
 
     // --- Game Logic ---
 
-    function startGame(selectedListType) {
-        listType = selectedListType;
+    function startExperiment() {
+        console.log('startExperiment function called.');
+        // Sample 60 unique words at the start of the experiment
+        let wordCopy = [...words];
+        preSampledWords = [];
+        for (let i = 0; i < 60; i++) {
+            const randomIndex = Math.floor(Math.random() * wordCopy.length);
+            preSampledWords.push(wordCopy.splice(randomIndex, 1)[0]);
+        }
+
+        // Shuffle the experiment order
+        for (let i = experimentOrder.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [experimentOrder[i], experimentOrder[j]] = [experimentOrder[j], experimentOrder[i]];
+        }
+        currentExperimentIndex = 0;
         startScreen.style.display = 'none';
         studyPhase.style.display = 'block';
         currentPhase = 'study';
-        generateStudyList();
-        startStudyPhase();
+        runNextListType();
     }
 
-    function generateStudyList() {
-        let wordCopy = [...words];
+    function runNextListType() {
+        if (currentExperimentIndex < experimentOrder.length) {
+            // Hide all other phases and show study phase
+            startScreen.style.display = 'none';
+            distractorPhase.style.display = 'none';
+            recognitionPhase.style.display = 'none';
+            resultsPhase.style.display = 'none';
+            studyPhase.style.display = 'block'; // Ensure study phase is visible
+            currentPhase = 'study';
+
+            listType = experimentOrder[currentExperimentIndex];
+
+            // Get the 20 words for the current condition from preSampledWords
+            const startIndex = currentExperimentIndex * 20;
+            const wordsForCurrentCondition = preSampledWords.slice(startIndex, startIndex + 20);
+
+            generateStudyList(wordsForCurrentCondition); // Pass the words to generateStudyList
+            startStudyPhase();
+        } else {
+            // All list types completed, show final results
+            studyPhase.style.display = 'none';
+            distractorPhase.style.display = 'none';
+            recognitionPhase.style.display = 'none';
+            resultsPhase.style.display = 'block'; // Show results phase
+            currentPhase = 'results';
+            showResults(); // Call showResults only once at the very end
+        }
+    }
+
+    function generateStudyList(selectedWordsForExperiment) {
+        // selectedWordsForExperiment is already the 20 unique words for this condition
+        // No need to sample from 'words' array here anymore
+
+        // Split into study words and lure words
+        const studyWordsRaw = selectedWordsForExperiment.slice(0, 10);
+        const lureWordsRaw = selectedWordsForExperiment.slice(10, 20);
+
         studyList = [];
+        lureList = []; // Reset lureList for each new experiment condition
+
         let strongCount = 0;
         let weakCount = 0;
 
@@ -68,17 +589,24 @@ document.addEventListener('DOMContentLoaded', () => {
             weakCount = 5;
         }
 
+        // Assign strengths to study words
+        let tempStudyWords = [...studyWordsRaw]; // Create a mutable copy
         for (let i = 0; i < strongCount; i++) {
-            const randomIndex = Math.floor(Math.random() * wordCopy.length);
-            studyList.push({ word: wordCopy.splice(randomIndex, 1)[0], strength: 'strong' });
+            const randomIndex = Math.floor(Math.random() * tempStudyWords.length);
+            studyList.push({ word: tempStudyWords.splice(randomIndex, 1)[0], strength: 'strong' });
         }
 
         for (let i = 0; i < weakCount; i++) {
-            const randomIndex = Math.floor(Math.random() * wordCopy.length);
-            studyList.push({ word: wordCopy.splice(randomIndex, 1)[0], strength: 'weak' });
+            const randomIndex = Math.floor(Math.random() * tempStudyWords.length);
+            studyList.push({ word: tempStudyWords.splice(randomIndex, 1)[0], strength: 'weak' });
         }
 
-        // Shuffle the list
+        // Populate lureList
+        for (const word of lureWordsRaw) {
+            lureList.push({ word: word, strength: 'lure' });
+        }
+
+        // Shuffle the study list
         studyList = studyList.sort(() => Math.random() - 0.5);
     }
 
@@ -106,62 +634,74 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startDistractorPhase() {
-        const num1 = Math.floor(Math.random() * 10) + 1;
-        const num2 = Math.floor(Math.random() * 10) + 1;
-        const num3 = Math.floor(Math.random() * 10) + 1;
-        const problem = `${num1} + ${num2} + ${num3} = ?`;
-        const correctAnswer = num1 + num2 + num3;
+        let distractorTimer; // To store the interval ID
+        let currentProblemCorrectAnswer; // To store the correct answer for the current problem
 
-        distractorProblem.textContent = problem;
+        function generateAndDisplayNewProblem() {
+            distractorAnswer.value = ''; // Clear the input field
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
+            const num3 = Math.floor(Math.random() * 10) + 1;
+            const problem = `${num1} + ${num2} + ${num3} = ?`;
+            currentProblemCorrectAnswer = num1 + num2 + num3; // Store the correct answer
 
-        let timeLeft = 10;
+            distractorProblem.textContent = problem;
+        }
+
+        function handleSubmission() {
+            // Prevent submission if the input field is empty
+            if (distractorAnswer.value.trim() === '') {
+                return; // Do nothing if the input is empty
+            }
+            // For now, we just generate a new problem and clear the input
+            // The user's answer is not being checked or scored in this version
+            generateAndDisplayNewProblem();
+        }
+
+        // Display the first problem when the phase starts
+        generateAndDisplayNewProblem();
+
+        let timeLeft = 10; // 10 seconds for the distractor task
         timerDisplay.textContent = timeLeft;
-        const timer = setInterval(() => {
+
+        distractorTimer = setInterval(() => {
             timeLeft--;
             timerDisplay.textContent = timeLeft;
             if (timeLeft <= 0) {
-                clearInterval(timer);
-                checkDistractorAnswer(correctAnswer);
+                clearInterval(distractorTimer); // Stop the timer
+                distractorPhase.style.display = 'none'; // Hide distractor phase
+                recognitionPhase.style.display = 'block'; // Show recognition phase
+                currentPhase = 'recognition';
+                startRecognitionPhase(); // Start the recognition phase
             }
-        }, 1000);
+        }, 1000); // Update every second
 
-        submitAnswer.onclick = () => {
-            clearInterval(timer);
-            checkDistractorAnswer(correctAnswer);
+        // Event listener for the submit button
+        submitAnswer.onclick = handleSubmission;
+
+        // Event listener for the input field (Enter key)
+        distractorAnswer.onkeydown = (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent default form submission behavior
+                handleSubmission();
+            }
         };
-    }
-
-    function checkDistractorAnswer(correctAnswer) {
-        const userAnswer = parseInt(distractorAnswer.value, 10);
-        distractorPhase.style.display = 'none';
-        recognitionPhase.style.display = 'block';
-        currentPhase = 'recognition';
-        startRecognitionPhase();
     }
 
     function startRecognitionPhase() {
         generateRecognitionList();
         let wordIndex = 0;
 
-        // Set up attention spotlight
-        if (listType === 'pure-strong') {
-            attentionSpotlight.style.width = '150px';
-            attentionSpotlight.style.height = '150px';
-        } else { // pure-weak or mixed
-            attentionSpotlight.style.width = '300px';
-            attentionSpotlight.style.height = '300px';
-        }
-        attentionSpotlight.style.display = 'block';
+        
 
         function showNextRecognitionWord() {
             if (wordIndex < recognitionList.length) {
                 recognitionWord.textContent = recognitionList[wordIndex].word;
             } else {
-                // End of recognition phase
+                // End of recognition phase for current list type
                 recognitionPhase.style.display = 'none';
-                resultsPhase.style.display = 'block';
-                currentPhase = 'results';
-                showResults();
+                currentExperimentIndex++; // Move to the next experiment condition
+                runNextListType(); // Start the next condition or show final results
             }
         }
 
@@ -181,20 +721,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function generateRecognitionList() {
-        recognitionList = [...studyList];
-        const lureCount = 10;
-        let wordCopy = [...words];
-
-        // Filter out studied words from the lure pool
-        const studiedWords = studyList.map(item => item.word);
-        wordCopy = wordCopy.filter(word => !studiedWords.includes(word));
-
-        for (let i = 0; i < lureCount; i++) {
-            const randomIndex = Math.floor(Math.random() * wordCopy.length);
-            recognitionList.push({ word: wordCopy.splice(randomIndex, 1)[0], strength: 'lure' });
-        }
-
-        // Shuffle the list
+        recognitionList = [...studyList, ...lureList];
+        // Shuffle the combined list
         recognitionList = recognitionList.sort(() => Math.random() - 0.5);
     }
 
@@ -210,24 +738,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showResults() {
-        // Calculate performance metrics
-        const strong_pure_correct = userResponses.filter(r => r.strength === 'strong' && r.listType === 'pure-strong' && r.correct).length;
-        const strong_mixed_correct = userResponses.filter(r => r.strength === 'strong' && r.listType === 'mixed' && r.correct).length;
-        const weak_mixed_correct = userResponses.filter(r => r.strength === 'weak' && r.listType === 'mixed' && r.correct).length;
-        const weak_pure_correct = userResponses.filter(r => r.strength === 'weak' && r.listType === 'pure-weak' && r.correct).length;
+        // Filter responses by listType
+        const pureStrongResponses = userResponses.filter(r => r.listType === 'pure-strong');
+        const pureWeakResponses = userResponses.filter(r => r.listType === 'pure-weak');
+        const mixedResponses = userResponses.filter(r => r.listType === 'mixed');
 
-        const total_strong_pure = userResponses.filter(r => r.strength === 'strong' && r.listType === 'pure-strong').length;
-        const total_strong_mixed = userResponses.filter(r => r.strength === 'strong' && r.listType === 'mixed').length;
-        const total_weak_mixed = userResponses.filter(r => r.strength === 'weak' && r.listType === 'mixed').length;
-        const total_weak_pure = userResponses.filter(r => r.strength === 'weak' && r.listType === 'pure-weak').length;
+        // Calculate accuracy for each list type
+        const strong_pure_accuracy = pureStrongResponses.length > 0 ? (pureStrongResponses.filter(r => r.correct).length / pureStrongResponses.length) * 100 : 0;
+        const weak_pure_accuracy = pureWeakResponses.length > 0 ? (pureWeakResponses.filter(r => r.correct).length / pureWeakResponses.length) * 100 : 0;
+        const strong_mixed_accuracy = mixedResponses.length > 0 ? (mixedResponses.filter(r => r.correct).length / mixedResponses.length) * 100 : 0;
+        const weak_mixed_accuracy = mixedResponses.length > 0 ? (mixedResponses.filter(r => r.correct).length / mixedResponses.length) * 100 : 0;
 
-        const strong_pure_accuracy = total_strong_pure > 0 ? (strong_pure_correct / total_strong_pure) * 100 : 0;
-        const strong_mixed_accuracy = total_strong_mixed > 0 ? (strong_mixed_correct / total_strong_mixed) * 100 : 0;
-        const weak_mixed_accuracy = total_weak_mixed > 0 ? (weak_mixed_correct / total_weak_mixed) * 100 : 0;
-        const weak_pure_accuracy = total_weak_pure > 0 ? (weak_pure_correct / total_weak_pure) * 100 : 0;
+        // Overall accuracy (already correct)
+        const overall_correct = userResponses.filter(r => r.correct).length;
+        const overall_total_items = userResponses.length;
+        const overall_accuracy = overall_total_items > 0 ? (overall_correct / overall_total_items) * 100 : 0;
 
         resultsSummary.innerHTML = `
-            <p><b>Overall Accuracy:</b> ${((strong_pure_correct + strong_mixed_correct + weak_mixed_correct + weak_pure_correct) / (total_strong_pure + total_strong_mixed + total_weak_mixed + total_weak_pure) * 100).toFixed(2)}%</p>
+            <p><b>Overall Accuracy:</b> ${overall_accuracy.toFixed(2)}%</p>
             <p><b>Strong Word Accuracy (Pure List):</b> ${strong_pure_accuracy.toFixed(2)}%</p>
             <p><b>Strong Word Accuracy (Mixed List):</b> ${strong_mixed_accuracy.toFixed(2)}%</p>
             <p><b>Weak Word Accuracy (Mixed List):</b> ${weak_mixed_accuracy.toFixed(2)}%</p>
@@ -240,17 +768,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function drawChart() {
             const data = google.visualization.arrayToDataTable([
-                ['Condition', 'Strong Words', 'Weak Words'],
-                ['Pure List', strong_pure_accuracy, weak_pure_accuracy],
-                ['Mixed List', strong_mixed_accuracy, weak_mixed_accuracy]
+                ['Condition', 'Strong Pure', 'Weak Pure', 'Mixed Strong', 'Mixed Weak'],
+                ['Accuracy', strong_pure_accuracy, weak_pure_accuracy, strong_mixed_accuracy, weak_mixed_accuracy]
             ]);
 
             const options = {
                 title: 'Inverted List-Strength Effect',
                 vAxis: { title: 'Accuracy (%)' },
-                hAxis: { title: 'List Type' },
+                hAxis: { title: '' }, // No label for the single category
+                legend: { position: 'bottom' },
                 seriesType: 'bars',
-                legend: { position: 'bottom' }
+                colors: ['#5b8fd9', '#00d68f', '#F14709', '#F14709'],
+                bar: { groupWidth: '75%' }, // Adjust group width
+                series: {
+                    0: { type: 'bars' }, // Strong Pure
+                    1: { type: 'bars' }, // Weak Pure
+                    2: { type: 'bars' }, // Mixed Strong
+                    3: { type: 'bars' }  // Mixed Weak
+                }
             };
 
             const chart = new google.visualization.ComboChart(resultsChart);
@@ -261,11 +796,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Save results to local storage
         localStorage.setItem('attentionTunerResults', JSON.stringify(userResponses));
+        playAgainBtn.style.display = 'block'; // Make sure playAgainBtn is visible
     }
 
     // --- Event Listeners for new buttons ---
     playAgainBtn.addEventListener('click', () => {
-        // Reset game state
+        // Reset game state for a full restart
         studyPhase.style.display = 'none';
         distractorPhase.style.display = 'none';
         recognitionPhase.style.display = 'none';
@@ -274,9 +810,11 @@ document.addEventListener('DOMContentLoaded', () => {
         currentPhase = 'start';
         studyList = [];
         recognitionList = [];
-        // userResponses is preserved for aggregation
+        userResponses = []; // Clear user responses for a fresh start
+        localStorage.removeItem('attentionTunerResults'); // Clear stored results
         distractorAnswer.value = ''; // Clear previous answer
-        attentionSpotlight.style.display = 'none'; // Hide spotlight
+        playAgainBtn.style.display = 'none'; // Hide play again button until all conditions are done
+        startExperiment(); // Restart the entire experiment sequence
     });
 
     clearResultsBtn.addEventListener('click', () => {
@@ -290,4 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Init ---
     // The game now starts on button click
+    const startExperimentBtn = document.getElementById('start-experiment-btn');
+    startExperimentBtn.addEventListener('click', startExperiment);
+    playAgainBtn.style.display = 'none'; // Initially hide the play again button
 });

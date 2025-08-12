@@ -1,5 +1,6 @@
 body {
-    font-family: sans-serif;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 16px;
     text-align: center;
 }
 
@@ -15,27 +16,25 @@ body {
 }
 
 #word-display {
-    font-size: 2em;
+    font-size: 40pt;
     padding: 20px;
+    text-align: center;
 }
 
 .weak-word {
-    animation: weak-highlight 0.5s forwards;
+    /* No specific animation for weak words, just duration */
 }
 
 .strong-word {
-    animation: strong-highlight 2s forwards;
+    /* No specific animation for strong words, just duration */
 }
 
 @keyframes weak-highlight {
-    from { background-color: yellow; }
-    to { background-color: white; }
+    /* Removed color animation */
 }
 
 @keyframes strong-highlight {
-    0% { background-color: orange; }
-    50% { background-color: orangered; }
-    100% { background-color: white; }
+    /* Removed color animation */
 }
 
 #attention-spotlight {
