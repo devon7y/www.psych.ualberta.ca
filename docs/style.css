@@ -523,6 +523,7 @@ hr {
   text-align: center;
   margin: 0;
   padding: 0;
+  font-weight: normal; /* Ensure the text is not bold */
 }
 
 #footer a {
@@ -536,6 +537,8 @@ hr {
 	gap: 40px;
 	margin-bottom: 20px;
   align-items: center;
+  padding-top: 70px; /* For fixed header offset */
+  margin-top: -70px; /* For fixed header offset */
 }
 
 .post .team-member-grid img {
