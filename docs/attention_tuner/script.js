@@ -510,7 +510,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let studyList = [];
     let recognitionList = [];
     let lureList = [];
-    let userResponses = JSON.parse(localStorage.getItem('attentionTunerResults')) || [];
+    let userResponses = JSON.parse(localStorage.getItem('invertedListStrengthEffectResults')) || [];
     let preSampledWords = [];
 
     // --- Game Logic ---
@@ -754,13 +754,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const overall_total_items = userResponses.length;
         const overall_accuracy = overall_total_items > 0 ? (overall_correct / overall_total_items) * 100 : 0;
 
-        resultsSummary.innerHTML = `
-            <p><b>Overall Accuracy:</b> ${overall_accuracy.toFixed(2)}%</p>
-            <p><b>Strong Word Accuracy (Pure List):</b> ${strong_pure_accuracy.toFixed(2)}%</p>
-            <p><b>Strong Word Accuracy (Mixed List):</b> ${strong_mixed_accuracy.toFixed(2)}%</p>
-            <p><b>Weak Word Accuracy (Mixed List):</b> ${weak_mixed_accuracy.toFixed(2)}%</p>
-            <p><b>Weak Word Accuracy (Pure List):</b> ${weak_pure_accuracy.toFixed(2)}%</p>
-        `;
+        resultsSummary.innerHTML = ``;
 
         // Draw chart
         google.charts.load('current', {packages:['corechart']});
@@ -773,10 +767,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ]);
 
             const options = {
-                title: 'Inverted List-Strength Effect',
-                vAxis: { title: 'Accuracy (%)', viewWindow: { min: 0, max: 100 } },
-                hAxis: { title: '' }, // No label for the single category
-                legend: { position: 'bottom' },
+                backgroundColor: '#1A1F2E',
+                vAxis: { title: 'Accuracy (%)', viewWindow: { min: 0, max: 100 }, textStyle: { color: '#e1e8ed' }, titleTextStyle: { color: '#e1e8ed' } },
+                hAxis: { title: '', textStyle: { color: '#e1e8ed' }, titleTextStyle: { color: '#e1e8ed' } },
+                legend: { position: 'bottom', textStyle: { color: '#e1e8ed', fontSize: 10 } },
                 seriesType: 'bars',
                 colors: ['#5b8fd9', '#00d68f', '#F14709', '#F14709'],
                 bar: { groupWidth: '75%' }, // Adjust group width
@@ -787,7 +781,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     3: { type: 'bars' }  // Mixed Weak
                 },
                 height: 400,
-                width: 600
+                width: '100%',
+                chartArea: { left: 0, top: 0, width: '100%', height: '100%' }
             };
 
             const chart = new google.visualization.ComboChart(resultsChart);
@@ -797,7 +792,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resultsExplanation.textContent = 'Notice anything strange? You were likely more accurate at recognizing \'strong\' words when they were in a list with other strong words (pure list) than when they were mixed with weak words. This is the inverted list-strength effect! It happens because when your brain expects only deep, meaningful information, it narrows its focus. When it expects a mix of shallow and deep information, it widens its focus, making it harder to pinpoint the specific deep features of the strong words.';
 
         // Save results to local storage
-        localStorage.setItem('attentionTunerResults', JSON.stringify(userResponses));
+        localStorage.setItem('invertedListStrengthEffectResults', JSON.stringify(userResponses));
         playAgainBtn.style.display = 'block'; // Make sure playAgainBtn is visible
     }
 
@@ -813,17 +808,13 @@ document.addEventListener('DOMContentLoaded', () => {
         studyList = [];
         recognitionList = [];
         userResponses = []; // Clear user responses for a fresh start
-        localStorage.removeItem('attentionTunerResults'); // Clear stored results
+        localStorage.removeItem('invertedListStrengthEffectResults'); // Clear stored results
         distractorAnswer.value = ''; // Clear previous answer
         playAgainBtn.style.display = 'none'; // Hide play again button until all conditions are done
         startExperiment(); // Restart the entire experiment sequence
     });
 
-    clearResultsBtn.addEventListener('click', () => {
-        localStorage.removeItem('attentionTunerResults');
-        userResponses = []; // Clear in-memory results as well
-        location.reload(); // Reload the page to reflect cleared state
-    });
+    
 
     // --- Init ---
     // The game now starts on button click

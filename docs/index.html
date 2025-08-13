@@ -8,6 +8,83 @@
   <meta name="description" content="" />
   <link href="style.css" rel="stylesheet" type="text/css" media="screen" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style type="text/css">
+    .game-embed {
+      background: #1A1F2E;
+      border-radius: 10px;
+      padding: 25px;
+      margin-top: 20px;
+      margin-bottom: 30px;
+      border: 1px solid #3a4254;
+    }
+    #game-container {
+        width: 100%;
+        margin: 0 auto;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 16px;
+        text-align: center;
+    }
+    .game-embed p {
+        text-align: center;
+    }
+    .game-embed h1 {
+        font-size: 2rem;
+    }
+        .phase-container {
+        padding: 10px;
+        border: none;
+        margin-bottom: 20px;
+        min-height: auto; /* Allow it to grow */
+    }
+    #study-phase, #distractor-phase, #recognition-phase {
+        height: 200px; /* Fixed height for these specific phases */
+    }
+    #word-display {
+        font-size: 40pt;
+        padding: 20px;
+        text-align: center;
+    }
+    #recognition-word {
+        font-size: 30pt;
+        padding: 20px;
+        text-align: center;
+    }
+    .weak-word { }
+    .strong-word { }
+    #results-chart {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .game-embed button {
+        background-color: #5b8fd9;
+        color: #e1e8ed;
+        border: 1px solid #3a4254;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    #play-again-btn {
+        display: block;
+        margin: 0 auto;
+    }
+    .game-embed button:hover {
+        background-color: #7cb3f1;
+    }
+    #start-screen {
+        min-height: auto;
+    }
+    .game-embed input[type="text"] {
+        background-color: #2d3447;
+        color: #e1e8ed;
+        border: 1px solid #3a4254;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    #recognition-phase p {
+        margin-bottom: 0;
+    }
+  </style>
 </head>
 <body class="page-home">
   <div id="header-wrapper">
@@ -51,7 +128,43 @@
           <!--<p class="meta"><span class="date">Sunday, April 26, 2009</span> 7:27 AM Posted by <a href="#">Someone</a></p>-->
           <h2 class="title"><a href="#">Welcome</a></h2>
           <div class="entry">
-            <p>To get an idea of our lab's research, press Start Experiment to do a 1-minute demonstration!<p>
+            <p>To get an idea of our lab's research, press Start Experiment to do a 1-minute demonstration of the Inverted List-Strength Effect! You will be prested with 10 words which you must try to memorize. Then, you will be shown 20 words, and you must indicate whether you have seen each word previously.</p>
+            <div class="game-embed">
+                <div id="game-container">
+                    <div id="start-screen" class="phase-container">
+                        <h1>Inverted List-Strength Effect</h1>
+                        <p>Press the button to start the experiment.</p>
+                        <button id="start-experiment-btn">Start Experiment</button>
+                    </div>
+                    <div id="study-phase" class="phase-container" style="display: none;">
+                        <h1>Study Phase</h1>
+                        <div id="word-display"></div>
+                    </div>
+                    <div id="distractor-phase" class="phase-container" style="display: none;">
+                        <h1>Distractor Task</h1>
+                        <p>Time left: <span id="timer">10</span></p>
+                        <p id="distractor-problem"></p>
+                        <input type="text" id="distractor-answer">
+                        <button id="submit-answer">Submit</button>
+                    </div>
+                    <div id="recognition-phase" class="phase-container" style="display: none;">
+                        <h1>Test Phase</h1>
+                        <p>Did you see this word previously?</p>
+                        <div id="recognition-word"></div>
+                        <button id="yes-button">Yes</button>
+                        <button id="no-button">No</button>
+                    </div>
+                    <div id="results-phase" class="phase-container" style="display: none;">
+                        <h1>Results</h1>
+                        <div id="results-summary"></div>
+                        <div id="results-chart"></div>
+                        <p id="results-explanation"></p>
+                        <div style="text-align: center;">
+                            <button id="play-again-btn">Play Again</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <p>We at the Computational Memory Lab study human verbal memory behaviour and its basis in cognitive and neural processes. There are several approaches we take in our research, including mathematical modelling, behavioural measures in the cognitive-psychology tradition, and measures of brain activity using electroencephalography (event-related potentials and oscillations) and functional magnetic resonance imaging (fMRI). We like to address — and sometimes resurrect — classic studies and re-examine them in light of up-to-date knowledge and novel data-analysis techniques.</p>
 
@@ -131,5 +244,7 @@
     </div>
     <!-- end #footer -->
   </div>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script src="attention_tuner/script.js"></script>
 </body>
 </html>
