@@ -499,6 +499,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsExplanation = document.getElementById('results-explanation');
     const playAgainBtn = document.getElementById('play-again-btn');
     const clearResultsBtn = document.getElementById('clear-results-btn');
+    const instructionsScreen1 = document.getElementById('instructions-screen-1');
+    const instructions1ContinueBtn = document.getElementById('instructions-1-continue-btn');
+    const instructionsScreen2 = document.getElementById('instructions-screen-2');
+    const instructions2ContinueBtn = document.getElementById('instructions-2-continue-btn');
 
     
 
@@ -532,38 +536,60 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         currentExperimentIndex = 0;
         startScreen.style.display = 'none';
-        studyPhase.style.display = 'block';
-        currentPhase = 'study';
-        runNextListType();
+        instructionsScreen1.style.display = 'block';
+        currentPhase = 'instructions-1';
     }
 
     function runNextListType() {
         if (currentExperimentIndex < experimentOrder.length) {
-            // Hide all other phases and show study phase
-            startScreen.style.display = 'none';
-            distractorPhase.style.display = 'none';
-            recognitionPhase.style.display = 'none';
-            resultsPhase.style.display = 'none';
-            studyPhase.style.display = 'block'; // Ensure study phase is visible
-            currentPhase = 'study';
-
-            listType = experimentOrder[currentExperimentIndex];
-
-            // Get the 20 words for the current condition from preSampledWords
-            const startIndex = currentExperimentIndex * 20;
-            const wordsForCurrentCondition = preSampledWords.slice(startIndex, startIndex + 20);
-
-            generateStudyList(wordsForCurrentCondition); // Pass the words to generateStudyList
-            startStudyPhase();
+            // Show instructions screen before second and third experiments
+            if (currentExperimentIndex > 0) {
+                // Hide all other phases and show instructions screen 2
+                startScreen.style.display = 'none';
+                instructionsScreen1.style.display = 'none';
+                studyPhase.style.display = 'none';
+                distractorPhase.style.display = 'none';
+                recognitionPhase.style.display = 'none';
+                resultsPhase.style.display = 'none';
+                instructionsScreen2.style.display = 'block';
+                currentPhase = 'instructions-2';
+            } else {
+                // First experiment, go directly to study phase
+                startNextStudyPhase();
+            }
         } else {
             // All list types completed, show final results
+            startScreen.style.display = 'none';
+            instructionsScreen1.style.display = 'none';
             studyPhase.style.display = 'none';
             distractorPhase.style.display = 'none';
             recognitionPhase.style.display = 'none';
+            instructionsScreen2.style.display = 'none';
             resultsPhase.style.display = 'block'; // Show results phase
             currentPhase = 'results';
             showResults(); // Call showResults only once at the very end
         }
+    }
+
+    function startNextStudyPhase() {
+        // Hide all other phases and show study phase
+        startScreen.style.display = 'none';
+        instructionsScreen1.style.display = 'none';
+        distractorPhase.style.display = 'none';
+        recognitionPhase.style.display = 'none';
+        resultsPhase.style.display = 'none';
+        instructionsScreen2.style.display = 'none';
+        studyPhase.style.display = 'block'; // Ensure study phase is visible
+        currentPhase = 'study';
+
+        listType = experimentOrder[currentExperimentIndex];
+
+        // Get the 20 words for the current condition from preSampledWords
+        const startIndex = currentExperimentIndex * 20;
+        const wordsForCurrentCondition = preSampledWords.slice(startIndex, startIndex + 20);
+
+        generateStudyList(wordsForCurrentCondition); // Pass the words to generateStudyList
+        startStudyPhase();
     }
 
     function generateStudyList(selectedWordsForExperiment) {
@@ -781,8 +807,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     3: { type: 'bars' }  // Mixed Weak
                 },
                 height: 400,
-                width: '100%',
-                chartArea: { left: 0, top: 0, width: '100%', height: '100%' }
+                width: 700
             };
 
             const chart = new google.visualization.ComboChart(resultsChart);
@@ -803,6 +828,8 @@ document.addEventListener('DOMContentLoaded', () => {
         distractorPhase.style.display = 'none';
         recognitionPhase.style.display = 'none';
         resultsPhase.style.display = 'none';
+        instructionsScreen1.style.display = 'none';
+        instructionsScreen2.style.display = 'none';
         startScreen.style.display = 'block';
         currentPhase = 'start';
         studyList = [];
@@ -812,6 +839,18 @@ document.addEventListener('DOMContentLoaded', () => {
         distractorAnswer.value = ''; // Clear previous answer
         playAgainBtn.style.display = 'none'; // Hide play again button until all conditions are done
         startExperiment(); // Restart the entire experiment sequence
+    });
+
+    // Event listener for instructions screen 1 continue button
+    instructions1ContinueBtn.addEventListener('click', () => {
+        instructionsScreen1.style.display = 'none';
+        runNextListType();
+    });
+
+    // Event listener for instructions screen 2 continue button
+    instructions2ContinueBtn.addEventListener('click', () => {
+        instructionsScreen2.style.display = 'none';
+        startNextStudyPhase();
     });
 
     

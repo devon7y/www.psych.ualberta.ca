@@ -36,7 +36,7 @@
         margin-bottom: 20px;
         min-height: auto; /* Allow it to grow */
     }
-    #study-phase, #distractor-phase, #recognition-phase {
+    #study-phase, #distractor-phase, #recognition-phase, #instructions-screen-1, #instructions-screen-2 {
         height: 200px; /* Fixed height for these specific phases */
     }
     #word-display {
@@ -54,6 +54,8 @@
     #results-chart {
         border-radius: 10px;
         overflow: hidden;
+        height: 400px;
+        width: 700px;
     }
     .game-embed button {
         background-color: #5b8fd9;
@@ -128,13 +130,18 @@
           <!--<p class="meta"><span class="date">Sunday, April 26, 2009</span> 7:27 AM Posted by <a href="#">Someone</a></p>-->
           <h2 class="title"><a href="#">Welcome</a></h2>
           <div class="entry">
-            <p>To get an idea of our lab's research, press Start Experiment to do a 1-minute demonstration of the Inverted List-Strength Effect! You will be prested with 10 words which you must try to memorize. Then, you will be shown 20 words, and you must indicate whether you have seen each word previously.</p>
+            <p>To get an idea of our lab's research, press Start Experiment to do a 1-minute demonstration of the Inverted List-Strength Effect!</p>
             <div class="game-embed">
                 <div id="game-container">
                     <div id="start-screen" class="phase-container">
                         <h1>Inverted List-Strength Effect</h1>
                         <p>Press the button to start the experiment.</p>
                         <button id="start-experiment-btn">Start Experiment</button>
+                    </div>
+                    <div id="instructions-screen-1" class="phase-container" style="display: none;">
+                        <h1>Instructions</h1>
+                        <p>In the memory test, words will be presented one by one. Half of those words will be old words (words presented just before in the memorization) and the remaining words will be new words (words not presented in this experiment). For each word, your task is to identify as accurately as possible if the word is an old word or a new word.</p>
+                        <button id="instructions-1-continue-btn">Continue</button>
                     </div>
                     <div id="study-phase" class="phase-container" style="display: none;">
                         <h1>Study Phase</h1>
@@ -153,6 +160,11 @@
                         <div id="recognition-word"></div>
                         <button id="yes-button">Yes</button>
                         <button id="no-button">No</button>
+                    </div>
+                    <div id="instructions-screen-2" class="phase-container" style="display: none;">
+                        <h1>Instructions</h1>
+                        <p>You will now study another list of words.</p>
+                        <button id="instructions-2-continue-btn">Continue</button>
                     </div>
                     <div id="results-phase" class="phase-container" style="display: none;">
                         <h1>Results</h1>
