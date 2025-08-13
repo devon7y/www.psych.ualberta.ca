@@ -504,7 +504,6 @@ hr {
   color: var(--footer-text);
   text-align: center;
   padding: 40px 20px;
-  margin-top: 60px;
   position: relative;
   overflow: hidden;
   transition: background-color 0.3s ease;
@@ -539,7 +538,7 @@ hr {
 	display: grid;
 	grid-template-columns: 30% 1fr;
 	gap: 40px;
-	margin-bottom: 20px;
+	margin-bottom: 40px;
   align-items: center;
   padding-top: 70px; /* For fixed header offset */
   margin-top: -70px; /* For fixed header offset */
@@ -550,6 +549,8 @@ hr {
 	aspect-ratio: 1 / 1;
 	object-fit: cover;
   border-radius: 30px;
+  overflow: hidden;
+  display: block;
 }
 
 .post .entry pre {

@@ -774,7 +774,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const options = {
                 title: 'Inverted List-Strength Effect',
-                vAxis: { title: 'Accuracy (%)' },
+                vAxis: { title: 'Accuracy (%)', viewWindow: { min: 0, max: 100 } },
                 hAxis: { title: '' }, // No label for the single category
                 legend: { position: 'bottom' },
                 seriesType: 'bars',
@@ -785,7 +785,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     1: { type: 'bars' }, // Weak Pure
                     2: { type: 'bars' }, // Mixed Strong
                     3: { type: 'bars' }  // Mixed Weak
-                }
+                },
+                height: 400,
+                width: 600
             };
 
             const chart = new google.visualization.ComboChart(resultsChart);
