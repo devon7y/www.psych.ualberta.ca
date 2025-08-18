@@ -26,10 +26,29 @@ html {
     --shadow-hover: rgba(0,0,0,0.4);
 }
 
+[data-theme="light"] {
+    --primary-color: #2a7de9;
+    --accent-color: #4a90e2;
+    --neural-green: #00b36b;
+    --text-dark: #2c3e50;
+    --text-light: #576c7f;
+    --bg-light: #f4f7fa;
+    --bg-white: #ffffff;
+    --border-light: #e0e6ed;
+    --header-bg: #ffffff;
+    --sidebar-bg: #f0f3f7;
+    --footer-bg: #e9edf1;
+    --footer-text: #576c7f;
+    --code-bg: #e8ecf3;
+    --shadow-color: rgba(44, 62, 80, 0.1);
+    --shadow-hover: rgba(44, 62, 80, 0.15);
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 body {
@@ -289,8 +308,23 @@ body.page-contact #menu li:nth-child(6) a:before {
 
 /* Remove search section completely */
 #search {
-  display: none !important;
+  display: block !important;
 }
+
+#theme-toggle {
+    background: var(--primary-color);
+    color: var(--bg-white);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#theme-toggle:hover {
+    background: var(--accent-color);
+}
+
 
 /* Logo Section */
 #logo {

@@ -35,12 +35,7 @@ Released   : 20100403
 		</div>
 		<!-- end #menu -->
 		<div id="search">
-			<form method="get" action="">
-				<fieldset>
-					<input type="text" name="s" id="search-text" size="15" />
-					<input type="submit" id="search-submit" value="GO" />
-				</fieldset>
-			</form>
+			<button id="theme-toggle">Toggle Theme</button>
 		</div>
 		<!-- end #search -->
 	</div>
@@ -135,5 +130,36 @@ Phone: (780) 492-0023
 	</div>
 	<!-- end #footer -->
 </div>
+<script>
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
+
+    // Function to set the theme
+    function setTheme(theme) {
+        body.dataset.theme = theme;
+        localStorage.setItem('theme', theme);
+    }
+
+    // Toggle theme on button click
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = body.dataset.theme === 'dark' ? 'light' : 'dark';
+        setTheme(currentTheme);
+    });
+
+    // Check for saved theme in local storage
+    const savedTheme = localStorage.getItem('theme');
+
+    // Check for OS preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    // Set initial theme
+    if (savedTheme) {
+        setTheme(savedTheme);
+    } else if (prefersDark) {
+        setTheme('dark');
+    } else {
+        setTheme('light');
+    }
+</script>
 </body>
 </html>
