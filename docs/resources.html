@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Resources - Computational Memory Lab</title>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<script>
+	(function() {
+		try {
+			var savedTheme = localStorage.getItem('theme');
+			var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+			var theme = savedTheme || (prefersDark ? 'dark' : 'light');
+			document.documentElement.setAttribute('data-theme', theme);
+		} catch (err) {
+			document.documentElement.setAttribute('data-theme', 'dark');
+		}
+	})();
+</script>
+<link href="style.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+.resource-section {
+	margin-bottom: 40px;
+}
+.resource-section h3 {
+	color: var(--primary-color);
+	margin-bottom: 15px;
+	font-size: 1.4rem;
+}
+.resource-links {
+	margin-top: 15px;
+	padding: 15px;
+	background: var(--sidebar-bg);
+	border-radius: 8px;
+	border: 1px solid var(--border-light);
+}
+.resource-links a {
+	display: inline-block;
+	margin-right: 20px;
+	margin-bottom: 8px;
+	padding: 8px 16px;
+	background: var(--primary-color);
+	color: #fff;
+	text-decoration: none;
+	border-radius: 5px;
+	font-size: 0.9rem;
+	transition: background 0.3s ease, transform 0.2s ease;
+}
+.resource-links a:hover {
+	background: var(--accent-color);
+	transform: translateY(-2px);
+}
+.citation {
+	font-style: italic;
+	color: var(--text-light);
+	margin: 10px 0;
+	padding-left: 20px;
+	border-left: 3px solid var(--primary-color);
+}
+</style>
+</head>
+<body class="page-resources">
+<div id="header-wrapper">
+	<div id="header">
+		<div id="menu">
+			<ul>
+				<li><a href="index.html" class="first">Home</a></li>
+				<li><a href="research.html">Research</a></li>
+				<li><a href="publications.html">Publications</a></li>
+				<li><a href="courses.html">Courses</a></li>
+				<li><a href="team.html">Our Team</a></li>
+				<li class="current_page_item"><a href="resources.html">Resources</a></li>
+				<li><a href="contact.html">Contact Us</a></li>
+			</ul>
+		</div>
+		<!-- end #menu -->
+		<div id="search">
+			<button id="theme-toggle">Toggle Theme</button>
+		</div>
+		<!-- end #search -->
+	</div>
+</div>
+<!-- end #header -->
+<div id="logo">
+  <img src="images/cml_logo.svg" alt="CML Logo" class="cml-logo">
+  <div class="logo-text-wrapper">
+    <h1>Computational Memory Lab</h1>
+    <p>Studying human memory through computation, behaviour, and brain imaging.</p>
+  </div>
+</div>
+<hr />
+<!-- end #logo -->
+<div id="page">
+	<div id="page-bgtop">
+		<div id="content">
+			<div class="post">
+				<h2 class="title"><a href="#">Resources</a></h2>
+				<div class="entry">
+					<p>This page provides access to software tools, code repositories, and methods developed by the Computational Memory Lab for analyzing brain activity and modeling memory.</p>
+
+					<div class="resource-section">
+						<h3>BOSC: Better OSCillation Detection</h3>
+						<p>BOSC (Better OSCillation detection) is a method for detecting oscillatory activity in EEG and other electrophysiological signals. Unlike traditional spectral analysis methods, BOSC produces systematic, objective, and consistent results across frequencies, brain regions, and tasks by modeling the functional form of the background spectrum.</p>
+
+						<p>The method works by:</p>
+						<ul>
+							<li>Modeling the background spectrum as colored noise (power scaling as 1/frequency)</li>
+							<li>Fitting the background with linear regression in log-log coordinates</li>
+							<li>Setting a power threshold based on the 95th percentile of the theoretical chi-square distribution</li>
+							<li>Applying a duration threshold (typically 3 cycles) that scales with frequency</li>
+							<li>Detecting oscillations only when both thresholds are exceeded</li>
+						</ul>
+
+						<p>This approach minimizes bias in oscillation detection across frequency, brain region, and task, and has been shown to be robust to dramatic changes in brain state. The method produces a useful quantitative measure called P<sub>episode</sub>: the proportion of time during which detected oscillations are present.</p>
+
+						<p class="citation">Whitten, T. A., Hughes, A. M., Dickson, C. T., and Caplan, J. B. (2011). A better oscillation detection method robustly extracts EEG rhythms across brain state changes: The human alpha rhythm as a test case. <em>NeuroImage</em>, 54(2), 860-874. [<a href="papers/BOSC_scripts.zip">BOSC scripts</a>]</p>
+
+						<div class="resource-links">
+							<a href="papers/BOSC_scripts.zip">Download BOSC MATLAB Scripts</a>
+							<a href="papers/Whitten_et_al_2011.pdf">Read the Paper (PDF)</a>
+						</div>
+					</div>
+
+					<div class="resource-section">
+						<h3>Optimized BOSC</h3>
+						<p>Optimized BOSC is an enhanced version of the BOSC method that incorporates several improvements for increased robustness, particularly when using short time windows or when analyzing signals with oscillations at the edges of the measured frequency spectrum.</p>
+
+						<p>Key improvements include:</p>
+						<ul>
+							<li><strong>High-power value removal:</strong> Removes power values exceeding a high threshold (99.9th percentile) to reduce the influence of oscillatory activity or artifacts on the background estimate</li>
+							<li><strong>Median-based regression:</strong> Uses median rather than mean power values at each frequency, which reduces the influence of outliers</li>
+							<li><strong>Robust regression:</strong> Employs iteratively reweighted least squares regression to further downweight outliers in the power spectrum</li>
+						</ul>
+
+						<p>The optimized method shows enhanced performance when:</p>
+						<ul>
+							<li>Using shorter time windows (less than 30 seconds)</li>
+							<li>Substantial power exists at one end of the measured spectrum</li>
+							<li>High-power artifacts are present in the signal</li>
+						</ul>
+
+						<p>For signals with no prominent peak or a peak near the middle of the power spectrum (like the alpha range), the standard BOSC method performs well. The optimized version is recommended for less conventional scenarios.</p>
+
+						<p class="citation">Pawluk, K. A., Shalamberidze, T., and Caplan, J. B. (2025). Making oscillation detection more robust. <em>Journal of Neuroscience Methods</em>, 422(110510).</p>
+
+						<div class="resource-links">
+							<a href="https://github.com/kapawluk/optimized-BOSC" target="_blank">GitHub Repository</a>
+							<a href="papers/Pawluk_et_al_2025.pdf">Read the Paper (PDF)</a>
+						</div>
+					</div>
+
+					<div class="resource-section">
+						<h3>REM Model Implementation</h3>
+						<p>Code for the REM (Retrieving Effectively from Memory) model implementation used in our research on associative recognition memory. This implementation demonstrates how item memory can emerge from an associative memory system without requiring separate hippocampal associations for item recognition.</p>
+
+						<p class="citation">Caplan, J. B. and Guitard, D. (in press). Spaced repetition and list-strength in recognition memory. <em>Memory & Cognition</em>.</p>
+
+						<div class="resource-links">
+							<a href="https://osf.io/b3hce/?view_only=c857f150ae6a41878a74434fc4959daf" target="_blank">OSF Repository - Model Code</a>
+							<a href="papers/Caplan_et_al_2022a.pdf">Read the Paper (PDF)</a>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+		<!-- end #content -->
+		<div style="clear: both;">&nbsp;</div>
+	</div>
+	<!-- end #page -->
+	<div id="footer">
+      <p>&copy; CML. All rights reserved.</p>
+    </div>
+    <!-- end #footer -->
+</div>
+<script>
+    const themeToggle = document.getElementById('theme-toggle');
+    const root = document.documentElement;
+    const body = document.body;
+
+    // Function to set the theme
+    function setTheme(theme) {
+        root.dataset.theme = theme;
+        body.dataset.theme = theme;
+        localStorage.setItem('theme', theme);
+    }
+
+    // Toggle theme on button click
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        setTheme(currentTheme);
+    });
+
+    // Check for saved theme in local storage
+    const savedTheme = localStorage.getItem('theme');
+
+    // Check for OS preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    // Set initial theme
+    if (savedTheme) {
+        setTheme(savedTheme);
+    } else if (prefersDark) {
+        setTheme('dark');
+    } else {
+        setTheme('light');
+    }
+
+    // Enable transitions after initial paint
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            root.setAttribute('data-theme-ready', 'true');
+        });
+    });
+</script>
+</body>
+</html>
