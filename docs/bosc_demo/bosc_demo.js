@@ -1332,6 +1332,15 @@
     return document.getElementById(id);
   }
 
+  function setRangeFill(slider) {
+    if (!slider) return;
+    const min = parseFloat(slider.min || "0");
+    const max = parseFloat(slider.max || "100");
+    const val = parseFloat(slider.value || "0");
+    const pct = max > min ? ((val - min) / (max - min)) * 100 : 0;
+    slider.style.setProperty("--bosc-range-fill", pct + "%");
+  }
+
   function initDemo() {
     const container = getEl("bosc-container");
     if (!container) return;
@@ -1403,8 +1412,10 @@
     const slider = getEl(sliderId);
     const label = getEl(labelId);
     if (!slider) return;
+    setRangeFill(slider);
     slider.addEventListener("input", function () {
       if (label) label.textContent = this.value;
+      setRangeFill(this);
       callback(this.value);
     });
   }
