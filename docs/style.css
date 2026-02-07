@@ -335,7 +335,8 @@ body.page-research #menu li:nth-child(2) a,
 body.page-publications #menu li:nth-child(3) a,
 body.page-courses #menu li:nth-child(4) a,
 body.page-team #menu li:nth-child(5) a,
-body.page-contact #menu li:nth-child(6) a {
+body.page-resources #menu li:nth-child(6) a,
+body.page-contact #menu li:nth-child(7) a {
   color: var(--primary-color);
   font-weight: 600;
 }
@@ -345,7 +346,8 @@ body.page-research #menu li:nth-child(2) a:before,
 body.page-publications #menu li:nth-child(3) a:before,
 body.page-courses #menu li:nth-child(4) a:before,
 body.page-team #menu li:nth-child(5) a:before,
-body.page-contact #menu li:nth-child(6) a:before {
+body.page-resources #menu li:nth-child(6) a:before,
+body.page-contact #menu li:nth-child(7) a:before {
   width: 80%;
   background: var(--text-dark);
 }
@@ -783,7 +785,8 @@ p[style*="color:red"] {
   body.page-publications #menu li:nth-child(3) a,
   body.page-courses #menu li:nth-child(4) a,
   body.page-team #menu li:nth-child(5) a,
-  body.page-contact #menu li:nth-child(6) a {
+  body.page-resources #menu li:nth-child(6) a,
+  body.page-contact #menu li:nth-child(7) a {
     background: var(--neural-gradient);
     border-color: transparent;
     color: var(--text-dark);
