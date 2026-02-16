@@ -278,6 +278,147 @@
         background: #4a90e2;
         border: 1px solid #3b7fcf;
     }
+
+    /* Attentional Subsetting Demo Styles */
+    .sub-step-nav {
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+    }
+    .sub-step-btn {
+        background-color: #2d3447 !important;
+        color: #8899aa !important;
+        border: 1px solid #3a4254 !important;
+        padding: 6px 12px !important;
+        border-radius: 4px !important;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+    .sub-step-btn:hover {
+        background-color: #3a4254 !important;
+        color: #c8d8e8 !important;
+    }
+    .sub-step-btn.active {
+        background-color: #5b8fd9 !important;
+        color: #fff !important;
+        border-color: #5b8fd9 !important;
+    }
+    .sub-canvas-row {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 8px;
+    }
+    .sub-canvas-row canvas {
+        border-radius: 6px;
+        border: 1px solid #3a4254;
+    }
+    .sub-info-text {
+        background: #2d3447;
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin: 10px 0;
+        font-size: 0.88rem;
+        line-height: 1.5;
+        color: #c8d8e8;
+        border-left: 3px solid #5b8fd9;
+    }
+    .sub-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+        padding-top: 8px;
+        border-top: 1px solid #3a4254;
+        margin-top: 10px;
+    }
+    .sub-control-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 160px;
+    }
+    .sub-control-group label {
+        font-size: 0.78rem;
+        color: #8899aa;
+        margin-bottom: 4px;
+    }
+    .sub-control-group input[type="range"] {
+        width: 140px;
+        accent-color: #5b8fd9;
+    }
+
+    [data-theme="light"] .sub-step-btn {
+        background-color: #e2e8f0 !important;
+        color: #4a5568 !important;
+        border: 1px solid #e0e6ed !important;
+    }
+    [data-theme="light"] .sub-step-btn:hover {
+        background-color: #cbd5e0 !important;
+        color: #2d3748 !important;
+    }
+    [data-theme="light"] .sub-step-btn.active {
+        background-color: #4a90e2 !important;
+        color: #fff !important;
+        border-color: #4a90e2 !important;
+    }
+    [data-theme="light"] .sub-canvas-row canvas {
+        border: 1px solid #e0e6ed;
+    }
+    [data-theme="light"] .sub-info-text {
+        background: #edf2f7;
+        color: #2d3748;
+        border-left: 3px solid #4a90e2;
+    }
+    [data-theme="light"] .sub-controls {
+        border-top: 1px solid #e0e6ed;
+    }
+    [data-theme="light"] .sub-control-group label {
+        color: #4a5568;
+    }
+    [data-theme="light"] .sub-control-group input[type="range"] {
+        accent-color: #4a90e2;
+    }
+    [data-theme="light"] .sub-control-group input[type="range"]::-webkit-slider-runnable-track {
+        height: 6px;
+        background: linear-gradient(
+            to right,
+            #4a90e2 var(--sub-range-fill, 50%),
+            #d9e1ec var(--sub-range-fill, 50%)
+        );
+        border: 1px solid #cbd5e0;
+        border-radius: 999px;
+    }
+    [data-theme="light"] .sub-control-group input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        margin-top: -6px;
+        border-radius: 50%;
+        background: #4a90e2;
+        border: 1px solid #3b7fcf;
+    }
+    [data-theme="light"] .sub-control-group input[type="range"]::-moz-range-track {
+        height: 6px;
+        background: #d9e1ec;
+        border: 1px solid #cbd5e0;
+        border-radius: 999px;
+    }
+    [data-theme="light"] .sub-control-group input[type="range"]::-moz-range-progress {
+        height: 6px;
+        background: #4a90e2;
+        border-radius: 999px;
+    }
+    [data-theme="light"] .sub-control-group input[type="range"]::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #4a90e2;
+        border: 1px solid #3b7fcf;
+    }
   </style>
 </head>
 <body class="page-home">
@@ -429,6 +570,78 @@
         </div>
 
         <div class="post">
+          <h2 class="title"><a href="#">Attentional Subsetting Theory</a></h2>
+          <div class="entry">
+            <p>Why does producing words aloud (writing, saying) improve memory compared to silent reading, and why does this <em>production effect</em> create list-strength effects — while simply studying items longer does not? Attentional Subsetting Theory proposes that attention encodes only a small subset of a word's features, and the size of the relevant feature space determines whether items interfere with each other in memory. Explore the interactive demo below to see how.</p>
+
+            <div class="game-embed" id="sub-container">
+              <div id="sub-start-screen" style="text-align: center; padding: 20px;">
+                <h1 style="font-size: 1.8rem; margin-bottom: 10px;">Attentional Subsetting Theory</h1>
+                <p style="margin-bottom: 5px;">An interactive walkthrough of how selective feature encoding shapes recognition memory and list-strength effects.</p>
+                <p style="font-size: 0.85em; margin-bottom: 15px; opacity: 0.7;">Based on Caplan (in press, JMP) and Caplan &amp; Guitard (2024)</p>
+                <button id="sub-start-btn">Start Demo</button>
+              </div>
+
+              <div id="sub-viz-area" style="display: none;">
+                <div class="sub-step-nav">
+                  <button class="sub-step-btn" data-step="1">1. Items</button>
+                  <button class="sub-step-btn" data-step="2">2. Encoding</button>
+                  <button class="sub-step-btn" data-step="3">3. Recognition</button>
+                  <button class="sub-step-btn" data-step="4">4. Sparseness</button>
+                  <button class="sub-step-btn" data-step="5">5. Results</button>
+                </div>
+
+                <div class="sub-canvas-row">
+                  <canvas id="sub-canvas-main"></canvas>
+                </div>
+                <div class="sub-canvas-row">
+                  <canvas id="sub-canvas-chart"></canvas>
+                </div>
+
+                <p id="sub-info-text" class="sub-info-text" style="display: none;"></p>
+              </div>
+
+              <div id="sub-controls-area" class="sub-controls" style="display: none;">
+
+                <!-- Steps 2–3: basic nC slider -->
+                <div id="sub-basic-controls" style="display: none; flex-wrap: wrap; gap: 10px; justify-content: center;">
+                  <div class="sub-control-group">
+                    <label>Features Attended (nC): <span id="sub-nC-val">6</span></label>
+                    <input type="range" id="sub-nC" min="1" max="14" step="1" value="6" />
+                  </div>
+                </div>
+
+                <!-- Step 3: probe toggle -->
+                <div id="sub-probe-group" style="display: none; align-items: center;">
+                  <button id="sub-probe-btn">Show Lure</button>
+                </div>
+
+                <!-- Steps 4–5: feature space slider -->
+                <div id="sub-space-controls" style="display: none; flex-wrap: wrap; gap: 10px; justify-content: center;">
+                  <div class="sub-control-group">
+                    <label>Feature Space Size (n): <span id="sub-n-val">32</span></label>
+                    <input type="range" id="sub-n" min="16" max="1024" step="16" value="32" />
+                  </div>
+                </div>
+
+                <!-- Step 5 only: separate S/D sliders -->
+                <div id="sub-step5-controls" style="display: none; flex-wrap: wrap; gap: 10px; justify-content: center;">
+                  <div class="sub-control-group">
+                    <label>Cond. S Features (nC<sub>S</sub>, shallow): <span id="sub-nC-S-val">4</span></label>
+                    <input type="range" id="sub-nC-S" min="1" max="20" step="1" value="4" />
+                  </div>
+                  <div class="sub-control-group">
+                    <label>Cond. D Features (nC<sub>D</sub>, deep): <span id="sub-nC-D-val">10</span></label>
+                    <input type="range" id="sub-nC-D" min="1" max="20" step="1" value="10" />
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="post">
           <h2 class="title"><a href="#">About the Lab</a></h2>
           <div class="entry">
             <p>We at the Computational Memory Lab study human verbal memory behaviour and its basis in cognitive and neural processes. There are several approaches we take in our research, including mathematical modelling, behavioural measures in the cognitive-psychology tradition, and measures of brain activity using electroencephalography (event-related potentials and oscillations) and functional magnetic resonance imaging (fMRI). We like to address — and sometimes resurrect — classic studies and re-examine them in light of up-to-date knowledge and novel data-analysis techniques.</p>
@@ -497,6 +710,7 @@
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="attention_tuner/script.js"></script>
   <script src="bosc_demo/bosc_demo.js"></script>
+  <script src="subsetting_demo/subsetting_demo.js"></script>
   <script>
     const themeToggle = document.getElementById('theme-toggle');
     const root = document.documentElement;
