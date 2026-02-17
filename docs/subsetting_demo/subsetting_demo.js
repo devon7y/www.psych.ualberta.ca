@@ -123,7 +123,7 @@
     return Math.sqrt(nC_x / Math.max(denom, 1e-9));
   }
 
-  // Ratio-of-Ratios (Eq. 1): RoR ≈ 1 → null LSE; RoR < 1 → S benefits more in mixed (positive LSE)
+  // Ratio-of-Ratios (Eq. 1): RoR ≈ 1 → null LSE; RoR > 1 → positive LSE; RoR < 1 → inverted LSE
   function computeRoR(nC_S, nC_D, L, n) {
     const hL = L / 2;
     const dpSP = dpPure(nC_S, L, n), dpDP = dpPure(nC_D, L, n);
@@ -291,7 +291,7 @@
     const startX = (W - labelW - memColX_offset - r * 2) / 2 + labelW;
     const startY = Math.round((H - totalH) / 2) + 4;
 
-    txt(ctx, "Attentional masking: attended features encoded (grey = ignored)", W / 2, 12,
+    txt(ctx, "Attentional masking: encoding only what attention notices", W / 2, 12,
       { font: 'bold 11px "Inter",sans-serif', align: "center" });
 
     drawSubspaceBands(ctx, startX - labelW, labelW + N_ITEMS * colW, startY, rowH);
@@ -343,12 +343,37 @@
       }
     }
 
-    txt(ctx, "nC = " + state.params.nC + " features attended per item",
-      W / 2, H - 8, { font: '9px "Inter",sans-serif', align: "center", color: c.label });
+    // Legend: three dot states, horizontally centered at bottom
+    const legY = H - 14;
+    const legR = 4;
+    const legendItems = [
+      { draw: (x) => { ctx.beginPath(); ctx.arc(x, legY, legR, 0, 2*Math.PI); ctx.fillStyle = `hsl(30,65%,60%)`; ctx.fill(); }, label: "attended + present → encoded" },
+      { draw: (x) => { ctx.beginPath(); ctx.arc(x, legY, legR, 0, 2*Math.PI); ctx.strokeStyle = `hsl(30,35%,42%)`; ctx.lineWidth = 1; ctx.stroke(); }, label: "attended + absent → not encoded" },
+      { draw: (x) => { ctx.beginPath(); ctx.arc(x, legY, legR, 0, 2*Math.PI); ctx.fillStyle = c.unatt; ctx.fill(); ctx.strokeStyle = c.unattStr; ctx.lineWidth = 0.5; ctx.stroke(); }, label: "unnoticed by attention" },
+    ];
+    // Measure total width to centre the whole group
+    const itemGap = 14;   // gap between dot and next dot
+    const labelPad = 6;   // gap between dot and its label
+    // Approximate label widths (9px font ≈ 5.5px/char)
+    const charW = 5.5;
+    const totalW = legendItems.reduce((acc, li, k) => {
+      const lw = li.label.length * charW;
+      return acc + legR * 2 + labelPad + lw + (k < legendItems.length - 1 ? itemGap : 0);
+    }, 0);
+    let lx = (W - totalW) / 2 + legR;
+    legendItems.forEach(li => {
+      li.draw(lx);
+      txt(ctx, li.label, lx + legR + labelPad, legY,
+        { font: '8px "Inter",sans-serif', color: c.label });
+      const lw = li.label.length * charW;
+      lx += legR * 2 + labelPad + lw + itemGap;
+    });
   }
 
   // =====================================================================
   // STEP 3: RECOGNITION — PROBE MATCHING
+  // Shows study items + memory on the left, then Target and Lure probe
+  // columns simultaneously so both can be compared against the same memory.
   // =====================================================================
   function drawStep3(canvas, state) {
     const { ctx, W, H } = setupCtx(canvas);
@@ -357,17 +382,16 @@
     const { items, masks } = state;
     if (!items || !masks) return;
 
-    const isTarget = state.probeIsTarget;
-    // Target = item 0; lure = last item (index N_ITEMS)
-    const probeIdx = isTarget ? 0 : N_ITEMS;
-    const probeMask = masks[0]; // item-specific masking: probe uses item 0's mask
+    const probeMask = masks[0]; // item-specific mask reiterated at test
 
     const r = 4, gap = 1, rowH = r * 2 + gap;
-    const labelW = 38;
+    const colGap = 14, labelW = 44;
     const totalH = N_VIS * rowH;
-    const colGap = 14;
+    const colW = r * 2 + colGap;
+    const startY = Math.round((H - totalH) / 2) + 4;
+    const midY = startY + totalH / 2;
 
-    // Compute memory features (only attended+present features contribute: m = Σ w_i ⊗ f_i)
+    // Memory: accumulate attended+present features from all studied items
     const memCount = new Array(N_VIS).fill(0);
     for (let i = 0; i < N_ITEMS; i++) {
       for (const f of masks[i]) {
@@ -375,48 +399,52 @@
       }
     }
 
-    // Identify glowing features (attended by probe mask AND present in both probe and memory)
-    const glowSet = new Set();
+    // Gold-ring glow: attended AND present in probe AND stored in memory
+    const targetGlow = new Set();
+    const lureGlow   = new Set();
     for (const f of probeMask) {
-      if (items[probeIdx][f] === 1 && memCount[f] > 0) glowSet.add(f);
+      if (items[0][f]       === 1 && memCount[f] > 0) targetGlow.add(f);
+      if (items[N_ITEMS][f] === 1 && memCount[f] > 0) lureGlow.add(f);
     }
 
-    // Layout: probe | arrow | memory | stats
-    const probeX = (W * 0.18) + r;
-    const arrX = probeX + r + 10;
-    const memX = arrX + 22 + r;
-    const statsX = memX + r + 22;
-    const startY = Math.round((H - totalH) / 2) + 4;
+    // Layout — centre the whole group in the canvas
+    // Sections: [labelW] [5*colW] [26 arrow+gap] [r mem] [sepW] [r target] [sepW] [r lure] [statsGap] [statsWidth]
+    const sepW = 62, statsGap = 16, statsWidth = 130;
+    const totalW = labelW + 5 * colW + 26 + r + sepW + sepW + r + statsGap + statsWidth;
+    const leftEdge = (W - totalW) / 2;
+    const startX  = leftEdge + labelW;           // mirrors step-2 convention
+    const memX    = startX + 5 * colW + 26 + r;  // centre of memory column dot
+    const targetX = memX + sepW;
+    const lureX   = targetX + sepW;
+    const statsX  = lureX + r + statsGap;
 
-    txt(ctx, "Recognition: probe compared to memory (attended features only)", W / 2, 12,
+    txt(ctx, "Recognition: target and lure vs. memory (gold ring = match)", W / 2, 12,
       { font: 'bold 11px "Inter",sans-serif', align: "center" });
 
-    const probeColor = isTarget ? c.signal : c.noise;
+    // Subspace bands behind study columns only
+    drawSubspaceBands(ctx, startX - labelW, labelW + 5 * colW, startY, rowH);
 
-    // Probe label
-    txt(ctx, isTarget ? "Target" : "Lure", probeX, startY - 9,
-      { font: '9px "Inter",sans-serif', align: "center", color: probeColor });
-
-    // Draw probe with mask applied and glowing features
-    // Pass items[probeIdx][f] so target and lure show different feature patterns
-    for (let f = 0; f < N_VIS; f++) {
-      const cy = startY + f * rowH + r;
-      const att = probeMask.has(f);
-      dot(ctx, probeX, cy, r, f, att, att && glowSet.has(f), items[probeIdx][f]);
+    // Study columns with masks applied
+    for (let i = 0; i < N_ITEMS; i++) {
+      const x = startX + i * colW + r;
+      txt(ctx, "W" + (i + 1), x, startY - 9,
+        { font: '9px "Inter",sans-serif', align: "center", color: c.label });
+      drawColumn(ctx, items, i, masks[i], x, startY, r, rowH, null);
     }
 
-    // Arrow
-    const midY = startY + totalH / 2;
+    // Arrow from W5 to memory
+    const arrowX1 = startX + 4 * colW + r + 4;
+    const arrowX2 = memX - r - 4;
     ctx.save();
     ctx.strokeStyle = c.label; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(arrX, midY); ctx.lineTo(arrX + 14, midY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(arrowX1, midY); ctx.lineTo(arrowX2, midY); ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(arrX + 10, midY - 4); ctx.lineTo(arrX + 14, midY); ctx.lineTo(arrX + 10, midY + 4);
+    ctx.moveTo(arrowX2 - 5, midY - 4); ctx.lineTo(arrowX2, midY); ctx.lineTo(arrowX2 - 5, midY + 4);
     ctx.stroke();
     ctx.restore();
 
-    // Memory column
-    txt(ctx, "Memory", memX, startY - 9,
+    // Memory column (gold rings appear on probe columns, not here)
+    txt(ctx, "Mem.", memX, startY - 9,
       { font: '9px "Inter",sans-serif', align: "center", color: c.memory });
     for (let f = 0; f < N_VIS; f++) {
       const cy = startY + f * rowH + r;
@@ -425,11 +453,7 @@
         ctx.beginPath(); ctx.arc(memX, cy, r, 0, 2 * Math.PI);
         ctx.fillStyle = `hsl(${hue},68%,${42 + Math.min(memCount[f] / N_ITEMS, 1) * 24}%)`;
         ctx.fill();
-        if (glowSet.has(f)) {
-          ctx.strokeStyle = c.highlight; ctx.lineWidth = 1.8; ctx.stroke();
-        } else {
-          ctx.strokeStyle = c.memory; ctx.lineWidth = 0.7; ctx.stroke();
-        }
+        ctx.strokeStyle = c.memory; ctx.lineWidth = 0.7; ctx.stroke();
       } else {
         ctx.beginPath(); ctx.arc(memX, cy, r, 0, 2 * Math.PI);
         ctx.fillStyle = c.unatt; ctx.fill();
@@ -437,20 +461,44 @@
       }
     }
 
-    // Matching strength stats
-    const matchCount = glowSet.size;
-    const noiseCount = probeMask.size - matchCount;
-    if (statsX + 80 < W) {
-      txt(ctx, "Matches:", statsX, midY - 20,
-        { font: '10px "Inter",sans-serif', color: c.label });
-      txt(ctx, String(matchCount), statsX + 56, midY - 20,
-        { font: 'bold 13px "Inter",sans-serif', color: probeColor });
-      txt(ctx, isTarget ? "(signal)" : "(chance)", statsX, midY - 4,
-        { font: '9px "Inter",sans-serif', color: probeColor });
-      const dpVal = dpPure(state.params.nC, N_ITEMS, state.params.n);
-      txt(ctx, "d\u2019 \u2248 " + dpVal.toFixed(2) + " (pure list)", statsX, midY + 14,
-        { font: 'bold 10px "Inter",sans-serif', color: c.text });
+    // "vs." labels centred between adjacent columns
+    txt(ctx, "vs.", (memX + targetX) / 2, startY - 9,
+      { font: 'italic 9px "Inter",sans-serif', align: "center", color: c.label });
+    txt(ctx, "vs.", (targetX + lureX) / 2, startY - 9,
+      { font: 'italic 9px "Inter",sans-serif', align: "center", color: c.label });
+
+    // Target probe column
+    txt(ctx, "Target", targetX, startY - 9,
+      { font: '9px "Inter",sans-serif', align: "center", color: c.signal });
+    for (let f = 0; f < N_VIS; f++) {
+      const cy = startY + f * rowH + r;
+      const att = probeMask.has(f);
+      dot(ctx, targetX, cy, r, f, att, att && targetGlow.has(f), items[0][f]);
     }
+
+    // Lure probe column
+    txt(ctx, "Lure", lureX, startY - 9,
+      { font: '9px "Inter",sans-serif', align: "center", color: c.noise });
+    for (let f = 0; f < N_VIS; f++) {
+      const cy = startY + f * rowH + r;
+      const att = probeMask.has(f);
+      dot(ctx, lureX, cy, r, f, att, att && lureGlow.has(f), items[N_ITEMS][f]);
+    }
+
+    // Stats panel
+    const dpVal = dpPure(state.params.nC, N_ITEMS, state.params.n);
+    txt(ctx, "Target:", statsX, midY - 22,
+      { font: '10px "Inter",sans-serif', color: c.label });
+    txt(ctx, targetGlow.size + " matches", statsX + 48, midY - 22,
+      { font: 'bold 10px "Inter",sans-serif', color: c.signal });
+    txt(ctx, "Lure:", statsX, midY - 6,
+      { font: '10px "Inter",sans-serif', color: c.label });
+    txt(ctx, lureGlow.size + " matches", statsX + 48, midY - 6,
+      { font: 'bold 10px "Inter",sans-serif', color: c.noise });
+    txt(ctx, "d\u2019 \u2248 " + dpVal.toFixed(2), statsX, midY + 12,
+      { font: 'bold 11px "Inter",sans-serif', color: c.text });
+    txt(ctx, "(pure list)", statsX, midY + 26,
+      { font: '9px "Inter",sans-serif', color: c.label });
   }
 
   // =====================================================================
@@ -480,7 +528,8 @@
       const px = 10 + s * panelW;
       const cx = px + panelW / 2;
       const cy = H / 2 + 12;
-      const maxR = Math.min(panelW * 0.34, (H - 60) * 0.45);
+      // Cap maxR so three label lines (n / d' / cross-talk) fit below the circle
+      const maxR = Math.min(panelW * 0.34, H / 2 - 56);
 
       // Feature-space circle
       ctx.beginPath(); ctx.arc(cx, cy, maxR, 0, 2 * Math.PI);
@@ -504,21 +553,20 @@
       // Labels
       txt(ctx, sc.label, cx, cy - maxR - 14,
         { font: '9px "Inter",sans-serif', align: "center", color: sc.col });
-      txt(ctx, "n = " + sc.n_eff, cx, cy + maxR + 10,
-        { font: '10px "Inter",sans-serif', align: "center", color: c.label });
-
-      // Overlap %
+      // Overlap % (centre of Venn circles)
       const overlapPct = Math.min(nC / sc.n_eff * 100, 100).toFixed(1);
       txt(ctx, "Overlap ≈ " + overlapPct + "%", cx, cy,
         { font: 'bold 9px "Inter",sans-serif', align: "center", color: c.text });
 
-      // d' value
+      // Three stacked labels below the circle (n / d' / cross-talk interpretation)
       const dp = dpPure(nC, N_ITEMS, sc.n_eff);
-      txt(ctx, "d' = " + dp.toFixed(2), cx, H - 10,
+      const lb = cy + maxR;
+      txt(ctx, "n = " + sc.n_eff, cx, lb + 13,
+        { font: '10px "Inter",sans-serif', align: "center", color: c.label });
+      txt(ctx, "d' = " + dp.toFixed(2), cx, lb + 27,
         { font: 'bold 10px "Inter",sans-serif', align: "center", color: sc.col });
-
       txt(ctx, s === 0 ? "Low cross-talk → null LSE" : "High cross-talk → positive LSE",
-        cx, cy + maxR + 22,
+        cx, lb + 41,
         { font: '8px "Inter",sans-serif', align: "center", color: c.label });
     }
   }
@@ -746,17 +794,19 @@
 
     // Inline legend: S = strong (more features), D = weak (fewer features)
     const legY = 28;
+    // S legend — left side of chart area
     ctx.save();
-    ctx.beginPath(); ctx.arc(margin.l + pW / 2 - 80, legY, 4, 0, 2 * Math.PI);
+    ctx.beginPath(); ctx.arc(margin.l + 8, legY, 4, 0, 2 * Math.PI);
     ctx.fillStyle = c.barS; ctx.fill();
     ctx.restore();
-    txt(ctx, "S = shallow (fewer features)", margin.l + pW / 2 - 73, legY,
+    txt(ctx, "S = shallow (fewer features)", margin.l + 16, legY,
       { font: '9px "Inter",sans-serif', color: c.barS });
+    // D legend — right side of chart area (well past end of S text)
     ctx.save();
-    ctx.beginPath(); ctx.arc(margin.l + pW / 2 + 30, legY, 4, 0, 2 * Math.PI);
+    ctx.beginPath(); ctx.arc(margin.l + pW / 2 + 8, legY, 4, 0, 2 * Math.PI);
     ctx.fillStyle = c.barD; ctx.fill();
     ctx.restore();
-    txt(ctx, "D = deep (more features)", margin.l + pW / 2 + 37, legY,
+    txt(ctx, "D = deep (more features)", margin.l + pW / 2 + 16, legY,
       { font: '9px "Inter",sans-serif', color: c.barD });
 
     const bars = [
@@ -860,8 +910,8 @@
   const STEP_INFO = [
     "",
     "<strong>Step 1: Words as Feature Vectors.</strong> Each column (W1, W2, \u2026, W5) represents a different word from the study list \u2014 for example, W1 might be \u201cAPPLE\u201d, W2 might be \u201cTABLE\u201d, W3 might be \u201cBLUE\u201d, and so on. Every word carries many distinct properties at once: how it <em>sounds</em> (phonological features \u2014 vowels, consonants, stress), how it <em>looks</em> on the page (orthographic features \u2014 letter shapes, length), and what it <em>means</em> (semantic features \u2014 the concepts, images, and associations it evokes). Notice that the semantic band (blue\u2013purple) is much taller than the phonological and orthographic bands: the semantic feature space is far larger in the model (\u223c512 features vs. \u223c64 each for phonological and orthographic). Each filled circle represents a feature that is <em>present</em> for that word; a hollow circle shows a feature that is absent. The theory assumes our memory system stores words by tracking these individual features \u2014 not the word as a single unit. (In the mathematical model, features have continuous values rather than just on/off; the filled/hollow display here is a simplified but faithful representation.)",
-    "<strong>Step 2: Selective Encoding.</strong> When studying a word, attention doesn\u2019t process every feature equally. Instead, it selects a small subset (the <em>attentional mask</em>) to check. Among those attended features: a <em>filled</em> colored circle means the feature is present in that word and gets encoded into memory; a <em>hollow</em> colored circle means the feature was attended but is absent in that word \u2014 nothing to encode. Grey circles are features that go completely unnoticed. Crucially, each word gets its own <em>unique</em> attentional subset, and the same features tend to be re-activated at test. Use the slider to control how many features (nC) are attended per word.",
-    "<strong>Step 3: Recognizing a Word.</strong> At test, the same attentional mask re-activates: you \u2018re-look\u2019 at the attended features of the probe word. <em>Filled</em> colored circles are features that are present in the probe; <em>hollow</em> colored circles are features the mask checked but that are absent in this particular probe word. A <strong>gold ring</strong> marks a feature that is both present in the probe and stored in memory \u2014 a match. For a <em>target</em> (a word you actually studied), many attended features are present and match memory \u2014 high match count. For a <em>lure</em> (a new, unstudied word), its features differ from what was studied, so fewer attended features are present and fewer still match memory \u2014 low match count. That gap is captured by d\u2019 (discrimination sensitivity). Toggle between Target and Lure to see the different patterns, and adjust nC to see how attending more features widens the gap.",
+    "<strong>Step 2: Selective Encoding.</strong> When studying a word, attention doesn\u2019t process every feature equally. Instead, it selects a small subset (the <em>attentional mask</em>) to attend to. Among those nC attended features: a <em>filled</em> colored circle means the feature is present in that word and gets encoded into memory; a <em>hollow</em> colored ring means the feature was attended, but happens to be absent in that particular word \u2014 so there is nothing to encode. Grey circles are features that go completely unnoticed by attention and are never encoded. As a result, the number of <em>filled</em> colored dots you see per column will often be less than nC \u2014 because some of the attended features simply aren\u2019t present in that word. Crucially, each word gets its own <em>unique</em> attentional subset, and the same features tend to be re-activated at test. Use the slider to control how many features (nC) are attended per word.",
+    "<strong>Step 3: Recognizing a Word.</strong> At test, the same attentional mask re-activates: you \u2018re-look\u2019 at the attended features of the probe word. <em>Filled</em> colored circles are features that are present in the probe; <em>hollow</em> colored rings are features attention attended to but that are absent in this particular probe word. A <strong>gold ring</strong> marks a feature that is both present in the probe <em>and</em> stored in memory \u2014 a match. A <em>target</em> (word W1, which you actually studied) and a <em>lure</em> (a new, unstudied word) are shown side by side against the same memory trace. For the target, many attended features are present and match memory \u2014 high match count. For the lure, its features differ from what was studied, so fewer attended features match \u2014 low match count. That gap is captured by d\u2019 (discrimination sensitivity). Adjust nC to see how attending more features widens the separation.",
     "<strong>Step 4: Why Feature Space Size Matters.</strong> The critical quantity is the <em>sparseness ratio</em> nC/n \u2014 the fraction of all features that attention selects. When nC/n is tiny (large n, sparse subsetting), two words\u2019 attentional spotlights almost never overlap by chance: cross-talk between items is negligible and list composition barely matters. When nC/n is large (small n, dense subsetting), the spotlights frequently share features \u2014 one word\u2019s memory trace bleeds into another\u2019s and list composition matters a lot. The two Venn diagrams illustrate this: large outer circle = large feature space (sparse); small outer circle = compact feature space (dense). The bar chart shows d\u2019 for four conditions. <em>Pure-S / Pure-D</em>: lists where all items are encoded the same shallow (S) or deep (D) way. <em>Mixed-S / Mixed-D</em>: the same conditions when the list is mixed. Drag the Feature Space (n) slider from small to large to watch the RoR converge toward 1 \u2014 a null list-strength effect \u2014 as sparseness increases.",
     "<strong>Step 5: The List-Strength Effect.</strong> Does it hurt your memory for a word if other words in the same list were studied more intensively? In a <em>pure list</em>, all words are studied the same way. In a <em>mixed list</em>, some words are encoded more deeply (condition D \u2014 more features, e.g. a spoken/produced word) and some more shallowly (condition S \u2014 fewer features, e.g. a silently-read word). Note: in the papers, D = deep/stronger and S = shallow/weaker, matching the sliders here. The <em>Ratio-of-Ratios</em> RoR = [d\u2019(D mixed)/d\u2019(S mixed)] / [d\u2019(D pure)/d\u2019(S pure)] quantifies the effect. <strong>RoR \u2248 1</strong> \u2014 a <em>null list-strength effect</em>: list composition barely changes relative performance. This occurs when features come from a <em>large</em> subspace (semantic encoding), so attentional spotlights of different items rarely overlap and cross-talk is minimal. <strong>RoR > 1</strong> \u2014 a <em>positive list-strength effect</em>: deep (D) items benefit disproportionately in mixed lists. This is predicted when features come from a <em>compact</em> subspace, such as phonological features during production/vocalisation. Because nC/n<sub>phon</sub> is not small, different items\u2019 masks frequently share features, adding noise that hurts the weaker (S) items more. The key insight: production is not simply \u201cstronger\u201d encoding in the usual sense. Repetition and longer study time also encode more features but produce near-null list-strength effects because the extra features come from the large semantic subspace. Production\u2019s large positive list-strength effect arises specifically because its extra features are <em>phonological</em> \u2014 drawn from a compact space where cross-talk is unavoidable.",
   ];
@@ -905,8 +955,8 @@
       cv.width = dw * dpr; cv.height = dispH * dpr;
       cv.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0);
     }
-    size("sub-canvas-main", 200);
-    size("sub-canvas-chart", 220);
+    size("sub-canvas-main", 240);
+    size("sub-canvas-chart", 250);
   }
 
   function goToStep(step) {
@@ -928,7 +978,7 @@
     show("sub-viz-area", step >= 1 ? "block" : "none");
     show("sub-controls-area", step >= 1 ? "flex" : "none");
     show("sub-basic-controls", (step >= 2 && step <= 4) ? "flex" : "none");
-    show("sub-probe-group", step === 3 ? "flex" : "none");
+    show("sub-probe-group", "none"); // both probes shown simultaneously in step 3
     show("sub-space-controls", step >= 4 ? "flex" : "none");
     show("sub-step5-controls", step === 5 ? "flex" : "none");
 
