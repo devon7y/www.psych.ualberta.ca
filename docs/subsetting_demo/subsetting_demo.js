@@ -178,6 +178,16 @@
       ctx.strokeStyle = c.unattStr;
       ctx.lineWidth = 0.5;
       ctx.stroke();
+      // Grey × to visually distinguish unattended features
+      const xOff = r * 0.707;
+      ctx.beginPath();
+      ctx.moveTo(x - xOff, y - xOff);
+      ctx.lineTo(x + xOff, y + xOff);
+      ctx.moveTo(x + xOff, y - xOff);
+      ctx.lineTo(x - xOff, y + xOff);
+      ctx.strokeStyle = c.unattStr;
+      ctx.lineWidth = 0.9;
+      ctx.stroke();
     } else if (value === 0) {
       // Attended but feature absent: hollow circle with muted outline
       const hue = featureHue(f);
@@ -349,7 +359,7 @@
     const legendItems = [
       { draw: (x) => { ctx.beginPath(); ctx.arc(x, legY, legR, 0, 2*Math.PI); ctx.fillStyle = `hsl(30,65%,60%)`; ctx.fill(); }, label: "attended + present → encoded" },
       { draw: (x) => { ctx.beginPath(); ctx.arc(x, legY, legR, 0, 2*Math.PI); ctx.strokeStyle = `hsl(30,35%,42%)`; ctx.lineWidth = 1; ctx.stroke(); }, label: "attended + absent → not encoded" },
-      { draw: (x) => { ctx.beginPath(); ctx.arc(x, legY, legR, 0, 2*Math.PI); ctx.fillStyle = c.unatt; ctx.fill(); ctx.strokeStyle = c.unattStr; ctx.lineWidth = 0.5; ctx.stroke(); }, label: "unnoticed by attention" },
+      { draw: (x) => { ctx.beginPath(); ctx.arc(x, legY, legR, 0, 2*Math.PI); ctx.fillStyle = c.unatt; ctx.fill(); ctx.strokeStyle = c.unattStr; ctx.lineWidth = 0.5; ctx.stroke(); const xOff = legR * 0.707; ctx.beginPath(); ctx.moveTo(x - xOff, legY - xOff); ctx.lineTo(x + xOff, legY + xOff); ctx.moveTo(x + xOff, legY - xOff); ctx.lineTo(x - xOff, legY + xOff); ctx.strokeStyle = c.unattStr; ctx.lineWidth = 0.9; ctx.stroke(); }, label: "unnoticed by attention" },
     ];
     // Measure total width to centre the whole group
     const itemGap = 14;   // gap between dot and next dot
@@ -495,9 +505,16 @@
       { font: '10px "Inter",sans-serif', color: c.label });
     txt(ctx, lureGlow.size + " matches", statsX + 48, midY - 6,
       { font: 'bold 10px "Inter",sans-serif', color: c.noise });
-    txt(ctx, "d\u2019 \u2248 " + dpVal.toFixed(2), statsX, midY + 12,
+    // Separator between sample counts and analytical d'
+    ctx.save();
+    ctx.strokeStyle = c.axes; ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(statsX, midY + 4); ctx.lineTo(statsX + 100, midY + 4);
+    ctx.stroke();
+    ctx.restore();
+    txt(ctx, "d\u2019 \u2248 " + dpVal.toFixed(2), statsX, midY + 15,
       { font: 'bold 11px "Inter",sans-serif', color: c.text });
-    txt(ctx, "(pure list)", statsX, midY + 26,
+    txt(ctx, "(predicted from nC)", statsX, midY + 28,
       { font: '9px "Inter",sans-serif', color: c.label });
   }
 
@@ -550,12 +567,11 @@
       ctx.fillStyle = sc.fillB; ctx.fill();
       ctx.strokeStyle = sc.col; ctx.lineWidth = 1.2; ctx.stroke();
 
-      // Labels
-      txt(ctx, sc.label, cx, cy - maxR - 14,
-        { font: '9px "Inter",sans-serif', align: "center", color: sc.col });
-      // Overlap % (centre of Venn circles)
+      // Labels — both above the outer circle to avoid covering the Venn
       const overlapPct = Math.min(nC / sc.n_eff * 100, 100).toFixed(1);
-      txt(ctx, "Overlap ≈ " + overlapPct + "%", cx, cy,
+      txt(ctx, sc.label, cx, cy - maxR - 22,
+        { font: '9px "Inter",sans-serif', align: "center", color: sc.col });
+      txt(ctx, "Overlap \u2248 " + overlapPct + "%", cx, cy - maxR - 9,
         { font: 'bold 9px "Inter",sans-serif', align: "center", color: c.text });
 
       // Three stacked labels below the circle (n / d' / cross-talk interpretation)
@@ -692,18 +708,29 @@
     const aw = W - padH * 2, ah = H - padV * 2;
     const rand = rng32(77);
     const show = Math.min(n, 120);
-    for (let i = 0; i < show; i++) {
+    const minDist = r * 2 + 2; // minimum centre-to-centre distance
+    const placed = [];
+    let dotIdx = 0;
+    for (let tries = 0; tries < show * 30 && dotIdx < show; tries++) {
       const x = padH + rand() * aw;
       const y = padV + rand() * ah;
-      const att = i < nC;
+      let ok = true;
+      for (let p = 0; p < placed.length; p++) {
+        const dx = placed[p].x - x, dy = placed[p].y - y;
+        if (dx * dx + dy * dy < minDist * minDist) { ok = false; break; }
+      }
+      if (!ok) continue;
+      placed.push({ x, y });
+      const att = dotIdx < nC;
       ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI);
       if (att) {
-        ctx.fillStyle = `hsl(${(i / nC) * 280 + 10},65%,60%)`;
+        ctx.fillStyle = `hsl(${(dotIdx / nC) * 280 + 10},65%,60%)`;
         ctx.fill();
       } else {
         ctx.fillStyle = c.unatt; ctx.fill();
         ctx.strokeStyle = c.unattStr; ctx.lineWidth = 0.5; ctx.stroke();
       }
+      dotIdx++;
     }
     if (n > show) {
       txt(ctx, "…+" + (n - show) + " more features", W / 2, H - 14,
@@ -909,10 +936,10 @@
 
   const STEP_INFO = [
     "",
-    "<strong>Step 1: Words as Feature Vectors.</strong> Each column (W1, W2, \u2026, W5) represents a different word from the study list \u2014 for example, W1 might be \u201cAPPLE\u201d, W2 might be \u201cTABLE\u201d, W3 might be \u201cBLUE\u201d, and so on. Every word carries many distinct properties at once: how it <em>sounds</em> (phonological features \u2014 vowels, consonants, stress), how it <em>looks</em> on the page (orthographic features \u2014 letter shapes, length), and what it <em>means</em> (semantic features \u2014 the concepts, images, and associations it evokes). Notice that the semantic band (blue\u2013purple) is much taller than the phonological and orthographic bands: the semantic feature space is far larger in the model (\u223c512 features vs. \u223c64 each for phonological and orthographic). Each filled circle represents a feature that is <em>present</em> for that word; a hollow circle shows a feature that is absent. The theory assumes our memory system stores words by tracking these individual features \u2014 not the word as a single unit. (In the mathematical model, features have continuous values rather than just on/off; the filled/hollow display here is a simplified but faithful representation.)",
-    "<strong>Step 2: Selective Encoding.</strong> When studying a word, attention doesn\u2019t process every feature equally. Instead, it selects a small subset (the <em>attentional mask</em>) to attend to. Among those nC attended features: a <em>filled</em> colored circle means the feature is present in that word and gets encoded into memory; a <em>hollow</em> colored ring means the feature was attended, but happens to be absent in that particular word \u2014 so there is nothing to encode. Grey circles are features that go completely unnoticed by attention and are never encoded. As a result, the number of <em>filled</em> colored dots you see per column will often be less than nC \u2014 because some of the attended features simply aren\u2019t present in that word. Crucially, each word gets its own <em>unique</em> attentional subset, and the same features tend to be re-activated at test. Use the slider to control how many features (nC) are attended per word.",
-    "<strong>Step 3: Recognizing a Word.</strong> At test, the same attentional mask re-activates: you \u2018re-look\u2019 at the attended features of the probe word. <em>Filled</em> colored circles are features that are present in the probe; <em>hollow</em> colored rings are features attention attended to but that are absent in this particular probe word. A <strong>gold ring</strong> marks a feature that is both present in the probe <em>and</em> stored in memory \u2014 a match. A <em>target</em> (word W1, which you actually studied) and a <em>lure</em> (a new, unstudied word) are shown side by side against the same memory trace. For the target, many attended features are present and match memory \u2014 high match count. For the lure, its features differ from what was studied, so fewer attended features match \u2014 low match count. That gap is captured by d\u2019 (discrimination sensitivity). Adjust nC to see how attending more features widens the separation.",
-    "<strong>Step 4: Why Feature Space Size Matters.</strong> The critical quantity is the <em>sparseness ratio</em> nC/n \u2014 the fraction of all features that attention selects. When nC/n is tiny (large n, sparse subsetting), two words\u2019 attentional spotlights almost never overlap by chance: cross-talk between items is negligible and list composition barely matters. When nC/n is large (small n, dense subsetting), the spotlights frequently share features \u2014 one word\u2019s memory trace bleeds into another\u2019s and list composition matters a lot. The two Venn diagrams illustrate this: large outer circle = large feature space (sparse); small outer circle = compact feature space (dense). The bar chart shows d\u2019 for four conditions. <em>Pure-S / Pure-D</em>: lists where all items are encoded the same shallow (S) or deep (D) way. <em>Mixed-S / Mixed-D</em>: the same conditions when the list is mixed. Drag the Feature Space (n) slider from small to large to watch the RoR converge toward 1 \u2014 a null list-strength effect \u2014 as sparseness increases.",
+    "<strong>Step 1: Words as Feature Vectors.</strong> Each column (W1, W2, \u2026, W5) represents a different word from the study list \u2014 for example, W1 might be \u201cAPPLE\u201d, W2 might be \u201cTABLE\u201d, W3 might be \u201cBLUE\u201d, and so on. Every word carries many distinct properties at once: how it <em>sounds</em> (phonological features \u2014 vowels, consonants, stress), how it <em>looks</em> on the page (orthographic features \u2014 letter shapes, length), and what it <em>means</em> (semantic features \u2014 the concepts, images, and associations it evokes). Notice that the semantic band (blue\u2013purple) is much taller than the phonological and orthographic bands: the semantic feature space is far larger in the model (\u223c512 features vs. \u223c64 each for phonological and orthographic). Each filled circle represents a feature that is <em>present</em> for that word; a hollow circle shows a feature that is absent. For example, for APPLE: the semantic feature \u201cis a fruit\u201d is present (filled circle), while \u201cis an animal\u201d is absent (hollow circle); the phonological feature \u201cstarts with a vowel sound\u201d is present, while \u201ccontains a /b/ sound\u201d is absent. The theory assumes our memory system stores words by tracking these individual features \u2014 not the word as a single unit. (In the mathematical model, features have continuous values rather than just on/off; the filled/hollow display here is a simplified but faithful representation.)",
+    "<strong>Step 2: Selective Encoding.</strong> Each word is represented by n total features spanning the phonological, orthographic, and semantic subspaces shown. When studying a word, attention does not process all n features equally \u2014 instead, it selects a small subset of nC features (the <em>attentional mask</em>) to attend to. Among those nC attended features: a <em>filled</em> colored circle means the feature is present in that word and gets encoded into memory; a <em>hollow</em> colored ring means the feature was attended but happens to be absent in that particular word \u2014 so there is nothing to encode. Unattended features appear as grey circles marked with \u00d7 and are never encoded. What does \u2018attended but absent\u2019 mean? The mask determines <em>which</em> features to look at, not whether those features happen to be present in a given word. For example, attention might check the phonological feature \u201ccontains a /b/ sound\u201d while encoding APPLE \u2014 but since APPLE has no /b/, this feature is absent and nothing is stored (hollow ring). By contrast, \u201cstarts with a vowel sound\u201d is both attended and present in APPLE, so it gets encoded (filled circle). As a result, the number of filled colored dots per column is often less than nC \u2014 because some attended features simply aren\u2019t present in that word. Crucially, each word gets its own <em>unique</em> attentional subset, and the same features tend to re-activate at test. The Memory column shows the accumulated memory trace \u2014 the sum of all attended-and-present features across all studied words. A filled circle in the Memory column means at least one studied word encoded that feature. Use the nC slider to control how many features (nC) are attended per word.",
+    "<strong>Step 3: Recognizing a Word.</strong> At test, the same attentional mask re-activates: you \u2018re-look\u2019 at the attended features of the probe word. <em>Filled</em> colored circles are features that are present in the probe; <em>hollow</em> colored rings are features attention attended to but that are absent in this particular probe word. A <strong>gold ring</strong> marks a feature that is both present in the probe <em>and</em> stored in memory \u2014 a match. A <em>target</em> (word W1, which you actually studied) and a <em>lure</em> (a new, unstudied word) are shown side by side against the same memory trace. For the target, many attended features are present and match memory \u2014 high match count. For the lure, its features differ from what was studied, so fewer attended features match \u2014 low match count. That gap is captured by d\u2019 (discrimination sensitivity). Adjust nC to see how attending more features widens the separation. Note: the d\u2019 shown is the <em>theoretical prediction</em> from the model formula (a function of nC, n, and list length) \u2014 not a count derived from these specific dots. This is why d\u2019 changes smoothly whenever you move the nC slider, even if the match counts for these particular items happen to stay the same.",
+    "<strong>Step 4: Why Feature Space Size Matters.</strong> The critical quantity is the <em>sparseness ratio</em> nC/n \u2014 the fraction of all features that attention selects. When nC/n is tiny (large n, sparse subsetting), two words\u2019 attentional spotlights almost never overlap by chance: cross-talk between items is negligible and list composition barely matters. When nC/n is large (small n, dense subsetting), the spotlights frequently share features \u2014 one word\u2019s memory trace bleeds into another\u2019s and list composition matters a lot. Each Venn diagram shows two items\u2019 attentional spotlights (the small circles, each covering nC features) inside the full feature space (the large outer circle, covering n features). The <em>Sparse</em> diagram tracks the n slider (always keeping n \u2265 8\u00d7nC); the <em>Dense</em> diagram is a fixed reference case at n \u2248 2.5\u00d7nC, illustrating what a compact feature space always looks like regardless of the slider. The bar chart shows d\u2019 for four conditions: <em>S (shallow)</em> items encode fewer features per word (e.g. reading silently; nC is small); <em>D (deep)</em> items encode more features (e.g. reading aloud; nC is larger); a <em>pure</em> list contains only S or only D items; a <em>mixed</em> list contains both. The <em>list-strength effect</em> is the finding that adding strongly-encoded (D) items to a mixed list can change \u2014 and in some conditions hurt \u2014 memory for the weaker (S) items relative to a pure list. Drag the n slider from small to large to watch the RoR converge toward 1 \u2014 a null list-strength effect \u2014 as sparseness increases.",
     "<strong>Step 5: The List-Strength Effect.</strong> Does it hurt your memory for a word if other words in the same list were studied more intensively? In a <em>pure list</em>, all words are studied the same way. In a <em>mixed list</em>, some words are encoded more deeply (condition D \u2014 more features, e.g. a spoken/produced word) and some more shallowly (condition S \u2014 fewer features, e.g. a silently-read word). Note: in the papers, D = deep/stronger and S = shallow/weaker, matching the sliders here. The <em>Ratio-of-Ratios</em> RoR = [d\u2019(D mixed)/d\u2019(S mixed)] / [d\u2019(D pure)/d\u2019(S pure)] quantifies the effect. <strong>RoR \u2248 1</strong> \u2014 a <em>null list-strength effect</em>: list composition barely changes relative performance. This occurs when features come from a <em>large</em> subspace (semantic encoding), so attentional spotlights of different items rarely overlap and cross-talk is minimal. <strong>RoR > 1</strong> \u2014 a <em>positive list-strength effect</em>: deep (D) items benefit disproportionately in mixed lists. This is predicted when features come from a <em>compact</em> subspace, such as phonological features during production/vocalisation. Because nC/n<sub>phon</sub> is not small, different items\u2019 masks frequently share features, adding noise that hurts the weaker (S) items more. The key insight: production is not simply \u201cstronger\u201d encoding in the usual sense. Repetition and longer study time also encode more features but produce near-null list-strength effects because the extra features come from the large semantic subspace. Production\u2019s large positive list-strength effect arises specifically because its extra features are <em>phonological</em> \u2014 drawn from a compact space where cross-talk is unavoidable.",
   ];
 
@@ -979,7 +1006,7 @@
     show("sub-controls-area", step >= 1 ? "flex" : "none");
     show("sub-basic-controls", (step >= 2 && step <= 4) ? "flex" : "none");
     show("sub-probe-group", "none"); // both probes shown simultaneously in step 3
-    show("sub-space-controls", step >= 4 ? "flex" : "none");
+    show("sub-space-controls", step >= 2 ? "flex" : "none");
     show("sub-step5-controls", step === 5 ? "flex" : "none");
 
     const infoEl = document.getElementById("sub-info-text");
