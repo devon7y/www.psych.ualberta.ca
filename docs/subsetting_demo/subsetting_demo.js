@@ -395,7 +395,7 @@
     // Layout — centre the whole group in the canvas
     const sepW = 44, statsGap = 10, statsWidth = 90;
     const arrowGap = 20;
-    const totalW = labelW + 5 * colW + arrowGap + r * 2 + sepW * 2 + r * 2 + statsGap + statsWidth;
+    const totalW = labelW + 5 * colW + arrowGap + r * 2 + sepW * 2 + statsGap + statsWidth;
     const leftEdge = Math.max(4, (W - totalW) / 2);
     const startX  = leftEdge + labelW;
     const memX    = startX + 5 * colW + arrowGap + r;
@@ -466,7 +466,7 @@
 
     // Stats panel
     const dpVal = dpPure(state.params.nC, N_ITEMS, state.params.n);
-    txt(ctx, "Tgt: " + targetGlow.size + " match", statsX, midY - 16,
+    txt(ctx, "Target: " + targetGlow.size + " match", statsX, midY - 16,
       { font: '9px "Inter",sans-serif', color: c.signal });
     txt(ctx, "Lure: " + lureGlow.size + " match", statsX, midY - 2,
       { font: '9px "Inter",sans-serif', color: c.noise });
