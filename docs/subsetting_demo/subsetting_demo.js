@@ -393,7 +393,7 @@
     }
 
     // Layout — centre the whole group in the canvas
-    const sepW = 44, statsGap = 10, statsWidth = 90;
+    const sepW = 44, statsGap = 10, statsWidth = 82;
     const arrowGap = 20;
     const totalW = labelW + 5 * colW + arrowGap + r * 2 + sepW * 2 + statsGap + statsWidth;
     const leftEdge = Math.max(4, (W - totalW) / 2);
@@ -473,7 +473,7 @@
     ctx.save();
     ctx.strokeStyle = c.axes; ctx.lineWidth = 0.5;
     ctx.beginPath();
-    ctx.moveTo(statsX, midY + 8); ctx.lineTo(statsX + 75, midY + 8);
+    ctx.moveTo(statsX, midY + 8); ctx.lineTo(statsX + 80, midY + 8);
     ctx.stroke();
     ctx.restore();
     txt(ctx, "d\u2019 \u2248 " + dpVal.toFixed(2), statsX, midY + 20,
