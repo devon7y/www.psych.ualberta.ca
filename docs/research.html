@@ -557,6 +557,20 @@
       width: 140px;
       accent-color: #5b8fd9;
   }
+  #eeg-band-controls,
+  #eeg-band-power-controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+  }
+  #eeg-band-power-controls .eeg-control-group {
+      min-width: 150px;
+  }
+  #eeg-blink-btn {
+      min-width: 120px;
+  }
   .eeg-band-btn {
       background-color: #2d3447 !important;
       color: #8899aa !important;
@@ -581,7 +595,8 @@
       flex-direction: column;
   }
   #eeg-container.eeg-active {
-      height: 760px;
+      min-height: 840px;
+      height: auto;
   }
   #eeg-start-screen {
       flex: 1;
@@ -686,60 +701,7 @@
 		<div id="content">
 
 			<div class="post">
-				<h2 class="title"><a href="#">Inverted List-Strength Effect</a></h2>
-				<div class="entry">
-					<p>To get an idea of our lab's research, press Start Experiment to do a 1-minute demonstration of the Inverted List-Strength Effect!</p>
-					<div class="game-embed">
-						<div id="game-container">
-							<div id="start-screen" class="phase-container">
-								<h1>Inverted List-Strength Effect</h1>
-								<p>Press the button to start the experiment.</p>
-								<button id="start-experiment-btn">Start Experiment</button>
-							</div>
-							<div id="instructions-screen-1" class="phase-container" style="display: none;">
-								<h1>Instructions</h1>
-								<p>In the memory test, words will be presented one by one. Half of those words will be old words (words presented just before in the memorization) and the remaining words will be new words (words not presented in this experiment). For each word, your task is to identify as accurately as possible if the word is an old word or a new word.</p>
-								<button id="instructions-1-continue-btn">Continue</button>
-							</div>
-							<div id="study-phase" class="phase-container" style="display: none;">
-								<h1>Study Phase</h1>
-								<div id="word-display"></div>
-							</div>
-							<div id="distractor-phase" class="phase-container" style="display: none;">
-								<h1>Distractor Task</h1>
-								<p>Time left: <span id="timer">10</span></p>
-								<p id="distractor-problem"></p>
-								<input type="text" id="distractor-answer">
-								<button id="submit-answer">Submit</button>
-							</div>
-							<div id="recognition-phase" class="phase-container" style="display: none;">
-								<h1>Test Phase</h1>
-								<p>Is this word old or new?</p>
-								<div id="recognition-word"></div>
-								<button id="yes-button">Old</button>
-								<button id="no-button">New</button>
-							</div>
-							<div id="instructions-screen-2" class="phase-container" style="display: none;">
-								<h1>Instructions</h1>
-								<p>You will now study another list of words.</p>
-								<button id="instructions-2-continue-btn">Continue</button>
-							</div>
-							<div id="results-phase" class="phase-container" style="display: none;">
-								<h1>Results</h1>
-								<div id="results-summary"></div>
-								<div id="results-chart"></div>
-								<p id="results-explanation"></p>
-								<div style="text-align: center;">
-									<button id="play-again-btn">Play Again</button>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div class="post">
-				<h2 class="title"><a href="#">How EEG Works: ERPs &amp; Oscillations</a></h2>
+				<h2 class="title"><a href="#">How EEG Works: ERPs and Oscillations</a></h2>
 				<div class="entry">
 					<p>Electroencephalography (EEG) records the brain's electrical activity through electrodes on the scalp. Two major analysis approaches &mdash; Event-Related Potentials (ERPs) and oscillations &mdash; reveal different aspects of brain function. Explore the interactive demo below to build an intuitive understanding of how EEG works.</p>
 
@@ -773,10 +735,17 @@
 							<div class="eeg-viz-spacer"></div>
 						</div>
 
-						<div id="eeg-controls-area" class="eeg-controls" style="display: none;">
+							<div id="eeg-controls-area" class="eeg-controls" style="display: none;">
 							<div id="eeg-noise-control" class="eeg-control-group" style="display: none;">
 								<label>Noise Level: <span id="eeg-noise-val">1.0</span></label>
 								<input type="range" id="eeg-noise" min="0.5" max="3" step="0.1" value="1.0" />
+							</div>
+							<div id="eeg-blink-control" class="eeg-control-group" style="display: none;">
+								<button id="eeg-blink-btn" type="button">Blink Eyes</button>
+							</div>
+							<div id="eeg-s3trials-control" class="eeg-control-group" style="display: none;">
+								<label>Trials Averaged: <span id="eeg-s3trials-val">1</span></label>
+								<input type="range" id="eeg-s3trials" min="1" max="200" step="1" value="1" />
 							</div>
 							<div id="eeg-trials-control" class="eeg-control-group" style="display: none;">
 								<label>Trials Averaged: <span id="eeg-ntrials-val">1</span></label>
@@ -788,12 +757,23 @@
 								<button class="eeg-band-btn" data-band="theta">Theta (4-8 Hz)</button>
 								<button class="eeg-band-btn" data-band="beta">Beta (13-30 Hz)</button>
 							</div>
-							<div id="eeg-alpha-control" class="eeg-control-group" style="display: none;">
-								<label>Alpha Power: <span id="eeg-alpha-val">2.0</span></label>
-								<input type="range" id="eeg-alpha" min="0" max="5" step="0.5" value="2.0" />
-							</div>
-							<div id="eeg-view-control" style="display: none; text-align: center;">
-								<button id="eeg-view-btn">Show Both</button>
+							<div id="eeg-band-power-controls" style="display: none;">
+								<div class="eeg-control-group">
+									<label>Alpha Power: <span id="eeg-alpha-val">2.0</span></label>
+									<input type="range" id="eeg-alpha" min="0" max="5" step="0.5" value="2.0" />
+								</div>
+								<div class="eeg-control-group">
+									<label>Delta Power: <span id="eeg-delta-val">1.0</span></label>
+									<input type="range" id="eeg-delta" min="0" max="5" step="0.5" value="1.0" />
+								</div>
+								<div class="eeg-control-group">
+									<label>Theta Power: <span id="eeg-theta-val">1.0</span></label>
+									<input type="range" id="eeg-theta" min="0" max="5" step="0.5" value="1.0" />
+								</div>
+								<div class="eeg-control-group">
+									<label>Beta Power: <span id="eeg-beta-val">1.0</span></label>
+									<input type="range" id="eeg-beta" min="0" max="5" step="0.5" value="1.0" />
+								</div>
 							</div>
 						</div>
 					</div>
@@ -927,6 +907,59 @@
 								</div>
 							</div>
 
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="post">
+				<h2 class="title"><a href="#">Inverted List-Strength Effect</a></h2>
+				<div class="entry">
+					<p>To get an idea of our lab's research, press Start Experiment to do a 1-minute demonstration of the Inverted List-Strength Effect!</p>
+					<div class="game-embed">
+						<div id="game-container">
+							<div id="start-screen" class="phase-container">
+								<h1>Inverted List-Strength Effect</h1>
+								<p>Press the button to start the experiment.</p>
+								<button id="start-experiment-btn">Start Demo</button>
+							</div>
+							<div id="instructions-screen-1" class="phase-container" style="display: none;">
+								<h1>Instructions</h1>
+								<p>In the memory test, words will be presented one by one. Half of those words will be old words (words presented just before in the memorization) and the remaining words will be new words (words not presented in this experiment). For each word, your task is to identify as accurately as possible if the word is an old word or a new word.</p>
+								<button id="instructions-1-continue-btn">Continue</button>
+							</div>
+							<div id="study-phase" class="phase-container" style="display: none;">
+								<h1>Study Phase</h1>
+								<div id="word-display"></div>
+							</div>
+							<div id="distractor-phase" class="phase-container" style="display: none;">
+								<h1>Distractor Task</h1>
+								<p>Time left: <span id="timer">10</span></p>
+								<p id="distractor-problem"></p>
+								<input type="text" id="distractor-answer">
+								<button id="submit-answer">Submit</button>
+							</div>
+							<div id="recognition-phase" class="phase-container" style="display: none;">
+								<h1>Test Phase</h1>
+								<p>Is this word old or new?</p>
+								<div id="recognition-word"></div>
+								<button id="yes-button">Old</button>
+								<button id="no-button">New</button>
+							</div>
+							<div id="instructions-screen-2" class="phase-container" style="display: none;">
+								<h1>Instructions</h1>
+								<p>You will now study another list of words.</p>
+								<button id="instructions-2-continue-btn">Continue</button>
+							</div>
+							<div id="results-phase" class="phase-container" style="display: none;">
+								<h1>Results</h1>
+								<div id="results-summary"></div>
+								<div id="results-chart"></div>
+								<p id="results-explanation"></p>
+								<div style="text-align: center;">
+									<button id="play-again-btn">Play Again</button>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>

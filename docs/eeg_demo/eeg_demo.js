@@ -20,8 +20,13 @@
   const DISPLAY_SECS = 4;
   const OSC_DUR = 4;
   const OSC_N = SR * OSC_DUR;
+  const BLINK_DUR = 0.45;
+  const BLINK_ENTRY_LEAD = 0.05;
+  const BLINK_FIXED_NOISE_LEVEL = 2.0;
+  const STEP1_TRACE_SHIFT_RATE = 0.8;
 
   const CHANNELS = ["Fz", "F3", "F4", "Cz", "Pz", "Oz"];
+  const BLINK_CHANNEL_GAIN = [3.8, 3.4, 3.2, 2.0, 1.2, 0.7];
 
   // Electrode positions used in topographic head diagram (no F3/F4)
   const ELECTRODE_POS = {
@@ -152,6 +157,27 @@
     rms = Math.sqrt(rms / nSamples);
     if (rms > 0) for (var si2 = 0; si2 < nSamples; si2++) signal[si2] /= rms;
     return signal;
+  }
+
+  function blinkWaveform(tSec) {
+    if (tSec < 0 || tSec > BLINK_DUR) return 0;
+    var main = Math.exp(-0.5 * Math.pow((tSec - 0.13) / 0.045, 2));
+    var rebound = Math.exp(-0.5 * Math.pow((tSec - 0.25) / 0.06, 2));
+    return main - 0.45 * rebound;
+  }
+
+  function getBlinkArtifact(absSample, chIdx) {
+    if (!state.blinkEvents || state.blinkEvents.length === 0) return 0;
+    var gain = BLINK_CHANNEL_GAIN[chIdx] || 0;
+    if (gain <= 0) return 0;
+    var sum = 0;
+    for (var i = 0; i < state.blinkEvents.length; i++) {
+      var evt = state.blinkEvents[i];
+      var tSec = (absSample - evt.startSample) / SR;
+      if (tSec < 0 || tSec > BLINK_DUR) continue;
+      sum += evt.strength * gain * blinkWaveform(tSec);
+    }
+    return sum;
   }
 
   function erpTemplate(tSec) {
@@ -471,9 +497,8 @@
       font: 'bold 12px "Inter", sans-serif', align: "center"
     });
 
-    // Zoomed-in layers: start at y=28, use ~65% of canvas height
+    // Center the layer diagram + explanation block vertically in the panel.
     var layerX = 22, layerW = W - 44;
-    var startY = 28;
     var layers = [
       { name: "Electrode", color: c.electrode, h: 20 },
       { name: "Scalp", color: c.scalp, h: 30 },
@@ -481,6 +506,16 @@
       { name: "CSF", color: c.csf, h: 18 },
       { name: "Cortex", color: c.cortex, h: 44 },
     ];
+    var explanText = [
+      "Pyramidal neurons generate currents",
+      "that travel through tissue layers to",
+      "be detected at the scalp electrode."
+    ];
+    var layerTotalH = 0;
+    for (var lh = 0; lh < layers.length; lh++) layerTotalH += layers[lh].h;
+    var blockH = layerTotalH + 12 + explanText.length * 16;
+    var startY = Math.max(24, Math.round((H - blockH) / 2));
+
     var y = startY;
     for (var i = 0; i < layers.length; i++) {
       var l = layers[i];
@@ -527,11 +562,6 @@
 
     // Bottom text (larger)
     var botY = y + 12;
-    var explanText = [
-      "Pyramidal neurons generate currents",
-      "that travel through tissue layers to",
-      "be detected at the scalp electrode."
-    ];
     ctx.font = '11px "Inter", sans-serif';
     ctx.fillStyle = c.textDim;
     ctx.textAlign = "center";
@@ -646,7 +676,7 @@
 
     var samplesVisible = Math.floor(DISPLAY_SECS * SR);
     var offset = state.scrollOffset;
-    // Scale amplitude dramatically with noise level
+    // Scale background EEG with noise slider, while blink stays fixed.
     var ampScale = state.params.noiseLevel;
 
     for (var ch = 0; ch < nCh; ch++) {
@@ -667,11 +697,14 @@
       ctx.beginPath();
       ctx.strokeStyle = c.signal;
       ctx.lineWidth = 1;
-      var amp = chH * 0.38 * ampScale;
+      var noiseAmp = chH * 0.38 * ampScale;
+      var blinkAmp = chH * 0.38 * BLINK_FIXED_NOISE_LEVEL;
       for (var si = 0; si < samplesVisible; si++) {
+        var absSample = state.rawAbsSample + si;
         var idx = (offset + si) % CONTINUOUS_N;
+        var blink = getBlinkArtifact(absSample, ch);
         var px = margins.left + (si / samplesVisible) * plotW;
-        var py = baseY - chSignal[idx] * amp;
+        var py = baseY - chSignal[idx] * noiseAmp - blink * blinkAmp;
         if (si === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
       }
       ctx.stroke();
@@ -691,22 +724,29 @@
     });
 
     if (!state.channels) return;
-    var chSignal = state.channels[3]; // Cz
+    var chIdx = 3; // Cz
+    var chSignal = state.channels[chIdx];
     var margins = { top: 35, bottom: 40, left: 20, right: 20 };
     var plotW = W - margins.left - margins.right;
     var plotH = H - margins.top - margins.bottom;
     var baseY = margins.top + plotH / 2;
-    var samplesShow = SR * 2;
+    var mainSamplesVisible = Math.floor(DISPLAY_SECS * SR);
+    // Show the start/left side of the main 4-second window (first ~75%) for earlier blink visibility.
+    var samplesShow = Math.floor(mainSamplesVisible * 0.75);
     var offset = state.scrollOffset;
     var ampScale = state.params.noiseLevel;
 
+    var noiseAmp = plotH * 0.38 * ampScale;
+    var blinkAmp = plotH * 0.38 * BLINK_FIXED_NOISE_LEVEL;
     ctx.beginPath();
     ctx.strokeStyle = c.signal;
     ctx.lineWidth = 1.5;
     for (var si = 0; si < samplesShow; si++) {
+      var absSample = state.rawAbsSample + si;
       var idx = (offset + si) % CONTINUOUS_N;
+      var blink = getBlinkArtifact(absSample, chIdx);
       var px = margins.left + (si / samplesShow) * plotW;
-      var py = baseY - chSignal[idx] * plotH * 0.38 * ampScale;
+      var py = baseY - chSignal[idx] * noiseAmp - blink * blinkAmp;
       if (si === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
     }
     ctx.stroke();
@@ -750,12 +790,15 @@
       { label: "Electrical noise", color: "#8899aa", desc: "50/60 Hz line" },
     ];
 
-    // Fill the full width - traces on left, labels on right
+    // Push content toward the left so the panel does not feel right-heavy.
     var startY = 36;
-    var rowH = Math.floor((H - startY - 35) / items.length);
-    var traceX = 8;
-    var traceW = W * 0.52;
-    var labelX = traceX + traceW + 10;
+    var rowH = Math.floor((H - startY - 34) / items.length);
+    var contentLeft = 8;
+    var contentRight = 10;
+    var contentW = W - contentLeft - contentRight;
+    var traceX = contentLeft;
+    var traceW = Math.max(86, contentW * 0.42);
+    var labelX = traceX + traceW + 8;
 
     for (var i = 0; i < items.length; i++) {
       var item = items[i];
@@ -890,7 +933,7 @@
     var c = getCanvasColors();
 
     var n = state.params.s3Trials;
-    drawText(ctx, "Averaged Signal (N = " + n + ")", W / 2, 16, {
+    drawText(ctx, "Recovered True Signal (N = " + n + ")", W / 2, 16, {
       font: 'bold 12px "Inter", sans-serif', align: "center"
     });
 
@@ -910,23 +953,10 @@
     ctx.moveTo(stimX, margins.top); ctx.lineTo(stimX, margins.top + plotH);
     ctx.strokeStyle = c.stimulus; ctx.lineWidth = 1.5; ctx.stroke();
 
-    // True ERP (always shown as reference)
-    ctx.beginPath();
-    ctx.setLineDash([4, 3]);
-    ctx.strokeStyle = c.erpTrue;
-    ctx.lineWidth = 1.5;
-    ctx.globalAlpha = 0.4;
-    for (var si = 0; si < EPOCH_LEN; si++) {
-      var px = toX(si), py = toY(state.erpTemplate[si]);
-      if (si === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-    }
-    ctx.stroke();
-    ctx.setLineDash([]); ctx.globalAlpha = 1;
-
-    // Averaged waveform - gets cleaner with N
+    // Averaged estimate of the true ERP: becomes cleaner as N increases.
     var avg = getAverage(state.cumSum, n);
     ctx.beginPath();
-    ctx.strokeStyle = c.erpAvg;
+    ctx.strokeStyle = c.erpTrue;
     ctx.lineWidth = 2.5;
     for (var si2 = 0; si2 < EPOCH_LEN; si2++) {
       var px2 = toX(si2), py2 = toY(avg[si2]);
@@ -934,20 +964,8 @@
     }
     ctx.stroke();
 
-    // Legend
-    var legY = margins.top + plotH + 12;
-    ctx.beginPath(); ctx.setLineDash([4, 3]);
-    ctx.moveTo(margins.left, legY); ctx.lineTo(margins.left + 18, legY);
-    ctx.strokeStyle = c.erpTrue; ctx.lineWidth = 1.5; ctx.stroke();
-    ctx.setLineDash([]);
-    drawText(ctx, "True signal", margins.left + 22, legY, {
-      font: '9px "Inter", sans-serif', color: c.textDim
-    });
-    ctx.beginPath();
-    ctx.moveTo(margins.left + plotW * 0.5, legY); ctx.lineTo(margins.left + plotW * 0.5 + 18, legY);
-    ctx.strokeStyle = c.erpAvg; ctx.lineWidth = 2.5; ctx.stroke();
-    drawText(ctx, "Avg (N=" + n + ")", margins.left + plotW * 0.5 + 22, legY, {
-      font: '9px "Inter", sans-serif', color: c.textDim
+    drawText(ctx, "More trials \u2192 cleaner estimate of the true ERP", margins.left + plotW / 2, margins.top + plotH + 12, {
+      font: '10px "Inter", sans-serif', align: "center", color: c.textDim
     });
   }
 
@@ -1227,16 +1245,15 @@
     if (!state.trials) return;
 
     var nTrials = state.params.nTrials;
-    // Show up to nTrials traces, dynamic alpha so many can stack visibly
-    var nShow = Math.min(nTrials, 60);
-    var traceAlpha = Math.max(0.04, 0.18 / Math.sqrt(nShow + 1));
+    var nShow = nTrials;
+    var traceAlpha = Math.max(0.012, 0.15 / Math.sqrt(nShow + 2));
 
     var margins = { top: 28, left: 10, right: 10 };
     var halfW = (W - margins.left - margins.right) / 2 - 8;
-    var traceAreaH = H * 0.42; // height for individual traces
-    var avgAreaH = 34;
+    var traceAreaH = H * 0.31;
+    var avgAreaH = 28;
 
-    var topY = margins.top + 12; // where traces start
+    var topY = margins.top + 12;
 
     // LEFT PANEL: Noise
     var noiseX = margins.left;
@@ -1260,11 +1277,11 @@
     ctx.globalAlpha = 1;
 
     // Average of noise
-    var avgNoiseY = topY + traceAreaH + 10;
+    var avgNoiseY = topY + traceAreaH + 8;
     drawText(ctx, "\u2193 Average", noiseX + halfW / 2, avgNoiseY, {
       font: '9px "Inter", sans-serif', align: "center", color: c.textDim
     });
-    avgNoiseY += 14;
+    avgNoiseY += 12;
 
     ctx.beginPath();
     ctx.strokeStyle = c.noise; ctx.lineWidth = 2.5;
@@ -1281,7 +1298,7 @@
     ctx.stroke();
 
     // Elaborate noise explanation
-    var noiseTextY = avgNoiseY + avgAreaH + 10;
+    var noiseTextY = avgNoiseY + avgAreaH + 8;
     drawText(ctx, "\u2248 0 \u00B5V — cancels out!", noiseX + halfW / 2, noiseTextY, {
       font: 'bold 10px "Inter", sans-serif', align: "center", color: c.noise
     });
@@ -1296,7 +1313,7 @@
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
     for (var li = 0; li < noiseExpl.length; li++) {
-      ctx.fillText(noiseExpl[li], noiseX + halfW / 2, noiseTextY + 14 + li * 13);
+      ctx.fillText(noiseExpl[li], noiseX + halfW / 2, noiseTextY + 12 + li * 12);
     }
 
     // RIGHT PANEL: Signal + noise
@@ -1319,11 +1336,11 @@
     }
     ctx.globalAlpha = 1;
 
-    var avgSigY = topY + traceAreaH + 10;
+    var avgSigY = topY + traceAreaH + 8;
     drawText(ctx, "\u2193 Average", sigX + halfW / 2, avgSigY, {
       font: '9px "Inter", sans-serif', align: "center", color: c.textDim
     });
-    avgSigY += 14;
+    avgSigY += 12;
 
     if (state.cumSum) {
       var avg = getAverage(state.cumSum, nShow);
@@ -1348,7 +1365,7 @@
     }
 
     // Elaborate signal explanation
-    var sigTextY = avgSigY + avgAreaH + 10;
+    var sigTextY = avgSigY + avgAreaH + 8;
     drawText(ctx, "\u2248 True ERP — emerges!", sigX + halfW / 2, sigTextY, {
       font: 'bold 10px "Inter", sans-serif', align: "center", color: c.erpTrue
     });
@@ -1363,7 +1380,7 @@
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
     for (var li2 = 0; li2 < sigExpl.length; li2++) {
-      ctx.fillText(sigExpl[li2], sigX + halfW / 2, sigTextY + 14 + li2 * 13);
+      ctx.fillText(sigExpl[li2], sigX + halfW / 2, sigTextY + 12 + li2 * 12);
     }
   }
 
@@ -1564,7 +1581,7 @@
       }
     }
 
-    // Band markers - solid colored lines at band boundaries with labels
+    // Band markers - high-contrast dotted guides so each band is easy to locate.
     var selected = state.params.selectedBand;
     for (var bi = 0; bi < BAND_ORDER.length; bi++) {
       var bName = BAND_ORDER[bi];
@@ -1572,34 +1589,35 @@
       var isSelected = bName === selected;
       var yTop = margins.top + plotH - ((band.hi - minFreq) / (maxFreq - minFreq)) * plotH;
       var yBot = margins.top + plotH - ((band.lo - minFreq) / (maxFreq - minFreq)) * plotH;
+      yTop = Math.max(margins.top, Math.min(margins.top + plotH, yTop));
+      yBot = Math.max(margins.top, Math.min(margins.top + plotH, yBot));
 
-      if (isSelected) {
-        // Selected: bright solid border + filled left stripe
-        ctx.strokeStyle = band.color;
-        ctx.lineWidth = 2.5;
-        ctx.setLineDash([]);
-        ctx.strokeRect(margins.left, yTop, plotW, yBot - yTop);
-        ctx.fillStyle = band.color;
-        ctx.globalAlpha = 0.9;
-        ctx.fillRect(margins.left, yTop, 4, yBot - yTop);
-        ctx.globalAlpha = 1;
-      } else {
-        // Non-selected: solid colored lines at boundaries
-        ctx.strokeStyle = band.color;
-        ctx.lineWidth = 1.5;
-        ctx.globalAlpha = 0.65;
-        ctx.setLineDash([]);
-        ctx.beginPath();
-        ctx.moveTo(margins.left, yTop); ctx.lineTo(margins.left + plotW, yTop);
-        ctx.moveTo(margins.left, yBot); ctx.lineTo(margins.left + plotW, yBot);
-        ctx.stroke();
-        ctx.globalAlpha = 1;
-        // Thin left stripe
-        ctx.fillStyle = band.color;
-        ctx.globalAlpha = 0.5;
-        ctx.fillRect(margins.left, yTop, 3, yBot - yTop);
-        ctx.globalAlpha = 1;
-      }
+      ctx.fillStyle = band.color;
+      ctx.globalAlpha = isSelected ? 0.12 : 0.05;
+      ctx.fillRect(margins.left, yTop, plotW, yBot - yTop);
+      ctx.globalAlpha = 1;
+
+      ctx.setLineDash([4, 3]);
+      ctx.strokeStyle = isSelected ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.65)";
+      ctx.lineWidth = isSelected ? 2.4 : 1.8;
+      ctx.beginPath();
+      ctx.moveTo(margins.left, yTop); ctx.lineTo(margins.left + plotW, yTop);
+      ctx.moveTo(margins.left, yBot); ctx.lineTo(margins.left + plotW, yBot);
+      ctx.stroke();
+
+      ctx.strokeStyle = band.color;
+      ctx.lineWidth = isSelected ? 1.8 : 1.2;
+      ctx.beginPath();
+      ctx.moveTo(margins.left, yTop); ctx.lineTo(margins.left + plotW, yTop);
+      ctx.moveTo(margins.left, yBot); ctx.lineTo(margins.left + plotW, yBot);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      drawText(ctx, bName.charAt(0).toUpperCase() + bName.slice(1), margins.left + plotW - 4, yTop + 8, {
+        font: (isSelected ? "bold " : "") + '8px "Inter", sans-serif',
+        align: "right",
+        color: isSelected ? band.color : "rgba(230,235,240,0.9)"
+      });
     }
 
     // Axis labels
@@ -1741,7 +1759,9 @@
     });
 
     var startY = 38;
-    var colW = (W - 30) / 3;
+    var tableW = W - 34;
+    var startX = (W - tableW) / 2;
+    var colW = tableW / 3;
     var headers = ["", "ERPs", "Oscillations"];
     var rows = [
       ["Focus:", "Time-locked events", "Ongoing rhythms"],
@@ -1752,33 +1772,35 @@
     ];
 
     for (var hi = 0; hi < headers.length; hi++) {
-      var hx = 15 + hi * colW;
+      var hx = startX + (hi + 0.5) * colW;
       drawText(ctx, headers[hi], hx, startY, {
-        font: 'bold 10px "Inter", sans-serif',
+        font: 'bold 11px "Inter", sans-serif',
+        align: "center",
         color: hi === 1 ? c.erpAvg : hi === 2 ? BANDS.alpha.color : c.text
       });
     }
 
     ctx.beginPath();
-    ctx.moveTo(15, startY + 10); ctx.lineTo(W - 15, startY + 10);
+    ctx.moveTo(startX, startY + 11); ctx.lineTo(startX + tableW, startY + 11);
     ctx.strokeStyle = c.gridLine; ctx.lineWidth = 0.5; ctx.stroke();
 
     for (var ri = 0; ri < rows.length; ri++) {
-      var ry = startY + 26 + ri * 22;
+      var ry = startY + 28 + ri * 24;
       for (var ci = 0; ci < rows[ri].length; ci++) {
-        var rx = 15 + ci * colW;
+        var rx = startX + (ci + 0.5) * colW;
         drawText(ctx, rows[ri][ci], rx, ry, {
-          font: (ci === 0 ? "bold " : "") + '9.5px "Inter", sans-serif',
+          font: (ci === 0 ? "bold " : "") + '10.5px "Inter", sans-serif',
+          align: "center",
           color: ci === 0 ? c.textDim : c.text
         });
       }
     }
 
     drawText(ctx, "Both approaches are complementary \u2014", W / 2, H - 36, {
-      font: '10px "Inter", sans-serif', align: "center", color: c.textDim
+      font: '11px "Inter", sans-serif', align: "center", color: c.textDim
     });
     drawText(ctx, "modern EEG research uses both!", W / 2, H - 20, {
-      font: 'bold 10px "Inter", sans-serif', align: "center", color: c.electrode
+      font: 'bold 11px "Inter", sans-serif', align: "center", color: c.electrode
     });
   }
 
@@ -1886,7 +1908,7 @@
     params: {
       noiseLevel: 1.0,
       nTrials: 1,
-      s3Trials: 10,
+      s3Trials: 1,
       selectedBand: "alpha",
       bandPowers: { delta: 1.0, theta: 1.0, alpha: 2.0, beta: 1.0 },
     },
@@ -1896,6 +1918,10 @@
     cumSum: null,
     bandData: null,
     scrollOffset: 0,
+    rawAbsSample: 0,
+    blinkEvents: [],
+    step1ShiftAccumulator: 0,
+    step1ShiftIndex: 0,
     animFrameId: null,
     sparkBuffers: null,
   };
@@ -1906,7 +1932,7 @@
     '<strong>Step 2: Raw EEG.</strong> Raw EEG from multiple electrodes shows a complex, noisy signal \u2014 a mixture of neural activity, muscle artifacts (EMG), eye movements (EOG), and electrical noise. Each channel records a slightly different mix depending on electrode placement. Notice the characteristic shape: lower frequencies have larger amplitudes (the \u201C1/f\u201D pattern). From raw EEG alone, individual cognitive events are not visible. Use the noise slider to amplify or reduce the apparent noise level.',
     '<strong>Step 3: Single Trials.</strong> When we present a stimulus, the brain produces a response. But any single trial is dominated by noise \u2014 the ongoing EEG is much larger than the evoked response. Use the slider to add more trials: the overlaid traces converge and the averaged signal (green line) gradually emerges. The signal-to-noise ratio improves by \u221AN \u2014 averaging 9 trials gives 3\u00D7 better SNR.',
     '<strong>Step 4: Event-Related Potentials.</strong> An ERP is the brain\'s average response to a repeated event. By averaging many trials, random noise cancels out while the consistent brain response remains. The SNR improves by \u221AN. <em>Drag the slider</em> to watch the ERP emerge! Classic components: <strong>N1</strong> (~100ms, early sensory processing), <strong>P2</strong> (~200ms, stimulus evaluation), <strong>P3</strong> (~350ms, attention & memory updating). Named by polarity (N=negative, P=positive) and approximate latency.',
-    '<strong>Step 5: Brain Oscillations.</strong> EEG contains rhythmic activity at different frequencies. Power \u2014 the amount of energy at a given frequency \u2014 is higher when oscillations are stronger and larger. <strong>Delta</strong> (1\u20134 Hz) dominates deep sleep; <strong>Theta</strong> (4\u20138 Hz) is linked to memory encoding; <strong>Alpha</strong> (8\u201313 Hz) appears during relaxed wakefulness; <strong>Beta</strong> (13\u201330 Hz) is associated with active processing. Adjust the power sliders to change each band\'s amplitude and watch the spectrum change.',
+    '<strong>Step 5: Brain Oscillations.</strong> EEG contains rhythmic activity at different frequencies. Power is the signal energy at a frequency, so higher power means a stronger rhythm. <strong>Delta</strong> (1\u20134 Hz) dominates deep sleep; <strong>Theta</strong> (4\u20138 Hz) is linked to memory encoding; <strong>Alpha</strong> (8\u201313 Hz) appears during relaxed wakefulness; <strong>Beta</strong> (13\u201330 Hz) is associated with active processing. Adjust the power sliders to change each band\'s amplitude and watch the spectrum change.',
     '<strong>Step 6: ERPs vs. Oscillations \u2014 Two Windows into the Brain.</strong> ERPs and oscillations are complementary. <em>ERPs</em> use time-locked averaging to reveal the brain\'s response to events \u2014 \u201Cwhen and how does the brain respond?\u201D <em>Oscillations</em> use frequency decomposition to reveal rhythmic brain states \u2014 \u201Cwhat cognitive state is the brain currently in?\u201D Modern EEG research examines both: a stimulus can produce an ERP <em>and</em> cause oscillatory changes (e.g., alpha suppression = cortex becomes less inhibited; theta rise = memory encoding active), visible in time-frequency analysis.',
   ];
 
@@ -1936,9 +1962,9 @@
     if (mainCanvas) {
       var displayW = Math.max(0, containerW - 10);
       mainCanvas.style.width = displayW + "px";
-      mainCanvas.style.height = "220px";
+      mainCanvas.style.height = "230px";
       mainCanvas.width = displayW * dpr;
-      mainCanvas.height = 220 * dpr;
+      mainCanvas.height = 230 * dpr;
     }
 
     var leftCanvas = getEl("eeg-canvas-left");
@@ -1946,7 +1972,7 @@
     if (leftCanvas && rightCanvas) {
       var availW = Math.max(0, containerW - 10 - 14);
       var halfW = Math.floor(availW / 2);
-      var dH = 270;
+      var dH = 300;
       for (var i = 0; i < 2; i++) {
         var cv = i === 0 ? leftCanvas : rightCanvas;
         cv.style.width = halfW + "px";
@@ -1962,6 +1988,12 @@
   // =====================================================================
 
   function generateData() {
+    state.scrollOffset = 0;
+    state.rawAbsSample = 0;
+    state.blinkEvents = [];
+    state.step1ShiftAccumulator = 0;
+    state.step1ShiftIndex = 0;
+
     state.channels = [];
     for (var ch = 0; ch < CHANNELS.length; ch++) {
       state.channels.push(generatePinkNoise(CONTINUOUS_N, SR, 1.5, state.seed + ch * 1000));
@@ -1995,6 +2027,17 @@
     render();
   }
 
+  function triggerBlinkArtifact() {
+    if (!state.channels) return;
+    var samplesVisible = Math.floor(DISPLAY_SECS * SR);
+    state.blinkEvents.push({
+      // Start just off the right edge so the blink enters from the live boundary.
+      startSample: state.rawAbsSample + samplesVisible + Math.round(BLINK_ENTRY_LEAD * SR),
+      strength: 1.0,
+    });
+    render();
+  }
+
   // =====================================================================
   // ANIMATION
   // =====================================================================
@@ -2007,16 +2050,29 @@
       lastTime = timestamp;
 
       if (state.step === 1) {
-        for (var name in state.sparkBuffers) {
-          var buf = state.sparkBuffers[name];
-          var rng = mulberry32(Math.floor(timestamp * 11) + name.charCodeAt(0) * 137);
-          for (var i = 0; i < buf.length - 1; i++) buf[i] = buf[i + 1];
-          // Smooth random walk for the trace
-          buf[buf.length - 1] = buf[buf.length - 2] * 0.85 + randn(rng) * 0.5;
+        state.step1ShiftAccumulator += (dt / (1000 / 60)) * STEP1_TRACE_SHIFT_RATE;
+        while (state.step1ShiftAccumulator >= 1) {
+          state.step1ShiftIndex += 1;
+          for (var name in state.sparkBuffers) {
+            var buf = state.sparkBuffers[name];
+            var rng = mulberry32(state.seed + state.step1ShiftIndex * 131 + name.charCodeAt(0) * 137);
+            for (var i = 0; i < buf.length - 1; i++) buf[i] = buf[i + 1];
+            // Smooth random walk for the trace
+            buf[buf.length - 1] = buf[buf.length - 2] * 0.85 + randn(rng) * 0.5;
+          }
+          state.step1ShiftAccumulator -= 1;
         }
         drawStep1Main(getEl("eeg-canvas-main"));
       } else if (state.step === 2) {
-        state.scrollOffset = (state.scrollOffset + Math.max(1, Math.round(SR * dt / 1000))) % CONTINUOUS_N;
+        var advanceSamples = Math.max(1, Math.round(SR * dt / 1000));
+        state.scrollOffset = (state.scrollOffset + advanceSamples) % CONTINUOUS_N;
+        state.rawAbsSample += advanceSamples;
+        if (state.blinkEvents.length > 0) {
+          var maxAgeSamples = Math.round((DISPLAY_SECS + BLINK_DUR) * SR);
+          state.blinkEvents = state.blinkEvents.filter(function (evt) {
+            return (state.rawAbsSample - evt.startSample) < maxAgeSamples;
+          });
+        }
         drawStep2Main(getEl("eeg-canvas-main"));
         drawStep2Left(getEl("eeg-canvas-left"));
       }
@@ -2090,16 +2146,18 @@
     if (controlsArea) controlsArea.style.display = step >= 1 ? "flex" : "none";
 
     var noiseCtrl = getEl("eeg-noise-control");
+    var blinkCtrl = getEl("eeg-blink-control");
     var s3TrialsCtrl = getEl("eeg-s3trials-control");
     var trialsCtrl = getEl("eeg-trials-control");
     var bandCtrls = getEl("eeg-band-controls");
     var bandPowerCtrls = getEl("eeg-band-power-controls");
 
     if (noiseCtrl) noiseCtrl.style.display = (step === 2 || step === 4 || step === 6) ? "flex" : "none";
+    if (blinkCtrl) blinkCtrl.style.display = step === 2 ? "flex" : "none";
     if (s3TrialsCtrl) s3TrialsCtrl.style.display = step === 3 ? "flex" : "none";
     if (trialsCtrl) trialsCtrl.style.display = step === 4 ? "flex" : "none";
     if (bandCtrls) bandCtrls.style.display = step === 5 ? "flex" : "none";
-    if (bandPowerCtrls) bandPowerCtrls.style.display = step === 5 ? "flex" : "none";
+    if (bandPowerCtrls) bandPowerCtrls.style.display = (step === 5 || step === 6) ? "flex" : "none";
 
     var infoEl = getEl("eeg-info-text");
     if (infoEl && STEP_INFO[step]) {
@@ -2125,6 +2183,28 @@
     });
   }
 
+  function syncTrialCounts(n, source) {
+    var val = Math.max(1, Math.min(MAX_TRIALS, parseInt(n, 10) || 1));
+    state.params.s3Trials = val;
+    state.params.nTrials = val;
+
+    var s3Slider = getEl("eeg-s3trials");
+    var s3Label = getEl("eeg-s3trials-val");
+    var nSlider = getEl("eeg-ntrials");
+    var nLabel = getEl("eeg-ntrials-val");
+
+    if (s3Slider && source !== "s3") {
+      s3Slider.value = String(val);
+      setRangeFill(s3Slider);
+    }
+    if (nSlider && source !== "n4") {
+      nSlider.value = String(val);
+      setRangeFill(nSlider);
+    }
+    if (s3Label) s3Label.textContent = String(val);
+    if (nLabel) nLabel.textContent = String(val);
+  }
+
   function initDemo() {
     var container = getEl("eeg-container");
     if (!container) return;
@@ -2135,6 +2215,8 @@
 
     var startBtn = getEl("eeg-start-btn");
     if (startBtn) startBtn.addEventListener("click", function () { goToStep(1); });
+    var blinkBtn = getEl("eeg-blink-btn");
+    if (blinkBtn) blinkBtn.addEventListener("click", triggerBlinkArtifact);
 
     // Noise slider (steps 2, 4, 6)
     wireSlider("eeg-noise", "eeg-noise-val", function (v) {
@@ -2144,13 +2226,13 @@
 
     // Step 3 trials slider
     wireSlider("eeg-s3trials", "eeg-s3trials-val", function (v) {
-      state.params.s3Trials = parseInt(v);
+      syncTrialCounts(v, "s3");
       render();
     });
 
     // Step 4 trials slider
     wireSlider("eeg-ntrials", "eeg-ntrials-val", function (v) {
-      state.params.nTrials = parseInt(v);
+      syncTrialCounts(v, "n4");
       render();
     });
 
@@ -2189,6 +2271,7 @@
     var observer = new MutationObserver(function () { render(); });
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
+    syncTrialCounts(state.params.nTrials);
     render();
   }
 
