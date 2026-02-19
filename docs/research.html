@@ -49,7 +49,7 @@
       min-height: auto;
   }
   #study-phase, #distractor-phase, #recognition-phase, #instructions-screen-1, #instructions-screen-2 {
-      height: 200px;
+      height: 240px;
   }
   #word-display {
       font-size: 40pt;
@@ -68,6 +68,20 @@
       overflow: hidden;
       height: 400px;
       width: 700px;
+      margin: 0 auto;
+  }
+  #results-explanation {
+      background: #2d3447;
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin: 10px 0;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: #c8d8e8;
+  }
+  [data-theme="light"] #results-explanation {
+      background: #edf2f7;
+      color: #2d3748;
   }
   .game-embed button {
       background-color: #5b8fd9;
@@ -156,10 +170,10 @@
   .bosc-canvas-row {
       display: flex;
       justify-content: center;
-      margin-bottom: 8px;
+      margin-bottom: 14px;
   }
   .bosc-bottom-row {
-      gap: 8px;
+      gap: 14px;
       flex-wrap: wrap;
   }
   .bosc-canvas-row canvas {
@@ -170,11 +184,10 @@
       background: #2d3447;
       border-radius: 6px;
       padding: 12px 16px;
-      margin: 10px 0;
+      margin: 14px 5px 0 5px;
       font-size: 0.88rem;
       line-height: 1.5;
       color: #c8d8e8;
-      border-left: 3px solid #5b8fd9;
   }
   .bosc-controls {
       display: flex;
@@ -229,7 +242,6 @@
   [data-theme="light"] .bosc-info-text {
       background: #edf2f7;
       color: #2d3748;
-      border-left: 3px solid #4a90e2;
   }
   [data-theme="light"] .bosc-controls {
       border-top: 1px solid #e0e6ed;
@@ -309,20 +321,73 @@
       display: flex;
       justify-content: center;
       margin-bottom: 8px;
+      gap: 8px;
   }
   .sub-canvas-row canvas {
       border-radius: 6px;
       border: 1px solid #3a4254;
   }
+
+  /* Fixed-size demo containers */
+  #bosc-container {
+      display: flex;
+      flex-direction: column;
+  }
+  #bosc-container.bosc-active {
+      height: 760px;
+  }
+  #bosc-start-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+  }
+  #bosc-viz-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+  }
+  #bosc-info-text {
+      flex-shrink: 0;
+  }
+  .bosc-viz-spacer {
+      flex: 1;
+  }
+
+  #sub-container {
+      display: flex;
+      flex-direction: column;
+  }
+  #sub-container.sub-active {
+      height: 760px;
+  }
+  #sub-start-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+  }
+  #sub-viz-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+  }
+  #sub-info-text {
+      flex-shrink: 0;
+  }
+  .sub-viz-spacer {
+      flex: 1;
+  }
   .sub-info-text {
       background: #2d3447;
       border-radius: 6px;
       padding: 12px 16px;
-      margin: 10px 0;
+      margin: 14px 5px 0 5px;
       font-size: 0.88rem;
       line-height: 1.5;
       color: #c8d8e8;
-      border-left: 3px solid #5b8fd9;
   }
   .sub-controls {
       display: flex;
@@ -370,7 +435,6 @@
   [data-theme="light"] .sub-info-text {
       background: #edf2f7;
       color: #2d3748;
-      border-left: 3px solid #4a90e2;
   }
   [data-theme="light"] .sub-controls {
       border-top: 1px solid #e0e6ed;
@@ -540,6 +604,7 @@
 							</div>
 
 							<p id="bosc-info-text" class="bosc-info-text" style="display: none;"></p>
+						<div class="bosc-viz-spacer"></div>
 						</div>
 
 						<div id="bosc-controls-area" class="bosc-controls" style="display: none;">
@@ -593,12 +658,11 @@
 
 							<div class="sub-canvas-row">
 								<canvas id="sub-canvas-main"></canvas>
-							</div>
-							<div class="sub-canvas-row">
 								<canvas id="sub-canvas-chart"></canvas>
 							</div>
 
 							<p id="sub-info-text" class="sub-info-text" style="display: none;"></p>
+							<div class="sub-viz-spacer"></div>
 						</div>
 
 						<div id="sub-controls-area" class="sub-controls" style="display: none;">

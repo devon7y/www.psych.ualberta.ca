@@ -1437,8 +1437,8 @@
 
     if (mainCanvas) {
       const dpr = window.devicePixelRatio || 1;
-      const displayW = Math.min(Math.max(0, containerW - 10), 750);
-      const displayH = 200;
+      const displayW = Math.max(0, containerW - 10);
+      const displayH = 220;
       mainCanvas.style.width = displayW + "px";
       mainCanvas.style.height = displayH + "px";
       mainCanvas.width = displayW * dpr;
@@ -1447,9 +1447,9 @@
     }
     if (specCanvas && pepCanvas) {
       const dpr = window.devicePixelRatio || 1;
-      const availableW = Math.max(0, containerW - 10 - 8);
-      const halfW = Math.min(Math.floor(availableW / 2), 370);
-      const displayH = 220;
+      const availableW = Math.max(0, containerW - 10 - 14);
+      const halfW = Math.floor(availableW / 2);
+      const displayH = 260;
       for (const cv of [specCanvas, pepCanvas]) {
         cv.style.width = halfW + "px";
         cv.style.height = displayH + "px";
@@ -1477,9 +1477,11 @@
     });
 
     // Show/hide start screen
+    const container = getEl("bosc-container");
     const startScreen = getEl("bosc-start-screen");
     const vizArea = getEl("bosc-viz-area");
     const controlsArea = getEl("bosc-controls-area");
+    if (container) container.classList.toggle("bosc-active", step >= 1);
     if (startScreen) startScreen.style.display = step === 0 ? "block" : "none";
     if (vizArea) vizArea.style.display = step >= 1 ? "block" : "none";
     if (controlsArea) controlsArea.style.display = step >= 1 ? "flex" : "none";
