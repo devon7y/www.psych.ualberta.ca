@@ -482,6 +482,171 @@
       background: #4a90e2;
       border: 1px solid #3b7fcf;
   }
+
+  /* EEG Demo Styles */
+  .eeg-step-nav {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+  }
+  .eeg-step-btn {
+      background-color: #2d3447 !important;
+      color: #8899aa !important;
+      border: 1px solid #3a4254 !important;
+      padding: 6px 12px !important;
+      border-radius: 4px !important;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s ease;
+  }
+  .eeg-step-btn:hover {
+      background-color: #3a4254 !important;
+      color: #c8d8e8 !important;
+  }
+  .eeg-step-btn.active {
+      background-color: #5b8fd9 !important;
+      color: #fff !important;
+      border-color: #5b8fd9 !important;
+  }
+  .eeg-canvas-row {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 14px;
+  }
+  .eeg-bottom-row {
+      gap: 14px;
+      flex-wrap: wrap;
+  }
+  .eeg-canvas-row canvas {
+      border-radius: 6px;
+      border: 1px solid #3a4254;
+  }
+  .eeg-info-text {
+      background: #2d3447;
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin: 14px 5px 0 5px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: #c8d8e8;
+  }
+  .eeg-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      padding-top: 8px;
+      border-top: 1px solid #3a4254;
+      margin-top: 10px;
+  }
+  .eeg-control-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 160px;
+  }
+  .eeg-control-group label {
+      font-size: 0.78rem;
+      color: #8899aa;
+      margin-bottom: 4px;
+  }
+  .eeg-control-group input[type="range"] {
+      width: 140px;
+      accent-color: #5b8fd9;
+  }
+  .eeg-band-btn {
+      background-color: #2d3447 !important;
+      color: #8899aa !important;
+      border: 1px solid #3a4254 !important;
+      padding: 5px 10px !important;
+      border-radius: 4px !important;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.2s ease;
+  }
+  .eeg-band-btn:hover {
+      background-color: #3a4254 !important;
+      color: #c8d8e8 !important;
+  }
+  .eeg-band-btn.active {
+      background-color: #5b8fd9 !important;
+      color: #fff !important;
+      border-color: #5b8fd9 !important;
+  }
+  #eeg-container {
+      display: flex;
+      flex-direction: column;
+  }
+  #eeg-container.eeg-active {
+      height: 760px;
+  }
+  #eeg-start-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+  }
+  #eeg-viz-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+  }
+  #eeg-info-text {
+      flex-shrink: 0;
+  }
+  .eeg-viz-spacer {
+      flex: 1;
+  }
+
+  /* Light theme overrides for EEG */
+  [data-theme="light"] .eeg-step-btn {
+      background-color: #e2e8f0 !important;
+      color: #4a5568 !important;
+      border: 1px solid #e0e6ed !important;
+  }
+  [data-theme="light"] .eeg-step-btn:hover {
+      background-color: #cbd5e0 !important;
+      color: #2d3748 !important;
+  }
+  [data-theme="light"] .eeg-step-btn.active {
+      background-color: #4a90e2 !important;
+      color: #fff !important;
+      border-color: #4a90e2 !important;
+  }
+  [data-theme="light"] .eeg-canvas-row canvas {
+      border: 1px solid #e0e6ed;
+  }
+  [data-theme="light"] .eeg-info-text {
+      background: #edf2f7;
+      color: #2d3748;
+  }
+  [data-theme="light"] .eeg-controls {
+      border-top: 1px solid #e0e6ed;
+  }
+  [data-theme="light"] .eeg-control-group label {
+      color: #4a5568;
+  }
+  [data-theme="light"] .eeg-control-group input[type="range"] {
+      accent-color: #4a90e2;
+  }
+  [data-theme="light"] .eeg-band-btn {
+      background-color: #e2e8f0 !important;
+      color: #4a5568 !important;
+      border: 1px solid #e0e6ed !important;
+  }
+  [data-theme="light"] .eeg-band-btn:hover {
+      background-color: #cbd5e0 !important;
+      color: #2d3748 !important;
+  }
+  [data-theme="light"] .eeg-band-btn.active {
+      background-color: #4a90e2 !important;
+      color: #fff !important;
+      border-color: #4a90e2 !important;
+  }
 </style>
 </head>
 <body class="page-research">
@@ -567,6 +732,68 @@
 								<div style="text-align: center;">
 									<button id="play-again-btn">Play Again</button>
 								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="post">
+				<h2 class="title"><a href="#">How EEG Works: ERPs &amp; Oscillations</a></h2>
+				<div class="entry">
+					<p>Electroencephalography (EEG) records the brain's electrical activity through electrodes on the scalp. Two major analysis approaches &mdash; Event-Related Potentials (ERPs) and oscillations &mdash; reveal different aspects of brain function. Explore the interactive demo below to build an intuitive understanding of how EEG works.</p>
+
+					<div class="game-embed" id="eeg-container">
+						<div id="eeg-start-screen" style="text-align: center; padding: 20px;">
+							<h1 style="font-size: 1.8rem; margin-bottom: 10px;">How EEG Works</h1>
+							<p style="margin-bottom: 5px;">An interactive walkthrough of EEG, Event-Related Potentials, and brain oscillations.</p>
+							<p style="font-size: 0.85em; margin-bottom: 15px; opacity: 0.7;">ERPs &amp; Oscillations: Two Windows into the Brain</p>
+							<button id="eeg-start-btn">Start Demo</button>
+						</div>
+
+						<div id="eeg-viz-area" style="display: none;">
+							<div class="eeg-step-nav">
+								<button class="eeg-step-btn" data-step="1">1. The Scalp</button>
+								<button class="eeg-step-btn" data-step="2">2. Raw EEG</button>
+								<button class="eeg-step-btn" data-step="3">3. Single Trials</button>
+								<button class="eeg-step-btn" data-step="4">4. ERPs</button>
+								<button class="eeg-step-btn" data-step="5">5. Oscillations</button>
+								<button class="eeg-step-btn" data-step="6">6. ERPs vs Oscillations</button>
+							</div>
+
+							<div class="eeg-canvas-row">
+								<canvas id="eeg-canvas-main"></canvas>
+							</div>
+							<div class="eeg-canvas-row eeg-bottom-row">
+								<canvas id="eeg-canvas-left"></canvas>
+								<canvas id="eeg-canvas-right"></canvas>
+							</div>
+
+							<p id="eeg-info-text" class="eeg-info-text" style="display: none;"></p>
+							<div class="eeg-viz-spacer"></div>
+						</div>
+
+						<div id="eeg-controls-area" class="eeg-controls" style="display: none;">
+							<div id="eeg-noise-control" class="eeg-control-group" style="display: none;">
+								<label>Noise Level: <span id="eeg-noise-val">1.0</span></label>
+								<input type="range" id="eeg-noise" min="0.5" max="3" step="0.1" value="1.0" />
+							</div>
+							<div id="eeg-trials-control" class="eeg-control-group" style="display: none;">
+								<label>Trials Averaged: <span id="eeg-ntrials-val">1</span></label>
+								<input type="range" id="eeg-ntrials" min="1" max="200" step="1" value="1" />
+							</div>
+							<div id="eeg-band-controls" style="display: none;">
+								<button class="eeg-band-btn active" data-band="alpha">Alpha (8-13 Hz)</button>
+								<button class="eeg-band-btn" data-band="delta">Delta (1-4 Hz)</button>
+								<button class="eeg-band-btn" data-band="theta">Theta (4-8 Hz)</button>
+								<button class="eeg-band-btn" data-band="beta">Beta (13-30 Hz)</button>
+							</div>
+							<div id="eeg-alpha-control" class="eeg-control-group" style="display: none;">
+								<label>Alpha Power: <span id="eeg-alpha-val">2.0</span></label>
+								<input type="range" id="eeg-alpha" min="0" max="5" step="0.5" value="2.0" />
+							</div>
+							<div id="eeg-view-control" style="display: none; text-align: center;">
+								<button id="eeg-view-btn">Show Both</button>
 							</div>
 						</div>
 					</div>
@@ -758,6 +985,7 @@
 <script src="attention_tuner/script.js"></script>
 <script src="bosc_demo/bosc_demo.js"></script>
 <script src="subsetting_demo/subsetting_demo.js"></script>
+<script src="eeg_demo/eeg_demo.js"></script>
 <script>
     const themeToggle = document.getElementById('theme-toggle');
     const root = document.documentElement;
