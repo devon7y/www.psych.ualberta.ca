@@ -656,6 +656,43 @@
   [data-theme="light"] .eeg-control-group input[type="range"] {
       accent-color: #4a90e2;
   }
+  [data-theme="light"] .eeg-control-group input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      background: linear-gradient(
+          to right,
+          #4a90e2 var(--eeg-range-fill, 50%),
+          #d9e1ec var(--eeg-range-fill, 50%)
+      );
+      border: 1px solid #cbd5e0;
+      border-radius: 999px;
+  }
+  [data-theme="light"] .eeg-control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      margin-top: -6px;
+      border-radius: 50%;
+      background: #4a90e2;
+      border: 1px solid #3b7fcf;
+  }
+  [data-theme="light"] .eeg-control-group input[type="range"]::-moz-range-track {
+      height: 6px;
+      background: #d9e1ec;
+      border: 1px solid #cbd5e0;
+      border-radius: 999px;
+  }
+  [data-theme="light"] .eeg-control-group input[type="range"]::-moz-range-progress {
+      height: 6px;
+      background: #4a90e2;
+      border-radius: 999px;
+  }
+  [data-theme="light"] .eeg-control-group input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #4a90e2;
+      border: 1px solid #3b7fcf;
+  }
   [data-theme="light"] .eeg-band-btn {
       background-color: #e2e8f0 !important;
       color: #4a5568 !important;
