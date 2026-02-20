@@ -546,14 +546,12 @@
     }
 
     // Arrow showing current flow upward
-    var arrowX = W / 2;
+    var arrowX = Math.min(layerX + layerW - 18, layerX + layerW / 2 + 54);
     var arrowTop = startY + 8;
     var arrowBot = cortexTop + 10;
     ctx.beginPath();
-    ctx.setLineDash([5, 4]);
     ctx.moveTo(arrowX, arrowBot); ctx.lineTo(arrowX, arrowTop);
     ctx.strokeStyle = c.electrode; ctx.lineWidth = 1.8; ctx.stroke();
-    ctx.setLineDash([]);
     ctx.beginPath();
     ctx.moveTo(arrowX - 6, arrowTop + 9);
     ctx.lineTo(arrowX, arrowTop - 1);
@@ -1935,7 +1933,7 @@
     '<strong>Step 3: Single Trials.</strong> When we present a stimulus, the brain produces a response. But any single trial is dominated by noise \u2014 the ongoing EEG is much larger than the evoked response. Use the slider to add more trials: the overlaid traces converge and the averaged signal (green line) gradually emerges. The signal-to-noise ratio improves by \u221AN \u2014 averaging 9 trials gives 3\u00D7 better SNR.',
     '<strong>Step 4: Event-Related Potentials.</strong> An ERP is the brain\'s average response to a repeated event. By averaging many trials, random noise cancels out while the consistent brain response remains. The SNR improves by \u221AN. <em>Drag the slider</em> to watch the ERP emerge! Classic components: <strong>N1</strong> (~100ms, early sensory processing), <strong>P2</strong> (~200ms, stimulus evaluation), <strong>P3</strong> (~350ms, attention & memory updating). Named by polarity (N=negative, P=positive) and approximate latency.',
     '<strong>Step 5: Brain Oscillations.</strong> EEG contains rhythmic activity at different frequencies. Power is the signal energy at a frequency, so higher power means a stronger rhythm. <strong>Delta</strong> (1\u20134 Hz) dominates deep sleep; <strong>Theta</strong> (4\u20138 Hz) is linked to memory encoding; <strong>Alpha</strong> (8\u201313 Hz) appears during relaxed wakefulness; <strong>Beta</strong> (13\u201330 Hz) is associated with active processing. Adjust the power sliders to change each band\'s amplitude and watch the spectrum change.',
-    '<strong>Step 6: ERPs vs. Oscillations \u2014 Two Windows into the Brain.</strong> ERPs and oscillations are complementary. <em>ERPs</em> use time-locked averaging to reveal the brain\'s response to events \u2014 \u201Cwhen and how does the brain respond?\u201D <em>Oscillations</em> use frequency decomposition to reveal rhythmic brain states \u2014 \u201Cwhat cognitive state is the brain currently in?\u201D Modern EEG research examines both: a stimulus can produce an ERP <em>and</em> cause oscillatory changes (e.g., alpha suppression = cortex becomes less inhibited; theta rise = memory encoding active), visible in time-frequency analysis.',
+    '<strong>Step 6: ERPs vs. Oscillations.</strong> <em>ERPs</em> use time-locked averaging to reveal the brain\'s response to events \u2014 \u201Cwhen and how does the brain respond?\u201D <em>Oscillations</em> use frequency decomposition to reveal rhythmic brain states \u2014 \u201Cwhat cognitive state is the brain currently in?\u201D Modern EEG research examines both: a stimulus can produce an ERP <em>and</em> cause oscillatory changes (e.g., alpha suppression = cortex becomes less inhibited; theta rise = memory encoding active), visible in time-frequency analysis.',
   ];
 
   function getEl(id) { return document.getElementById(id); }
@@ -1974,7 +1972,7 @@
     if (leftCanvas && rightCanvas) {
       var availW = Math.max(0, containerW - 10 - 14);
       var halfW = Math.floor(availW / 2);
-      var dH = 300;
+      var dH = 270;
       for (var i = 0; i < 2; i++) {
         var cv = i === 0 ? leftCanvas : rightCanvas;
         cv.style.width = halfW + "px";
