@@ -710,6 +710,39 @@
       color: #fff !important;
       border-color: #4a90e2 !important;
   }
+
+  /* Mobile layout for demo embeds */
+  @media (max-width: 900px) {
+      #eeg-container.eeg-active {
+          height: 1280px;
+      }
+      #bosc-container.bosc-active,
+      #sub-container.sub-active {
+          height: 1160px;
+      }
+
+      .eeg-bottom-row,
+      .bosc-bottom-row,
+      .sub-canvas-row {
+          flex-direction: column;
+          flex-wrap: nowrap;
+          align-items: center;
+          gap: 10px;
+      }
+
+      .eeg-bottom-row canvas,
+      .bosc-bottom-row canvas,
+      .sub-canvas-row canvas {
+          width: 100% !important;
+          max-width: 100% !important;
+      }
+
+      .eeg-viz-spacer,
+      .bosc-viz-spacer,
+      .sub-viz-spacer {
+          min-height: 22px;
+      }
+  }
 </style>
 </head>
 <body class="page-research">
