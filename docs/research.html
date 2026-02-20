@@ -534,13 +534,14 @@
   }
   .eeg-controls {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       gap: 10px;
       justify-content: center;
       align-items: center;
-      padding-top: 8px;
+      padding-top: 14px;
       border-top: 1px solid #3a4254;
-      margin-top: 10px;
+      margin-top: 12px;
+      overflow-x: auto;
   }
   .eeg-control-group {
       display: flex;
@@ -560,13 +561,20 @@
   #eeg-band-controls,
   #eeg-band-power-controls {
       display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+      gap: 8px;
+      flex-wrap: nowrap;
       justify-content: center;
       align-items: center;
   }
   #eeg-band-power-controls .eeg-control-group {
-      min-width: 150px;
+      min-width: 98px;
+  }
+  #eeg-band-power-controls .eeg-control-group label {
+      font-size: 0.72rem;
+      white-space: nowrap;
+  }
+  #eeg-band-power-controls .eeg-control-group input[type="range"] {
+      width: 90px;
   }
   #eeg-blink-btn {
       min-width: 120px;
@@ -575,10 +583,10 @@
       background-color: #2d3447 !important;
       color: #8899aa !important;
       border: 1px solid #3a4254 !important;
-      padding: 5px 10px !important;
+      padding: 5px 9px !important;
       border-radius: 4px !important;
       cursor: pointer;
-      font-size: 0.75rem;
+      font-size: 0.73rem;
       transition: all 0.2s ease;
   }
   .eeg-band-btn:hover {
@@ -595,8 +603,7 @@
       flex-direction: column;
   }
   #eeg-container.eeg-active {
-      min-height: 840px;
-      height: auto;
+      height: 840px;
   }
   #eeg-start-screen {
       flex: 1;
@@ -615,6 +622,7 @@
   }
   .eeg-viz-spacer {
       flex: 1;
+      min-height: 20px;
   }
 
   /* Light theme overrides for EEG */
@@ -752,16 +760,12 @@
 								<input type="range" id="eeg-ntrials" min="1" max="200" step="1" value="1" />
 							</div>
 							<div id="eeg-band-controls" style="display: none;">
-								<button class="eeg-band-btn active" data-band="alpha">Alpha (8-13 Hz)</button>
-								<button class="eeg-band-btn" data-band="delta">Delta (1-4 Hz)</button>
-								<button class="eeg-band-btn" data-band="theta">Theta (4-8 Hz)</button>
-								<button class="eeg-band-btn" data-band="beta">Beta (13-30 Hz)</button>
+								<button class="eeg-band-btn" data-band="delta">Delta</button>
+								<button class="eeg-band-btn" data-band="theta">Theta</button>
+								<button class="eeg-band-btn active" data-band="alpha">Alpha</button>
+								<button class="eeg-band-btn" data-band="beta">Beta</button>
 							</div>
 							<div id="eeg-band-power-controls" style="display: none;">
-								<div class="eeg-control-group">
-									<label>Alpha Power: <span id="eeg-alpha-val">2.0</span></label>
-									<input type="range" id="eeg-alpha" min="0" max="5" step="0.5" value="2.0" />
-								</div>
 								<div class="eeg-control-group">
 									<label>Delta Power: <span id="eeg-delta-val">1.0</span></label>
 									<input type="range" id="eeg-delta" min="0" max="5" step="0.5" value="1.0" />
@@ -769,6 +773,10 @@
 								<div class="eeg-control-group">
 									<label>Theta Power: <span id="eeg-theta-val">1.0</span></label>
 									<input type="range" id="eeg-theta" min="0" max="5" step="0.5" value="1.0" />
+								</div>
+								<div class="eeg-control-group">
+									<label>Alpha Power: <span id="eeg-alpha-val">2.0</span></label>
+									<input type="range" id="eeg-alpha" min="0" max="5" step="0.5" value="2.0" />
 								</div>
 								<div class="eeg-control-group">
 									<label>Beta Power: <span id="eeg-beta-val">1.0</span></label>

@@ -731,8 +731,10 @@
     var plotH = H - margins.top - margins.bottom;
     var baseY = margins.top + plotH / 2;
     var mainSamplesVisible = Math.floor(DISPLAY_SECS * SR);
-    // Show the start/left side of the main 4-second window (first ~75%) for earlier blink visibility.
+    // Use a shorter zoom window and align it to the main view's right edge.
     var samplesShow = Math.floor(mainSamplesVisible * 0.75);
+    // Anchor the zoom window to the right edge of the main view for immediate blink timing.
+    var startInMain = Math.max(0, mainSamplesVisible - samplesShow);
     var offset = state.scrollOffset;
     var ampScale = state.params.noiseLevel;
 
@@ -742,8 +744,8 @@
     ctx.strokeStyle = c.signal;
     ctx.lineWidth = 1.5;
     for (var si = 0; si < samplesShow; si++) {
-      var absSample = state.rawAbsSample + si;
-      var idx = (offset + si) % CONTINUOUS_N;
+      var absSample = state.rawAbsSample + startInMain + si;
+      var idx = (offset + startInMain + si) % CONTINUOUS_N;
       var blink = getBlinkArtifact(absSample, chIdx);
       var px = margins.left + (si / samplesShow) * plotW;
       var py = baseY - chSignal[idx] * noiseAmp - blink * blinkAmp;
