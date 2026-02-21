@@ -883,6 +883,178 @@
       border: 1px solid #3b7fcf;
   }
 
+  /* Classifier / Predict Memory Demo Styles */
+  .clf-step-nav {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+  }
+  .clf-step-btn {
+      background-color: #2d3447 !important;
+      color: #8899aa !important;
+      border: 1px solid #3a4254 !important;
+      padding: 6px 12px !important;
+      border-radius: 4px !important;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s ease;
+  }
+  .clf-step-btn:hover {
+      background-color: #3a4254 !important;
+      color: #c8d8e8 !important;
+  }
+  .clf-step-btn.active {
+      background-color: #5b8fd9 !important;
+      color: #fff !important;
+      border-color: #5b8fd9 !important;
+  }
+  .clf-canvas-row {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 14px;
+  }
+  .clf-bottom-row {
+      gap: 14px;
+      flex-wrap: wrap;
+  }
+  .clf-canvas-row canvas {
+      border-radius: 6px;
+      border: 1px solid #3a4254;
+  }
+  .clf-info-text {
+      background: #2d3447;
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin: 14px 5px 0 5px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: #c8d8e8;
+  }
+  .clf-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      padding-top: 8px;
+      border-top: 1px solid #3a4254;
+      margin-top: 10px;
+  }
+  .clf-control-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 160px;
+  }
+  .clf-control-group label {
+      font-size: 0.78rem;
+      color: #8899aa;
+      margin-bottom: 4px;
+  }
+  .clf-control-group input[type="range"] {
+      width: 140px;
+      accent-color: #5b8fd9;
+  }
+  #clf-container {
+      display: flex;
+      flex-direction: column;
+  }
+  #clf-container.clf-active {
+      height: 840px;
+  }
+  #clf-start-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+  }
+  #clf-viz-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+  }
+  #clf-info-text {
+      flex-shrink: 0;
+  }
+  .clf-viz-spacer {
+      flex: 1;
+      min-height: 20px;
+  }
+
+  /* Light theme overrides for Classifier demo */
+  [data-theme="light"] .clf-step-btn {
+      background-color: #e2e8f0 !important;
+      color: #4a5568 !important;
+      border: 1px solid #e0e6ed !important;
+  }
+  [data-theme="light"] .clf-step-btn:hover {
+      background-color: #cbd5e0 !important;
+      color: #2d3748 !important;
+  }
+  [data-theme="light"] .clf-step-btn.active {
+      background-color: #4a90e2 !important;
+      color: #fff !important;
+      border-color: #4a90e2 !important;
+  }
+  [data-theme="light"] .clf-canvas-row canvas {
+      border: 1px solid #e0e6ed;
+  }
+  [data-theme="light"] .clf-info-text {
+      background: #edf2f7;
+      color: #2d3748;
+  }
+  [data-theme="light"] .clf-controls {
+      border-top: 1px solid #e0e6ed;
+  }
+  [data-theme="light"] .clf-control-group label {
+      color: #4a5568;
+  }
+  [data-theme="light"] .clf-control-group input[type="range"] {
+      accent-color: #4a90e2;
+      height: 18px;
+      background: transparent;
+  }
+  [data-theme="light"] .clf-control-group input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      background: linear-gradient(
+          to right,
+          #4a90e2 var(--clf-range-fill, 50%),
+          #d9e1ec var(--clf-range-fill, 50%)
+      );
+      border: 1px solid #cbd5e0;
+      border-radius: 999px;
+  }
+  [data-theme="light"] .clf-control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      margin-top: -6px;
+      border-radius: 50%;
+      background: #4a90e2;
+      border: 1px solid #3b7fcf;
+  }
+  [data-theme="light"] .clf-control-group input[type="range"]::-moz-range-track {
+      height: 6px;
+      background: #d9e1ec;
+      border: 1px solid #cbd5e0;
+      border-radius: 999px;
+  }
+  [data-theme="light"] .clf-control-group input[type="range"]::-moz-range-progress {
+      height: 6px;
+      background: #4a90e2;
+      border-radius: 999px;
+  }
+  [data-theme="light"] .clf-control-group input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #4a90e2;
+      border: 1px solid #3b7fcf;
+  }
+
   /* Mobile layout for demo embeds */
   @media (max-width: 900px) {
       #eeg-container.eeg-active {
@@ -895,11 +1067,15 @@
       #erp-container.erp-active {
           height: 1280px;
       }
+      #clf-container.clf-active {
+          height: 1280px;
+      }
 
       .eeg-bottom-row,
       .bosc-bottom-row,
       .sub-canvas-row,
-      .erp-bottom-row {
+      .erp-bottom-row,
+      .clf-bottom-row {
           flex-direction: column;
           flex-wrap: nowrap;
           align-items: center;
@@ -909,7 +1085,8 @@
       .eeg-bottom-row canvas,
       .bosc-bottom-row canvas,
       .sub-canvas-row canvas,
-      .erp-bottom-row canvas {
+      .erp-bottom-row canvas,
+      .clf-bottom-row canvas {
           width: 100% !important;
           max-width: 100% !important;
       }
@@ -917,7 +1094,8 @@
       .eeg-viz-spacer,
       .bosc-viz-spacer,
       .sub-viz-spacer,
-      .erp-viz-spacer {
+      .erp-viz-spacer,
+      .clf-viz-spacer {
           min-height: 22px;
       }
   }
@@ -1152,6 +1330,57 @@
 			</div>
 
 			<div class="post">
+				<h2 class="title"><a href="#">Predicting Memory from Brain Activity</a></h2>
+				<div class="entry">
+					<p>Can we actually <em>predict</em> whether a memory will form, rather than just describe brain activity after the fact? Chakravarty, Chen &amp; Caplan (2020) applied machine learning classifiers to study-phase EEG to answer this question. By mapping EEG features &mdash; such as the Late Positive Component (LPC) and Slow Wave amplitudes &mdash; to later memory outcomes, classifiers can predict hit or miss trial-by-trial. This has practical implications for adaptive learning systems, clinical diagnostics, and basic neuroscience. Explore the interactive demo below to understand how classifiers work, why single-trial prediction is challenging, and what the ROC curve and AUC tell us about classifier performance.</p>
+
+					<div class="game-embed" id="clf-container">
+						<div id="clf-start-screen" style="text-align: center; padding: 20px;">
+							<h1 style="font-size: 1.8rem; margin-bottom: 10px;">Predicting Memory from Brain Activity</h1>
+							<p style="margin-bottom: 5px;">An interactive walkthrough of how EEG classifiers predict the subsequent memory effect.</p>
+							<p style="font-size: 0.85em; margin-bottom: 15px; opacity: 0.7;">Based on Chakravarty, Chen &amp; Caplan (2020)</p>
+							<button id="clf-start-btn">Start Demo</button>
+						</div>
+
+						<div id="clf-viz-area" style="display: none;">
+							<div class="clf-step-nav">
+								<button class="clf-step-btn" data-step="1">1. Why Predict?</button>
+								<button class="clf-step-btn" data-step="2">2. The Signal</button>
+								<button class="clf-step-btn" data-step="3">3. Single Trials</button>
+								<button class="clf-step-btn" data-step="4">4. The Classifier</button>
+								<button class="clf-step-btn" data-step="5">5. ROC &amp; AUC</button>
+								<button class="clf-step-btn" data-step="6">6. Multivariate</button>
+							</div>
+
+							<div class="clf-canvas-row">
+								<canvas id="clf-canvas-main"></canvas>
+							</div>
+							<div class="clf-canvas-row clf-bottom-row">
+								<canvas id="clf-canvas-left"></canvas>
+								<canvas id="clf-canvas-right"></canvas>
+							</div>
+
+							<p id="clf-info-text" class="clf-info-text" style="display: none;"></p>
+							<div class="clf-viz-spacer"></div>
+						</div>
+
+						<div id="clf-controls-area" class="clf-controls" style="display: none;">
+							<!-- Step 3: Trials averaged slider -->
+							<div id="clf-trials-control" class="clf-control-group" style="display: none;">
+								<label>Trials Averaged: <span id="clf-ntrials-val">30</span></label>
+								<input type="range" id="clf-ntrials" min="1" max="200" step="1" value="30" />
+							</div>
+							<!-- Step 4: Threshold slider -->
+							<div id="clf-thresh-control" class="clf-control-group" style="display: none;">
+								<label>Threshold &theta;: <span id="clf-thresh-val">1.5</span> &mu;V</label>
+								<input type="range" id="clf-thresh" min="-8" max="10" step="0.5" value="1.5" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="post">
 				<h2 class="title"><a href="#">Attentional Subsetting Theory</a></h2>
 				<div class="entry">
 					<p>Why does producing words aloud (writing, saying) improve memory compared to silent reading, and why does this <em>production effect</em> create list-strength effects — while simply studying items longer does not? Attentional Subsetting Theory proposes that attention encodes only a small subset of a word's features, and the size of the relevant feature space determines whether items interfere with each other in memory. Explore the interactive demo below to see how.</p>
@@ -1316,6 +1545,7 @@
 </div>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script src="erp_memory_demo/erp_demo.js"></script>
+<script src="clf_demo/clf_demo.js"></script>
 <script src="attention_tuner/script.js"></script>
 <script src="bosc_demo/bosc_demo.js"></script>
 <script src="subsetting_demo/subsetting_demo.js"></script>
