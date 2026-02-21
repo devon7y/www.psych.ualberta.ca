@@ -711,6 +711,178 @@
       border-color: #4a90e2 !important;
   }
 
+  /* ERP Memory Demo Styles */
+  .erp-step-nav {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+  }
+  .erp-step-btn {
+      background-color: #2d3447 !important;
+      color: #8899aa !important;
+      border: 1px solid #3a4254 !important;
+      padding: 6px 12px !important;
+      border-radius: 4px !important;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s ease;
+  }
+  .erp-step-btn:hover {
+      background-color: #3a4254 !important;
+      color: #c8d8e8 !important;
+  }
+  .erp-step-btn.active {
+      background-color: #5b8fd9 !important;
+      color: #fff !important;
+      border-color: #5b8fd9 !important;
+  }
+  .erp-canvas-row {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 14px;
+  }
+  .erp-bottom-row {
+      gap: 14px;
+      flex-wrap: wrap;
+  }
+  .erp-canvas-row canvas {
+      border-radius: 6px;
+      border: 1px solid #3a4254;
+  }
+  .erp-info-text {
+      background: #2d3447;
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin: 14px 5px 0 5px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: #c8d8e8;
+  }
+  .erp-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      padding-top: 8px;
+      border-top: 1px solid #3a4254;
+      margin-top: 10px;
+  }
+  .erp-control-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 160px;
+  }
+  .erp-control-group label {
+      font-size: 0.78rem;
+      color: #8899aa;
+      margin-bottom: 4px;
+  }
+  .erp-control-group input[type="range"] {
+      width: 140px;
+      accent-color: #5b8fd9;
+  }
+  #erp-container {
+      display: flex;
+      flex-direction: column;
+  }
+  #erp-container.erp-active {
+      height: 840px;
+  }
+  #erp-start-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+  }
+  #erp-viz-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+  }
+  #erp-info-text {
+      flex-shrink: 0;
+  }
+  .erp-viz-spacer {
+      flex: 1;
+      min-height: 20px;
+  }
+
+  /* Light theme overrides for ERP */
+  [data-theme="light"] .erp-step-btn {
+      background-color: #e2e8f0 !important;
+      color: #4a5568 !important;
+      border: 1px solid #e0e6ed !important;
+  }
+  [data-theme="light"] .erp-step-btn:hover {
+      background-color: #cbd5e0 !important;
+      color: #2d3748 !important;
+  }
+  [data-theme="light"] .erp-step-btn.active {
+      background-color: #4a90e2 !important;
+      color: #fff !important;
+      border-color: #4a90e2 !important;
+  }
+  [data-theme="light"] .erp-canvas-row canvas {
+      border: 1px solid #e0e6ed;
+  }
+  [data-theme="light"] .erp-info-text {
+      background: #edf2f7;
+      color: #2d3748;
+  }
+  [data-theme="light"] .erp-controls {
+      border-top: 1px solid #e0e6ed;
+  }
+  [data-theme="light"] .erp-control-group label {
+      color: #4a5568;
+  }
+  [data-theme="light"] .erp-control-group input[type="range"] {
+      accent-color: #4a90e2;
+      height: 18px;
+      background: transparent;
+  }
+  [data-theme="light"] .erp-control-group input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      background: linear-gradient(
+          to right,
+          #4a90e2 var(--erp-range-fill, 50%),
+          #d9e1ec var(--erp-range-fill, 50%)
+      );
+      border: 1px solid #cbd5e0;
+      border-radius: 999px;
+  }
+  [data-theme="light"] .erp-control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      margin-top: -6px;
+      border-radius: 50%;
+      background: #4a90e2;
+      border: 1px solid #3b7fcf;
+  }
+  [data-theme="light"] .erp-control-group input[type="range"]::-moz-range-track {
+      height: 6px;
+      background: #d9e1ec;
+      border: 1px solid #cbd5e0;
+      border-radius: 999px;
+  }
+  [data-theme="light"] .erp-control-group input[type="range"]::-moz-range-progress {
+      height: 6px;
+      background: #4a90e2;
+      border-radius: 999px;
+  }
+  [data-theme="light"] .erp-control-group input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #4a90e2;
+      border: 1px solid #3b7fcf;
+  }
+
   /* Mobile layout for demo embeds */
   @media (max-width: 900px) {
       #eeg-container.eeg-active {
@@ -720,10 +892,14 @@
       #sub-container.sub-active {
           height: 1160px;
       }
+      #erp-container.erp-active {
+          height: 1280px;
+      }
 
       .eeg-bottom-row,
       .bosc-bottom-row,
-      .sub-canvas-row {
+      .sub-canvas-row,
+      .erp-bottom-row {
           flex-direction: column;
           flex-wrap: nowrap;
           align-items: center;
@@ -732,14 +908,16 @@
 
       .eeg-bottom-row canvas,
       .bosc-bottom-row canvas,
-      .sub-canvas-row canvas {
+      .sub-canvas-row canvas,
+      .erp-bottom-row canvas {
           width: 100% !important;
           max-width: 100% !important;
       }
 
       .eeg-viz-spacer,
       .bosc-viz-spacer,
-      .sub-viz-spacer {
+      .sub-viz-spacer,
+      .erp-viz-spacer {
           min-height: 22px;
       }
   }
@@ -921,6 +1099,50 @@
 					</div>
 				</div>
 			</div>
+			<div class="post">
+				<h2 class="title"><a href="#">ERP Effects in Memory: SME, RSE, and Old/New Effect</a></h2>
+				<div class="entry">
+					<p>Electroencephalography (EEG) can be used to study memory by examining <em>Event-Related Potentials</em> (ERPs) &mdash; voltage changes in the brain time-locked to a stimulus. In recognition memory research, three effects have proven especially informative: the <strong>Subsequent Memory Effect</strong> (brain activity at study predicts later remembering), the <strong>Old/New Effect</strong> (brain activity at test distinguishes correctly recognized old items from correctly rejected new ones), and the <strong>Retrieval Success Effect</strong> (brain activity at test distinguishes successfully from unsuccessfully retrieved old items). Explore the interactive demo below to see how these effects look and what cognitive processes they reflect.</p>
+
+					<div class="game-embed" id="erp-container">
+						<div id="erp-start-screen" style="text-align: center; padding: 20px;">
+							<h1 style="font-size: 1.8rem; margin-bottom: 10px;">ERP Effects in Memory</h1>
+							<p style="margin-bottom: 5px;">An interactive walkthrough of the Subsequent Memory Effect, Old/New Effect, and Retrieval Success Effect.</p>
+							<p style="font-size: 0.85em; margin-bottom: 15px; opacity: 0.7;">Based on Chen et al. (2014) and Chen &amp; Caplan (2017)</p>
+							<button id="erp-start-btn">Start Demo</button>
+						</div>
+
+						<div id="erp-viz-area" style="display: none;">
+							<div class="erp-step-nav">
+								<button class="erp-step-btn" data-step="1">1. The Experiment</button>
+								<button class="erp-step-btn" data-step="2">2. Study ERPs</button>
+								<button class="erp-step-btn" data-step="3">3. SME</button>
+								<button class="erp-step-btn" data-step="4">4. Test ERPs</button>
+								<button class="erp-step-btn" data-step="5">5. Old/New Effect</button>
+								<button class="erp-step-btn" data-step="6">6. Retrieval Success</button>
+							</div>
+
+							<div class="erp-canvas-row">
+								<canvas id="erp-canvas-main"></canvas>
+							</div>
+							<div class="erp-canvas-row erp-bottom-row">
+								<canvas id="erp-canvas-left"></canvas>
+								<canvas id="erp-canvas-right"></canvas>
+							</div>
+
+							<p id="erp-info-text" class="erp-info-text" style="display: none;"></p>
+							<div class="erp-viz-spacer"></div>
+						</div>
+
+						<div id="erp-controls-area" class="erp-controls" style="display: none;">
+							<div id="erp-ntrials-control" class="erp-control-group" style="display: none;">
+								<label>Trials Averaged: <span id="erp-ntrials-val">30</span></label>
+								<input type="range" id="erp-ntrials" min="1" max="200" step="1" value="30" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 
 			<div class="post">
 				<h2 class="title"><a href="#">Attentional Subsetting Theory</a></h2>
@@ -1096,6 +1318,7 @@
     <!-- end #footer -->
 </div>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script src="erp_memory_demo/erp_demo.js"></script>
 <script src="attention_tuner/script.js"></script>
 <script src="bosc_demo/bosc_demo.js"></script>
 <script src="subsetting_demo/subsetting_demo.js"></script>
