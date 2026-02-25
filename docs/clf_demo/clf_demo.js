@@ -153,6 +153,212 @@
     ctx.fillText(s, x, y);
   }
 
+  // Word-wrap text block renderer for info panels
+  function drawTextBlock(ctx, sections, x, y, maxWidth, opts) {
+    opts = opts || {};
+    var fontSize = opts.fontSize || 12;
+    var lineH = opts.lineHeight || 17;
+    var sectionGap = opts.sectionGap || 8;
+    var c = C();
+    var cy = y;
+
+    sections.forEach(function (sec, si) {
+      if (si > 0) cy += sectionGap;
+      if (sec.heading) {
+        ctx.font = 'bold ' + (fontSize + 1) + 'px "Inter", sans-serif';
+        ctx.fillStyle = sec.color || c.text;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        ctx.fillText(sec.heading, x, cy);
+        cy += lineH + 2;
+      }
+      if (sec.text) {
+        var font = (sec.bold ? "bold " : "") + fontSize + 'px "Inter", sans-serif';
+        var color = sec.color || c.text;
+        ctx.font = font;
+        ctx.fillStyle = color;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        var words = sec.text.split(" ");
+        var line = "";
+        for (var i = 0; i < words.length; i++) {
+          var test = line ? line + " " + words[i] : words[i];
+          if (ctx.measureText(test).width > maxWidth && line) {
+            ctx.fillText(line, x, cy);
+            cy += lineH;
+            line = words[i];
+          } else {
+            line = test;
+          }
+        }
+        if (line) { ctx.fillText(line, x, cy); cy += lineH; }
+      }
+      if (sec.divider) {
+        cy += 2;
+        ctx.beginPath();
+        ctx.moveTo(x, cy);
+        ctx.lineTo(x + maxWidth, cy);
+        ctx.strokeStyle = c.grid;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+        cy += 6;
+      }
+    });
+    return cy;
+  }
+
+  // HTML tooltip setup for ERP plots
+  function setupERPTooltip(canvas) {
+    var tooltip = document.createElement("div");
+    tooltip.style.cssText = "position:absolute;pointer-events:none;display:none;" +
+      "background:rgba(20,25,36,0.92);color:#c8d8e8;padding:6px 10px;" +
+      "border-radius:4px;font:10px 'Inter',sans-serif;z-index:100;" +
+      "border:1px solid #3a4254;white-space:nowrap;";
+    canvas.parentElement.style.position = "relative";
+    canvas.parentElement.appendChild(tooltip);
+
+    canvas.addEventListener("mousemove", function (e) {
+      if (state.step !== 2 && state.step !== 3) {
+        tooltip.style.display = "none";
+        return;
+      }
+      var rect = canvas.getBoundingClientRect();
+      var mx = e.clientX - rect.left;
+      var my = e.clientY - rect.top;
+      var dpr = window.devicePixelRatio || 1;
+      var W = canvas.width / dpr, H = canvas.height / dpr;
+      var mg = { top: 30, bottom: 26, left: 44, right: 14 };
+      var plotW = W - mg.left - mg.right, plotH = H - mg.top - mg.bottom;
+
+      if (mx < mg.left || mx > mg.left + plotW || my < mg.top || my > mg.top + plotH) {
+        tooltip.style.display = "none";
+        return;
+      }
+
+      var tMin = -PRE, tMax = POST;
+      var t = tMin + (mx - mg.left) / plotW * (tMax - tMin);
+      var tMs = Math.round(t * 1000);
+      var si = Math.round((t + PRE) * SR);
+      if (si < 0 || si >= N) { tooltip.style.display = "none"; return; }
+
+      var lines = ["<b>" + tMs + " ms</b>"];
+      if (state.data) {
+        var hitVal = state.data.hit[si].toFixed(2);
+        var missVal = state.data.miss[si].toFixed(2);
+        var c = C();
+        lines.push('<span style="color:' + c.hits + '">\u25CF Hits: ' + hitVal + ' \u03bcV</span>');
+        lines.push('<span style="color:' + c.misses + '">\u25CF Misses: ' + missVal + ' \u03bcV</span>');
+      }
+
+      tooltip.innerHTML = lines.join("<br>");
+      tooltip.style.display = "block";
+
+      var tipX = mx + 12;
+      var tipY = my - 10;
+      if (tipX + tooltip.offsetWidth > rect.width - 5) tipX = mx - tooltip.offsetWidth - 12;
+      tooltip.style.left = tipX + "px";
+      tooltip.style.top  = tipY + "px";
+
+      // Redraw with crosshair and dots
+      render();
+      var ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.save();
+      ctx.setLineDash([2, 3]);
+      ctx.strokeStyle = "rgba(200,216,232,0.3)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(mx, mg.top);
+      ctx.lineTo(mx, mg.top + plotH);
+      ctx.stroke();
+      ctx.restore();
+
+      // Draw dots on waveforms
+      if (state.data) {
+        var c = C();
+        var yMin = -2, yMax = 2.5;
+        var toY = function (v) { return mg.top + (yMax - v) / (yMax - yMin) * plotH; };
+        var hitPy = toY(state.data.hit[si]);
+        var missPy = toY(state.data.miss[si]);
+        [
+          { py: hitPy, color: c.hits },
+          { py: missPy, color: c.misses }
+        ].forEach(function (d) {
+          ctx.beginPath();
+          ctx.arc(mx, d.py, 4, 0, 2 * Math.PI);
+          ctx.fillStyle = d.color;
+          ctx.fill();
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        });
+      }
+    });
+
+    canvas.addEventListener("mouseleave", function () {
+      tooltip.style.display = "none";
+      render();
+    });
+  }
+
+  // HTML tooltip setup for heatmap (step 6)
+  function setupHeatmapTooltip(canvas) {
+    var tooltip = document.createElement("div");
+    tooltip.style.cssText = "position:absolute;pointer-events:none;display:none;" +
+      "background:rgba(20,25,36,0.92);color:#c8d8e8;padding:6px 10px;" +
+      "border-radius:4px;font:10px 'Inter',sans-serif;z-index:100;" +
+      "border:1px solid #3a4254;white-space:nowrap;";
+    canvas.parentElement.style.position = "relative";
+    canvas.parentElement.appendChild(tooltip);
+
+    canvas.addEventListener("mousemove", function (e) {
+      if (state.step !== 6) { tooltip.style.display = "none"; return; }
+      var rect = canvas.getBoundingClientRect();
+      var mx = e.clientX - rect.left;
+      var my = e.clientY - rect.top;
+      var dpr = window.devicePixelRatio || 1;
+      var W = canvas.width / dpr, H = canvas.height / dpr;
+      var mg = { top: 26, bottom: 34, left: 34, right: 20 };
+      var plotW = W - mg.left - mg.right, plotH = H - mg.top - mg.bottom;
+
+      if (mx < mg.left || mx > mg.left + plotW || my < mg.top || my > mg.top + plotH) {
+        tooltip.style.display = "none";
+        state.heatmapHover = null;
+        return;
+      }
+
+      var nT = 12, nE = 10;
+      var cW = plotW / nT, cH = plotH / nE;
+      var ti = Math.floor((mx - mg.left) / cW);
+      var ei = Math.floor((my - mg.top) / cH);
+      if (ti < 0 || ti >= nT || ei < 0 || ei >= nE) {
+        tooltip.style.display = "none";
+        state.heatmapHover = null;
+        return;
+      }
+
+      state.heatmapHover = { ti: ti, ei: ei };
+      var elecLabels = ["Fp1","Fp2","F3","Fz","F4","C3","Cz","C4","Pz","Oz"];
+      var binLabels  = ["0","100","200","300","400","500","600","700","800","900","1000","1100"];
+      tooltip.innerHTML = "<b>" + elecLabels[ei] + " \u00b7 " + binLabels[ti] + " ms</b>";
+      tooltip.style.display = "block";
+
+      var tipX = mx + 12;
+      var tipY = my - 10;
+      if (tipX + tooltip.offsetWidth > rect.width - 5) tipX = mx - tooltip.offsetWidth - 12;
+      tooltip.style.left = tipX + "px";
+      tooltip.style.top  = tipY + "px";
+
+      render();
+    });
+
+    canvas.addEventListener("mouseleave", function () {
+      tooltip.style.display = "none";
+      state.heatmapHover = null;
+      render();
+    });
+  }
+
   function roundRect(ctx, x, y, w, h, r) {
     r = Math.min(r, w / 2, h / 2);
     ctx.beginPath();
@@ -369,12 +575,13 @@
   // ------------------------------------------------------------------
   // STATE
   // ------------------------------------------------------------------
-  var state = { step: 0, nTrials: 30, threshold: 1.5, data: null };
+  var state = { step: 0, nTrials: 30, threshold: 1.5, data: null, seed: 8801,
+    heatmapHover: null };
 
   function generateData() {
     state.data = {
-      hit:  makeERP(hitTemplate,  state.nTrials, 8801),
-      miss: makeERP(missTemplate, state.nTrials, 8802),
+      hit:  makeERP(hitTemplate,  state.nTrials, state.seed),
+      miss: makeERP(missTemplate, state.nTrials, state.seed + 1),
     };
   }
 
@@ -409,9 +616,9 @@
         { font: 'bold ' + Math.max(9, Math.round(iconR * 0.85)) + 'px "Inter", sans-serif',
           align: "center", color: s.col });
       txt(ctx, s.label, cx2, topY + topH + 12,
-        { font: 'bold 9px "Inter", sans-serif', align: "center", color: s.col });
+        { font: 'bold 11px "Inter", sans-serif', align: "center", color: s.col });
       txt(ctx, s.sub, cx2, topY + topH + 24,
-        { font: '7.5px "Inter", sans-serif', align: "center", color: c.textDim });
+        { font: '9px "Inter", sans-serif', align: "center", color: c.textDim });
       if (i < stages.length - 1) {
         var ax = bx + stageW + 2, ay = iconCy;
         ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax + gap - 3, ay);
@@ -429,80 +636,64 @@
       roundRect(ctx, b.x, resultY, bW, H - resultY - 10, 6);
       ctx.fillStyle = b.col + "18"; ctx.fill(); ctx.strokeStyle = b.col; ctx.lineWidth = 1.5; ctx.stroke();
       txt(ctx, b.label, b.x + bW / 2, resultY + 14,
-        { font: 'bold 10px "Inter", sans-serif', align: "center", color: b.col });
+        { font: 'bold 12px "Inter", sans-serif', align: "center", color: b.col });
       var words = b.desc.split(" "), line = "", lineY = resultY + 30;
       words.forEach(function (w) {
-        ctx.font = '8.5px "Inter", sans-serif';
+        ctx.font = '11.5px "Inter", sans-serif';
         var test = line + (line ? " " : "") + w;
         if (ctx.measureText(test).width > bW - 12 && line) {
           txt(ctx, line, b.x + bW / 2, lineY,
-            { font: '8.5px "Inter", sans-serif', align: "center", color: c.text });
-          line = w; lineY += 14;
+            { font: '11.5px "Inter", sans-serif', align: "center", color: c.text });
+          line = w; lineY += 16;
         } else line = test;
       });
       if (line) txt(ctx, line, b.x + bW / 2, lineY,
-        { font: '8.5px "Inter", sans-serif', align: "center", color: c.text });
+        { font: '11.5px "Inter", sans-serif', align: "center", color: c.text });
     });
   }
 
   function drawStep1Left(canvas) {
     var r = setupCtx(canvas); var ctx = r.ctx, W = r.W, H = r.H, c = C();
+    var pad = 12;
     txt(ctx, "Why Does This Matter?", W / 2, 14,
-      { font: 'bold 11px "Inter", sans-serif', align: "center" });
+      { font: 'bold 13px "Inter", sans-serif', align: "center" });
     var apps = [
       { label: "Adaptive Learning",   col: "#5b8fd9",
-        lines: ["Track which study events", "form memories; re-study", "at-risk items automatically."] },
+        desc: "Track which study events form memories and re-study at-risk items automatically." },
       { label: "Clinical Assessment", col: "#a78bfa",
-        lines: ["Detect memory encoding", "deficits in early-stage", "Alzheimer\u2019s or MCI."] },
+        desc: "Detect memory encoding deficits in early-stage Alzheimer\u2019s or MCI." },
       { label: "Basic Science",       col: "#4CAF50",
-        lines: ["Confirm SME is truly", "predictive, not just a", "post-hoc description."] },
+        desc: "Confirm the SME is truly predictive, not just a post-hoc description." },
     ];
-    var rH = Math.floor((H - 28) / 3);
+    var rH = Math.floor((H - 32) / 3);
     apps.forEach(function (a, i) {
-      var ry = 22 + i * rH;
-      roundRect(ctx, 5, ry, W - 10, rH - 5, 4);
-      ctx.fillStyle = a.col + "18"; ctx.fill(); ctx.strokeStyle = a.col; ctx.lineWidth = 1; ctx.stroke();
-      txt(ctx, a.label, 11, ry + 13,
-        { font: 'bold 9.5px "Inter", sans-serif', color: a.col });
-      a.lines.forEach(function (l, li) {
-        txt(ctx, l, 11, ry + 26 + li * 13,
-          { font: '8.5px "Inter", sans-serif', color: c.text });
-      });
+      var ry = 28 + i * rH;
+      roundRect(ctx, 6, ry, W - 12, rH - 6, 5);
+      ctx.fillStyle = a.col + "18"; ctx.fill(); ctx.strokeStyle = a.col; ctx.lineWidth = 1.5; ctx.stroke();
+      txt(ctx, a.label, pad, ry + 16,
+        { font: 'bold 12px "Inter", sans-serif', color: a.col });
+      drawTextBlock(ctx, [{ text: a.desc }], pad, ry + 32, W - pad * 2 - 12, { fontSize: 11, lineHeight: 15 });
     });
   }
 
   function drawStep1Right(canvas) {
     var r = setupCtx(canvas); var ctx = r.ctx, W = r.W, H = r.H, c = C();
+    var pad = 16, mw = W - pad * 2;
     txt(ctx, "Chakravarty, Chen & Caplan (2020)", W / 2, 14,
-      { font: 'bold 10px "Inter", sans-serif', align: "center", color: c.clf });
-    var lines = [
-      { t: "62 participants studied 225" },
-      { t: "words with EEG recorded." },
-      { t: "Each study trial was labeled" },
-      { t: "Hit (remembered) or Miss." },
-      { t: "" },
-      { t: "Two classifier approaches:", bold: true },
-      { t: "1. Univariate: LPC or SW" },
-      { t: "   amplitude as one feature." },
-      { t: "2. Multivariate: 120 features" },
-      { t: "   (10 elecs \u00d7 12 time bins)." },
-      { t: "" },
-      { t: "Evaluation:", bold: true },
-      { t: "10-fold cross-validation" },
-      { t: "ROC curves + AUC" },
-      { t: "(0.5 = chance, 1.0 = perfect)" },
-      { t: "" },
-      { t: "Key result:", bold: true },
-      { t: "AUC \u2248 0.53 \u2014 small but" },
-      { t: "significant above chance." },
-    ];
-    var ly = 30;
-    lines.forEach(function (l) {
-      if (!l.t) { ly += 4; return; }
-      txt(ctx, l.t, 10, ly,
-        { font: (l.bold ? "bold " : "") + '9px "Inter", sans-serif', color: c.text });
-      ly += 13;
-    });
+      { font: 'bold 13px "Inter", sans-serif', align: "center", color: c.clf });
+    drawTextBlock(ctx, [
+      { text: "62 participants studied 225 words while EEG was recorded. Each study trial was labeled Hit (remembered) or Miss (forgotten) based on a later recognition test." },
+      { divider: true },
+      { heading: "Two Classifier Approaches" },
+      { text: "1. Univariate: LPC or SW amplitude at Pz as a single feature." },
+      { text: "2. Multivariate: 120 features (10 electrodes \u00d7 12 time bins)." },
+      { divider: true },
+      { heading: "Evaluation" },
+      { text: "10-fold cross-validation with ROC curves and AUC. AUC of 0.5 = chance, 1.0 = perfect prediction." },
+      { divider: true },
+      { heading: "Key Result" },
+      { text: "AUC \u2248 0.53 \u2014 small but statistically significant above chance across all 62 participants.", bold: true },
+    ], pad, 26, mw, { fontSize: 11, lineHeight: 15, sectionGap: 6 });
   }
 
   // ------------------------------------------------------------------
@@ -512,10 +703,11 @@
     var r = setupCtx(canvas); var ctx = r.ctx, W = r.W, H = r.H;
     if (!state.data) return;
     var c = C();
-    drawERPPlot(ctx, W, H, [
+    var wfs = [
       { data: state.data.hit,  color: c.hits,   label: "Later Remembered (Hits)",  lineWidth: 2.2 },
       { data: state.data.miss, color: c.misses, label: "Later Forgotten (Misses)", lineWidth: 2.2, dash: [6, 3] },
-    ], {
+    ];
+    drawERPPlot(ctx, W, H, wfs, {
       title: "Study-Phase ERPs: SME at Electrode Pz", electrode: "Pz", yMin: -2, yMax: 2.5,
       regions: [
         { t0: 0.40, t1: 0.70, color: c.regionLPC, label: "LPC",       labelColor: "#5b8fd9" },
@@ -530,31 +722,29 @@
       { font: 'bold 11px "Inter", sans-serif', align: "center" });
     drawHead(ctx, W, H - 22, ["Pz"]);
     txt(ctx, "Parietal midline \u2014 key SME electrode", W / 2, H - 8,
-      { font: '8.5px "Inter", sans-serif', align: "center", color: c.textDim });
+      { font: '10px "Inter", sans-serif', align: "center", color: c.textDim });
   }
 
   function drawStep2Right(canvas) {
     var r = setupCtx(canvas); var ctx = r.ctx, W = r.W, H = r.H, c = C();
     txt(ctx, "Two Classifier Features", W / 2, 14,
-      { font: 'bold 11px "Inter", sans-serif', align: "center" });
+      { font: 'bold 13px "Inter", sans-serif', align: "center" });
     var feats = [
-      { abbr: "LPC", name: "Late Positive Component", time: "400\u2013700 ms", col: "#5b8fd9",
-        lines: ["Larger for hits (remembered).", "Reflects elaborative encoding", "and familiarity strength."] },
-      { abbr: "SW",  name: "Slow Wave",               time: "700\u20131200 ms", col: "#4CAF50",
-        lines: ["Sustained positivity for hits.", "Reflects context integration", "and deeper semantic encoding."] },
+      { abbr: "LPC", name: "Late Positive Component", time: "400\u2013700 ms \u00b7 Pz", col: "#5b8fd9",
+        desc: "Larger for later-remembered items. Reflects elaborative encoding and familiarity strength." },
+      { abbr: "SW",  name: "Slow Wave", time: "700\u20131200 ms \u00b7 Pz", col: "#4CAF50",
+        desc: "Sustained positivity for hits. Reflects context integration and deeper semantic encoding." },
     ];
-    var fh = Math.floor((H - 28) / 2);
+    var pad = 12;
+    var fh = Math.floor((H - 32) / 2);
     feats.forEach(function (f, i) {
-      var fy = 22 + i * fh;
-      roundRect(ctx, 5, fy, W - 10, fh - 5, 5);
-      ctx.fillStyle = f.col + "18"; ctx.fill(); ctx.strokeStyle = f.col; ctx.lineWidth = 1; ctx.stroke();
-      txt(ctx, f.abbr, 11, fy + 14,   { font: 'bold 14px "Inter", sans-serif', color: f.col });
-      txt(ctx, f.name, 11, fy + 28,   { font: 'bold 8.5px "Inter", sans-serif', color: f.col });
-      txt(ctx, f.time + " \u00b7 Pz", 11, fy + 40, { font: '8px "Inter", sans-serif', color: c.textDim });
-      f.lines.forEach(function (l, li) {
-        txt(ctx, l, 11, fy + 53 + li * 13,
-          { font: '8.5px "Inter", sans-serif', color: c.text });
-      });
+      var fy = 28 + i * fh;
+      roundRect(ctx, 6, fy, W - 12, fh - 6, 6);
+      ctx.fillStyle = f.col + "18"; ctx.fill(); ctx.strokeStyle = f.col; ctx.lineWidth = 1.5; ctx.stroke();
+      txt(ctx, f.abbr, pad, fy + 16,  { font: 'bold 16px "Inter", sans-serif', color: f.col });
+      txt(ctx, f.name, pad, fy + 33,  { font: 'bold 11px "Inter", sans-serif', color: f.col });
+      txt(ctx, f.time, pad, fy + 48,  { font: '10px "Inter", sans-serif', color: c.textDim });
+      drawTextBlock(ctx, [{ text: f.desc }], pad, fy + 62, W - pad * 2 - 12, { fontSize: 11, lineHeight: 15 });
     });
   }
 
@@ -565,10 +755,11 @@
     var r = setupCtx(canvas); var ctx = r.ctx, W = r.W, H = r.H;
     if (!state.data) return;
     var c = C();
-    drawERPPlot(ctx, W, H, [
+    var wfs = [
       { data: state.data.hit,  color: c.hits,   label: "Hits ("   + state.nTrials + " trials avg)", lineWidth: 2.2 },
       { data: state.data.miss, color: c.misses, label: "Misses (" + state.nTrials + " trials avg)", lineWidth: 2.2, dash: [6, 3] },
-    ], {
+    ];
+    drawERPPlot(ctx, W, H, wfs, {
       title: "Effect of Averaging on Signal Clarity", electrode: "Pz", yMin: -2, yMax: 2.5,
       regions: [
         { t0: 0.40, t1: 0.70, color: c.regionLPC, label: "LPC", labelColor: "#5b8fd9" },
@@ -632,36 +823,19 @@
 
   function drawStep3Right(canvas) {
     var r = setupCtx(canvas); var ctx = r.ctx, W = r.W, H = r.H, c = C();
+    var pad = 16, mw = W - pad * 2;
     txt(ctx, "The Challenge", W / 2, 14,
-      { font: 'bold 11px "Inter", sans-serif', align: "center" });
-    var lines = [
-      { t: "Trial averages (ERPs) reveal" },
-      { t: "the SME. But classifiers must" },
-      { t: "work on individual trials \u2014" },
-      { t: "no averaging allowed." },
-      { t: "" },
-      { t: "Problem:", bold: true },
-      { t: "Single-trial EEG amplitudes" },
-      { t: "for hits and misses overlap" },
-      { t: "massively (\u03c3 \u2248 5\u20136 \u03bcV," },
-      { t: "\u0394\u03bc \u2248 1 \u03bcV). See histogram." },
-      { t: "" },
-      { t: "Use the slider below:", bold: true },
-      { t: "Drag to average more trials." },
-      { t: "N=1: indistinguishable" },
-      { t: "N=30: SME starts to emerge" },
-      { t: "N=200: clear LPC & SW" },
-      { t: "" },
-      { t: "Classifiers face the N=1" },
-      { t: "challenge on every trial!" },
-    ];
-    var ly = 30;
-    lines.forEach(function (l) {
-      if (!l.t) { ly += 4; return; }
-      txt(ctx, l.t, 10, ly,
-        { font: (l.bold ? "bold " : "") + '9px "Inter", sans-serif', color: c.text });
-      ly += 13;
-    });
+      { font: 'bold 13px "Inter", sans-serif', align: "center" });
+    drawTextBlock(ctx, [
+      { text: "Trial averages (ERPs) reveal the SME clearly. But classifiers must work on individual trials \u2014 no averaging allowed." },
+      { divider: true },
+      { heading: "Problem" },
+      { text: "Single-trial EEG amplitudes for hits and misses overlap massively (\u03c3 \u2248 5\u20136 \u03bcV, \u0394\u03bc \u2248 1 \u03bcV). See the histogram on the left." },
+      { divider: true },
+      { heading: "Try the Slider Below" },
+      { text: "Drag to average more trials. N=1: waveforms are indistinguishable. N=30: the SME starts to emerge. N=200: clear LPC & Slow Wave separation." },
+      { text: "Classifiers face the N=1 challenge on every single trial!", bold: true },
+    ], pad, 32, mw);
   }
 
   // ------------------------------------------------------------------
@@ -765,41 +939,26 @@
 
   function drawStep4Right(canvas) {
     var r = setupCtx(canvas); var ctx = r.ctx, W = r.W, H = r.H, c = C();
+    var pad = 16, mw = W - pad * 2;
     txt(ctx, "How the Classifier Works", W / 2, 14,
-      { font: 'bold 11px "Inter", sans-serif', align: "center" });
+      { font: 'bold 13px "Inter", sans-serif', align: "center" });
     var thr = state.threshold;
     var tpr = 1 - normCDF((thr - MU_HIT) / SIGMA_CLF);
     var fpr = 1 - normCDF((thr - MU_MISS) / SIGMA_CLF);
-    var lines = [
-      { t: "Rule: predict \u201cHit\u201d if" },
-      { t: "LPC amplitude \u2265 \u03b8," },
-      { t: "else predict \u201cMiss.\u201d" },
-      { t: "" },
-      { t: "At \u03b8 = " + thr.toFixed(1) + " \u03bcV:", bold: true },
-      { t: "Hit rate (TPR): " + (tpr * 100).toFixed(1) + "%", col: c.hits },
-      { t: "False alarm (FPR): " + (fpr * 100).toFixed(1) + "%", col: c.misses },
-      { t: "" },
-      { t: "Moving threshold:", bold: true },
-      { t: "\u2191 \u03b8: fewer false alarms," },
-      { t: "    miss more true hits" },
-      { t: "\u2193 \u03b8: catch more true hits," },
-      { t: "    more false alarms" },
-      { t: "" },
-      { t: "ROC curve (left):", bold: true },
-      { t: "Each point = one threshold." },
-      { t: "Gold dot = current \u03b8." },
-      { t: "AUC = area under curve" },
-      { t: "(0.5 = chance, 1.0 = perfect)" },
-      { t: "" },
-      { t: "Use the slider to explore!" },
-    ];
-    var ly = 30;
-    lines.forEach(function (l) {
-      if (!l.t) { ly += 4; return; }
-      txt(ctx, l.t, 10, ly,
-        { font: (l.bold ? "bold " : "") + '9px "Inter", sans-serif', color: l.col || c.text });
-      ly += 13;
-    });
+    drawTextBlock(ctx, [
+      { text: "Rule: predict \u201cHit\u201d if LPC amplitude \u2265 \u03b8, otherwise predict \u201cMiss.\u201d" },
+      { divider: true },
+      { heading: "At \u03b8 = " + thr.toFixed(1) + " \u03bcV" },
+      { text: "Hit rate (TPR): " + (tpr * 100).toFixed(1) + "%", color: c.hits, bold: true },
+      { text: "False alarm (FPR): " + (fpr * 100).toFixed(1) + "%", color: c.misses, bold: true },
+      { divider: true },
+      { heading: "Moving the Threshold" },
+      { text: "\u2191 \u03b8: fewer false alarms, but miss more true hits. \u2193 \u03b8: catch more true hits, but more false alarms." },
+      { divider: true },
+      { heading: "ROC Curve (left)" },
+      { text: "Each point represents one threshold value. The gold dot shows the current \u03b8. AUC = area under the curve (0.5 = chance, 1.0 = perfect)." },
+      { text: "Use the slider below to explore the trade-off!", bold: true },
+    ], pad, 32, mw);
   }
 
   // ------------------------------------------------------------------
@@ -907,40 +1066,20 @@
 
   function drawStep5Right(canvas) {
     var r = setupCtx(canvas); var ctx = r.ctx, W = r.W, H = r.H, c = C();
+    var pad = 16, mw = W - pad * 2;
     txt(ctx, "Interpreting AUC", W / 2, 14,
-      { font: 'bold 11px "Inter", sans-serif', align: "center" });
-    var lines = [
-      { t: "AUC = Area Under ROC Curve" },
-      { t: "Summarizes classifier quality:" },
-      { t: "" },
-      { t: "0.5 = chance (diagonal)", col: c.textDim },
-      { t: "1.0 = perfect prediction", col: c.auc2 },
-      { t: "" },
-      { t: "Paper results:", bold: true },
-      { t: "All methods avg AUC \u2248 0.53." },
-      { t: "Significant, but small." },
-      { t: "" },
-      { t: "Why so small?", bold: true },
-      { t: "Memory is multifactorial:" },
-      { t: "\u2022 Inter-item interference" },
-      { t: "\u2022 Serial position effects" },
-      { t: "\u2022 Retrieval context match" },
-      { t: "\u2022 Attention & strategy" },
-      { t: "" },
-      { t: "EEG at study captures only" },
-      { t: "some of these factors." },
-      { t: "" },
-      { t: "Note: demo ROC curves show", col: c.textDim },
-      { t: "a single-participant example.", col: c.textDim },
-      { t: "Paper reports group averages.", col: c.textDim },
-    ];
-    var ly = 30;
-    lines.forEach(function (l) {
-      if (!l.t) { ly += 4; return; }
-      txt(ctx, l.t, 10, ly,
-        { font: (l.bold ? "bold " : "") + '9px "Inter", sans-serif', color: l.col || c.text });
-      ly += 13;
-    });
+      { font: 'bold 13px "Inter", sans-serif', align: "center" });
+    drawTextBlock(ctx, [
+      { text: "AUC = Area Under the ROC Curve. It summarizes overall classifier quality: 0.5 = chance (diagonal), 1.0 = perfect prediction." },
+      { divider: true },
+      { heading: "Paper Results" },
+      { text: "All methods averaged AUC \u2248 0.53 \u2014 statistically significant but small." },
+      { divider: true },
+      { heading: "Why So Small?" },
+      { text: "Memory is multifactorial: inter-item interference, serial position effects, retrieval context match, attention, and strategy all play a role. EEG at study captures only some of these factors." },
+      { divider: true },
+      { text: "Note: the demo ROC curves show a single-participant example. The paper reports group averages across 62 participants.", color: c.textDim },
+    ], pad, 32, mw);
   }
 
   // ------------------------------------------------------------------
@@ -1001,18 +1140,28 @@
 
     // Color scale legend
     var scX = W - mg.right + 3, scY = mg.top, scH = plotH, scW = 8;
-    for (var si = 0; si <= scH; si++) {
-      var sv = si / scH;
+    for (var si2 = 0; si2 <= scH; si2++) {
+      var sv = si2 / scH;
       var al = 0.12 + Math.abs(sv - 0.5) * 2 * 0.75;
       ctx.fillStyle = sv < 0.5
         ? "rgba(91,143,217," + al + ")"
         : "rgba(255,107,107," + al + ")";
-      ctx.fillRect(scX, scY + si, scW, 1);
+      ctx.fillRect(scX, scY + si2, scW, 1);
     }
     txt(ctx, "+", scX + scW / 2, scY - 5,
       { font: '8px "Inter", sans-serif', align: "center", color: "#5b8fd9" });
     txt(ctx, "\u2212", scX + scW / 2, scY + scH + 5,
       { font: '8px "Inter", sans-serif', align: "center", color: "#ff6b6b" });
+
+    // Hover highlight for heatmap cells
+    if (state.heatmapHover && state.step === 6) {
+      var hti = state.heatmapHover.ti, hei = state.heatmapHover.ei;
+      if (hti >= 0 && hti < nT && hei >= 0 && hei < nE) {
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(mg.left + hti * cW, mg.top + hei * cH, cW - 1, cH - 1);
+      }
+    }
   }
 
   function drawStep6Left(canvas) {
@@ -1021,45 +1170,31 @@
       { font: 'bold 11px "Inter", sans-serif', align: "center" });
     drawHead(ctx, W, H - 32, ["Pz", "Fz", "Cz"]);
     txt(ctx, "Each \u00d7 12 time bins (0\u20131200 ms)", W / 2, H - 18,
-      { font: '8px "Inter", sans-serif', align: "center", color: c.textDim });
+      { font: '10px "Inter", sans-serif', align: "center", color: c.textDim });
     txt(ctx, "= 120 features per trial", W / 2, H - 6,
-      { font: '8px "Inter", sans-serif', align: "center", color: c.textDim });
+      { font: '10px "Inter", sans-serif', align: "center", color: c.textDim });
   }
 
   function drawStep6Right(canvas) {
     var r = setupCtx(canvas); var ctx = r.ctx, W = r.W, H = r.H, c = C();
+    var pad = 16, mw = W - pad * 2;
     txt(ctx, "Multivariate Classification", W / 2, 14,
-      { font: 'bold 11px "Inter", sans-serif', align: "center" });
-    var lines = [
-      { t: "LDA combines 120 features" },
-      { t: "into one weighted score:" },
-      { t: "score = \u03a3 w\u1d62 \u00d7 feature\u1d62" },
-      { t: "" },
-      { t: "Heatmap (left):", bold: true },
-      { t: "Blue = positive (hit-predicting)" },
-      { t: "Red = negative (miss-predicting)" },
-      { t: "Strongest: Pz at 400\u2013700 ms" },
-      { t: "(consistent with the LPC)." },
-      { t: "" },
-      { t: "Cross-validation:", bold: true },
-      { t: "Trials split into 10 folds." },
-      { t: "Train on 9, test on 1." },
-      { t: "Repeat 10\u00d7 \u2014 prevents" },
-      { t: "overfitting to training data." },
-      { t: "" },
-      { t: "Paper results:", bold: true },
-      { t: "LDA avg AUC = 0.53", col: "#a78bfa" },
-      { t: "SVM avg AUC = 0.53", col: c.auc2 },
-      { t: "Both sign. above chance" },
-      { t: "across 62 participants." },
-    ];
-    var ly = 30;
-    lines.forEach(function (l) {
-      if (!l.t) { ly += 4; return; }
-      txt(ctx, l.t, 10, ly,
-        { font: (l.bold ? "bold " : "") + '9px "Inter", sans-serif', color: l.col || c.text });
-      ly += 13;
-    });
+      { font: 'bold 13px "Inter", sans-serif', align: "center" });
+    drawTextBlock(ctx, [
+      { heading: "LDA (Linear Discriminant Analysis)" },
+      { text: "Best linear combo of features to separate hit vs. miss. Weighted score: \u03a3 w\u1d62 \u00d7 feature\u1d62" },
+      { divider: true },
+      { heading: "SVM (Support Vector Machine)" },
+      { text: "Optimal boundary between hit/miss patterns. Captures non-linear relationships between features." },
+      { divider: true },
+      { heading: "Heatmap (left)" },
+      { text: "LDA feature weights. Blue = hit-predicting, Red = miss-predicting. Peak at Pz 400\u2013700 ms." },
+      { divider: true },
+      { heading: "Paper Results" },
+      { text: "LDA avg AUC = 0.53", color: "#a78bfa", bold: true },
+      { text: "SVM avg AUC = 0.53", color: c.auc2, bold: true },
+      { text: "Both significantly above chance." },
+    ], pad, 22, mw, { fontSize: 11, lineHeight: 14, sectionGap: 6 });
   }
 
   // ------------------------------------------------------------------
@@ -1067,12 +1202,12 @@
   // ------------------------------------------------------------------
   var STEP_INFO = [
     "",
-    "<strong>Why Predict Memory?</strong> The subsequent memory effect (SME) identifies brain activity <em>associated</em> with later memory success. But does this make it truly <em>predictive</em>? Chakravarty, Chen &amp; Caplan (2020) applied machine learning classifiers to study-phase EEG to ask: can we predict, trial by trial, which words a participant will remember? This has major implications: adaptive learning systems that detect at-risk memories for re-study, clinical tools for diagnosing encoding deficits in Alzheimer&rsquo;s and MCI, and basic science tests of whether the SME reflects a genuine causal mechanism.",
-    "<strong>The SME Signal.</strong> When study-phase ERPs are averaged over many trials and sorted by memory outcome, two features emerge at electrode Pz: the <em>Late Positive Component</em> (LPC, 400&ndash;700 ms) &mdash; larger for later-remembered items &mdash; and the <em>Slow Wave</em> (SW, 700&ndash;1200 ms) &mdash; a sustained positivity also larger for hits. These two time-window amplitudes serve as the univariate features that a simple threshold classifier uses to predict memory trial by trial.",
-    "<strong>The Challenge: Single-Trial Noise.</strong> Trial-averaged ERPs can reveal clear hits&ndash;misses differences, but classifiers must work on individual trials. Single-trial EEG is dominated by neural noise unrelated to the target process. The LPC amplitude distributions for hits and misses overlap massively (&sigma; &approx; 5&ndash;6 &mu;V, &Delta;&mu; &approx; 1 &mu;V &mdash; see the histogram). Use the slider to explore how averaging improves signal-to-noise: with 1 trial the waveforms are indistinguishable; with 200 the SME is clear. Classifiers face the single-trial challenge.",
-    "<strong>How Classification Works.</strong> A threshold classifier predicts &ldquo;Hit&rdquo; if the LPC amplitude exceeds threshold &theta;, otherwise &ldquo;Miss.&rdquo; Because hit and miss amplitude distributions overlap, varying &theta; creates a trade-off between True Positive Rate (TPR, fraction of hits correctly predicted) and False Positive Rate (FPR, fraction of misses incorrectly predicted). The ROC curve traces all (FPR, TPR) pairs as &theta; sweeps across all values. Use the slider to explore this trade-off and watch the gold dot move along the ROC curve.",
-    "<strong>ROC Curves &amp; AUC.</strong> The Area Under the Curve (AUC) summarizes overall classifier quality: 0.5 = chance, 1.0 = perfect. Chakravarty et al. (2020) found mean AUC &approx; 0.53 for both LPC and SW &mdash; small but statistically significant across 62 participants. The bar chart shows actual paper values. The ROC curves in the main panel illustrate the concept of univariate vs. multivariate improvement for an individual participant example; group-level effects are modest but consistent.",
-    "<strong>Multivariate Classification.</strong> Instead of one feature, LDA and SVM classifiers combine 120 features: mean voltage at 10 electrodes across 12 time bins (0&ndash;1200 ms). The heatmap shows simulated LDA feature weights calibrated to the paper&rsquo;s topographic findings: the largest positive weights (blue) appear at Pz in the LPC window (400&ndash;700 ms), consistent with the univariate SME. Cross-validation ensures generalizability by testing predictions on held-out data. LDA and SVM both achieved mean AUC &approx; 0.53 &mdash; modest but significant &mdash; with multivariate features providing a broader picture of memory-relevant neural activity.",
+    "<strong>Step 1: Why Predict Memory?</strong> The subsequent memory effect (SME) identifies brain activity <em>associated</em> with later memory success. But does this make it truly <em>predictive</em>? Chakravarty, Chen &amp; Caplan (2020) applied machine learning classifiers to study-phase EEG to ask: can we predict, trial by trial, which words a participant will remember? This has major implications: adaptive learning systems that detect at-risk memories for re-study, clinical tools for diagnosing encoding deficits in Alzheimer&rsquo;s and MCI, and basic science tests of whether the SME reflects a genuine causal mechanism.",
+    "<strong>Step 2: The SME Signal.</strong> When study-phase ERPs are averaged over many trials and sorted by memory outcome, two features emerge at electrode Pz: the <em>Late Positive Component</em> (LPC, 400&ndash;700 ms) &mdash; larger for later-remembered items &mdash; and the <em>Slow Wave</em> (SW, 700&ndash;1200 ms) &mdash; a sustained positivity also larger for hits. These two time-window amplitudes serve as the univariate features that a simple threshold classifier uses to predict memory trial by trial.",
+    "<strong>Step 3: The Challenge: Single-Trial Noise.</strong> Trial-averaged ERPs can reveal clear hits&ndash;misses differences, but classifiers must work on individual trials. Single-trial EEG is dominated by neural noise unrelated to the target process. The LPC amplitude distributions for hits and misses overlap massively (&sigma; &approx; 5&ndash;6 &mu;V, &Delta;&mu; &approx; 1 &mu;V &mdash; see the histogram). Use the slider to explore how averaging improves signal-to-noise: with 1 trial the waveforms are indistinguishable; with 200 the SME is clear. Classifiers face the single-trial challenge.",
+    "<strong>Step 4: How Classification Works.</strong> A threshold classifier predicts &ldquo;Hit&rdquo; if the LPC amplitude exceeds threshold &theta;, otherwise &ldquo;Miss.&rdquo; Because hit and miss amplitude distributions overlap, varying &theta; creates a trade-off between True Positive Rate (TPR, fraction of hits correctly predicted) and False Positive Rate (FPR, fraction of misses incorrectly predicted). The ROC curve traces all (FPR, TPR) pairs as &theta; sweeps across all values. Use the slider to explore this trade-off and watch the gold dot move along the ROC curve.",
+    "<strong>Step 5: ROC Curves &amp; AUC.</strong> The Area Under the Curve (AUC) summarizes overall classifier quality: 0.5 = chance, 1.0 = perfect. Chakravarty et al. (2020) found mean AUC &approx; 0.53 for both LPC and SW &mdash; small but statistically significant across 62 participants. The bar chart shows actual paper values. The ROC curves in the main panel illustrate the concept of univariate vs. multivariate improvement for an individual participant example; group-level effects are modest but consistent.",
+    "<strong>Step 6: Multivariate Classification.</strong> Instead of one feature, LDA and SVM classifiers combine 120 features: mean voltage at 10 electrodes across 12 time bins (0&ndash;1200 ms). The heatmap shows simulated LDA feature weights calibrated to the paper&rsquo;s topographic findings: the largest positive weights (blue) appear at Pz in the LPC window (400&ndash;700 ms), consistent with the univariate SME. Cross-validation ensures generalizability by testing predictions on held-out data. LDA and SVM both achieved mean AUC &approx; 0.53 &mdash; modest but significant &mdash; with multivariate features providing a broader picture of memory-relevant neural activity.",
   ];
 
   // ------------------------------------------------------------------
@@ -1102,7 +1237,7 @@
     var left = getEl("clf-canvas-left"), right = getEl("clf-canvas-right");
     if (left && right) {
       var avail = Math.max(0, cW - 10 - 14);
-      var half  = Math.floor(avail / 2), dH = 270;
+      var half  = Math.floor(avail / 2), dH = 320;
       [left, right].forEach(function (cv) {
         cv.style.width  = half + "px";
         cv.style.height = dH + "px";
@@ -1144,18 +1279,26 @@
     if (container) container.classList.toggle("clf-active", step >= 1);
     if (ss)   ss.style.display   = step === 0 ? "flex" : "none";
     if (viz)  viz.style.display  = step >= 1 ? "flex"  : "none";
-    if (ctrl) ctrl.style.display = (step === 3 || step === 4) ? "flex" : "none";
+    if (ctrl) ctrl.style.display = step >= 1 ? "flex" : "none";
 
     var triCtrl = getEl("clf-trials-control"),
-        thrCtrl = getEl("clf-thresh-control");
+        thrCtrl = getEl("clf-thresh-control"),
+        regenCtrl = getEl("clf-regen-control");
     if (triCtrl) triCtrl.style.display = step === 3 ? "flex" : "none";
     if (thrCtrl) thrCtrl.style.display = step === 4 ? "flex" : "none";
+    if (regenCtrl) regenCtrl.style.display = (step === 2 || step === 3) ? "flex" : "none";
 
     var infoEl = getEl("clf-info-text");
     if (infoEl) {
       infoEl.innerHTML     = STEP_INFO[step] || "";
       infoEl.style.display = step >= 1 ? "block" : "none";
     }
+    // Set interactive cursor on canvases
+    var mainCv = getEl("clf-canvas-main");
+    if (mainCv) mainCv.style.cursor = (step === 2 || step === 3 || step === 6) ? "crosshair" : "default";
+    var leftCv2 = getEl("clf-canvas-left");
+    if (leftCv2) leftCv2.style.cursor = step === 4 ? "pointer" : "default";
+
     resizeCanvases();
     render();
   }
@@ -1204,6 +1347,54 @@
       });
       if (thrVal) thrVal.textContent = state.threshold.toFixed(1);
       setRangeFill(thrSlider);
+    }
+
+    // Regenerate data button
+    var regenBtn = getEl("clf-regen-btn");
+    if (regenBtn) {
+      regenBtn.addEventListener("click", function () {
+        state.seed = Math.floor(Math.random() * 100000);
+        state.data = null;
+        generateData();
+        render();
+      });
+    }
+
+    // Setup tooltips for interactive canvases
+    setupERPTooltip(getEl("clf-canvas-main"));
+    setupHeatmapTooltip(getEl("clf-canvas-main"));
+
+    // Click on ROC to set threshold (step 4)
+    var leftCv = getEl("clf-canvas-left");
+    if (leftCv) {
+      leftCv.addEventListener("click", function (e) {
+        if (state.step !== 4) return;
+        var rect = leftCv.getBoundingClientRect();
+        var mx = e.clientX - rect.left;
+        var dpr = window.devicePixelRatio || 1;
+        var W = leftCv.width / dpr;
+        var mg = { left: 36, right: 8 };
+        var plotW = W - mg.left - mg.right;
+        var fpr = (mx - mg.left) / plotW;
+        if (fpr < 0 || fpr > 1) return;
+        // Convert FPR to threshold
+        var invNorm = function (p) {
+          // Approximation of inverse normal CDF
+          if (p <= 0) return -10; if (p >= 1) return 10;
+          var t = Math.sqrt(-2 * Math.log(p < 0.5 ? p : 1 - p));
+          var c0 = 2.515517, c1 = 0.802853, c2 = 0.010328;
+          var d1 = 1.432788, d2 = 0.189269, d3 = 0.001308;
+          var s = t - (c0 + t * (c1 + t * c2)) / (1 + t * (d1 + t * (d2 + t * d3)));
+          return p < 0.5 ? -s : s;
+        };
+        var thr = MU_MISS + SIGMA_CLF * invNorm(1 - fpr);
+        thr = Math.max(-10, Math.min(15, thr));
+        state.threshold = Math.round(thr * 2) / 2; // snap to 0.5
+        var thrSlider2 = getEl("clf-thresh"), thrVal2 = getEl("clf-thresh-val");
+        if (thrSlider2) { thrSlider2.value = state.threshold; setRangeFill(thrSlider2); }
+        if (thrVal2) thrVal2.textContent = state.threshold.toFixed(1);
+        render();
+      });
     }
 
     window.addEventListener("resize", function () { resizeCanvases(); render(); });
