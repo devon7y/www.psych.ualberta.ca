@@ -962,7 +962,7 @@
       flex-direction: column;
   }
   #clf-container.clf-active {
-      height: 840px;
+      height: 890px;
   }
   #clf-start-screen {
       flex: 1;
@@ -981,7 +981,8 @@
   }
   .clf-viz-spacer {
       flex: 1;
-      min-height: 20px;
+      min-height: 14px;
+      max-height: 30px;
   }
 
   /* Light theme overrides for Classifier demo */
@@ -1008,6 +1009,10 @@
   }
   [data-theme="light"] .clf-controls {
       border-top: 1px solid #e0e6ed;
+  }
+  [data-theme="light"] #clf-regen-btn {
+      border-color: #4a90e2;
+      color: #2d3748;
   }
   [data-theme="light"] .clf-control-group label {
       color: #4a5568;
@@ -1285,13 +1290,13 @@
 				</div>
 			</div>
 			<div class="post">
-				<h2 class="title"><a href="#">ERP Effects in Memory: SME, RSE, and ONE</a></h2>
+				<h2 class="title"><a href="#">ERP Effects in Item Memory: SME, RSE, and ONE</a></h2>
 				<div class="entry">
-					<p>Electroencephalography (EEG) can be used to study memory by examining <em>Event-Related Potentials</em> (ERPs) &mdash; voltage changes in the brain time-locked to a stimulus. In recognition memory research, three effects have proven especially informative: the <strong>Subsequent Memory Effect</strong> (brain activity at study predicts later remembering), the <strong>Old/New Effect</strong> (brain activity at test distinguishes correctly recognized old items from correctly rejected new ones), and the <strong>Retrieval Success Effect</strong> (brain activity at test distinguishes successfully from unsuccessfully retrieved old items). Explore the interactive demo below to see how these effects look and what cognitive processes they reflect.</p>
+					<p><em>Item memory</em> refers to the ability to recognize individual items &mdash; judging whether a word, face, or object has been encountered before, independent of when or where it was studied. Electroencephalography (EEG) can be used to study item memory by examining <em>Event-Related Potentials</em> (ERPs) &mdash; voltage changes in the brain time-locked to a stimulus. In recognition memory research, three effects have proven especially informative: the <strong>Subsequent Memory Effect</strong> (brain activity at study predicts later remembering), the <strong>Old/New Effect</strong> (brain activity at test distinguishes correctly recognized old items from correctly rejected new ones), and the <strong>Retrieval Success Effect</strong> (brain activity at test distinguishes successfully from unsuccessfully retrieved old items). Explore the interactive demo below to see how these effects look and what cognitive processes they reflect.</p>
 
 					<div class="game-embed" id="erp-container">
 						<div id="erp-start-screen" style="text-align: center; padding: 20px;">
-							<h1 style="font-size: 1.8rem; margin-bottom: 10px;">ERP Effects in Memory</h1>
+							<h1 style="font-size: 1.8rem; margin-bottom: 10px;">ERP Effects in Item Memory</h1>
 							<p style="margin-bottom: 5px;">An interactive walkthrough of the Subsequent Memory Effect, Old/New Effect, and Retrieval Success Effect.</p>
 							<p style="font-size: 0.85em; margin-bottom: 15px; opacity: 0.7;">Based on Chen et al. (2014) and Chen &amp; Caplan (2017)</p>
 							<button id="erp-start-btn">Start Demo</button>
@@ -1323,6 +1328,10 @@
 							<div id="erp-ntrials-control" class="erp-control-group" style="display: none;">
 								<label>Trials Averaged: <span id="erp-ntrials-val">30</span></label>
 								<input type="range" id="erp-ntrials" min="1" max="200" step="1" value="30" />
+							</div>
+							<div id="erp-magnitude-control" class="erp-control-group" style="display: none;">
+								<label>Effect Magnitude: <span id="erp-magnitude-val">1.0</span>&times;</label>
+								<input type="range" id="erp-magnitude" min="0" max="2" step="0.1" value="1.0" />
 							</div>
 						</div>
 					</div>
@@ -1374,6 +1383,10 @@
 							<div id="clf-thresh-control" class="clf-control-group" style="display: none;">
 								<label>Threshold &theta;: <span id="clf-thresh-val">1.5</span> &mu;V</label>
 								<input type="range" id="clf-thresh" min="-8" max="10" step="0.5" value="1.5" />
+							</div>
+							<!-- Regenerate data button -->
+							<div id="clf-regen-control" class="clf-control-group">
+								<button id="clf-regen-btn" style="padding: 6px 16px; border-radius: 4px; border: 1px solid #5b8fd9; background: transparent; color: #c8d8e8; cursor: pointer; font-size: 0.82rem;">&#x1f504; New Random Data</button>
 							</div>
 						</div>
 					</div>
