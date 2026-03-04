@@ -1,0 +1,727 @@
+/* Memory Trace - Game-specific styles */
+
+/* ===== Game Container ===== */
+#mt-game {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 400px;
+}
+
+/* ===== Phase containers ===== */
+.mt-phase {
+  display: none;
+  width: 100%;
+}
+
+.mt-phase.active {
+  display: block;
+}
+
+/* ===== Start Screen ===== */
+#mt-start {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+#mt-start h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2.2rem;
+  color: var(--primary-color);
+  margin-bottom: 12px;
+}
+
+#mt-start h2:after {
+  display: none;
+}
+
+.mt-subtitle {
+  color: var(--text-light);
+  font-size: 1.05rem;
+  margin-bottom: 28px;
+  line-height: 1.7;
+}
+
+.mt-how-to {
+  text-align: left;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 0 auto 28px;
+  max-width: 480px;
+}
+
+.mt-how-to h3 {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  color: var(--primary-color);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.mt-how-to ol {
+  list-style: none;
+  counter-reset: step;
+  padding: 0;
+  margin: 0;
+}
+
+.mt-how-to ol li {
+  counter-increment: step;
+  padding: 6px 0 6px 32px;
+  position: relative;
+  color: var(--text-light);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.mt-how-to ol li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mt-strength-legend {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.mt-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+.mt-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.mt-legend-dot--strong {
+  background: #5b8fd9;
+  box-shadow: 0 0 8px rgba(91, 143, 217, 0.6);
+}
+
+.mt-legend-dot--weak {
+  background: #00d68f;
+  box-shadow: 0 0 6px rgba(0, 214, 143, 0.4);
+}
+
+/* ===== HUD Bar ===== */
+.mt-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+}
+
+.mt-hud-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.mt-hud-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-light);
+  opacity: 0.7;
+}
+
+.mt-hud-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.mt-hud-value--green {
+  color: #00d68f;
+}
+
+.mt-hud-value--amber {
+  color: #f5a623;
+}
+
+/* ===== Grid ===== */
+.mt-grid-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.mt-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.mt-grid--4 {
+  grid-template-columns: repeat(4, 1fr);
+  width: 320px;
+}
+
+.mt-grid--5 {
+  grid-template-columns: repeat(5, 1fr);
+  width: 370px;
+}
+
+.mt-grid--6 {
+  grid-template-columns: repeat(6, 1fr);
+  width: 420px;
+}
+
+.mt-cell {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: var(--sidebar-bg);
+  border: 2px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: transparent;
+  cursor: default;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.1s ease, box-shadow 0.3s ease;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Study phase: cell lighting up */
+.mt-cell.study-active {
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.mt-cell.study-strong {
+  border-color: #5b8fd9;
+  background: rgba(91, 143, 217, 0.15);
+  box-shadow: 0 0 20px rgba(91, 143, 217, 0.5), 0 0 40px rgba(91, 143, 217, 0.2), inset 0 0 15px rgba(91, 143, 217, 0.15);
+  animation: pulse-strong 0.8s ease-in-out infinite alternate;
+}
+
+.mt-cell.study-weak {
+  border-color: #00d68f;
+  background: rgba(0, 214, 143, 0.08);
+  box-shadow: 0 0 10px rgba(0, 214, 143, 0.3), inset 0 0 8px rgba(0, 214, 143, 0.08);
+  animation: pulse-weak 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-strong {
+  0% { box-shadow: 0 0 20px rgba(91, 143, 217, 0.5), 0 0 40px rgba(91, 143, 217, 0.2); }
+  100% { box-shadow: 0 0 28px rgba(91, 143, 217, 0.7), 0 0 56px rgba(91, 143, 217, 0.3); }
+}
+
+@keyframes pulse-weak {
+  0% { box-shadow: 0 0 10px rgba(0, 214, 143, 0.3); }
+  100% { box-shadow: 0 0 16px rgba(0, 214, 143, 0.45); }
+}
+
+/* Recall phase: clickable cells */
+.mt-cell.recall-ready {
+  cursor: pointer;
+  border-color: var(--border-light);
+  color: transparent;
+}
+
+.mt-cell.recall-ready:hover {
+  border-color: var(--accent-color);
+  background: rgba(91, 143, 217, 0.08);
+  transform: scale(1.04);
+}
+
+.mt-cell.recall-ready:active {
+  transform: scale(0.96);
+}
+
+/* Recall feedback */
+.mt-cell.recall-correct {
+  border-color: #00d68f;
+  background: rgba(0, 214, 143, 0.2);
+  box-shadow: 0 0 16px rgba(0, 214, 143, 0.4);
+  color: #fff;
+  cursor: default;
+  animation: flash-correct 0.4s ease;
+}
+
+.mt-cell.recall-wrong {
+  border-color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.2);
+  box-shadow: 0 0 16px rgba(255, 107, 107, 0.4);
+  cursor: default;
+  animation: flash-wrong 0.4s ease;
+}
+
+.mt-cell.recall-missed {
+  border-color: #f5a623;
+  background: rgba(245, 166, 35, 0.1);
+  color: var(--text-light);
+  opacity: 0.6;
+  cursor: default;
+}
+
+@keyframes flash-correct {
+  0% { transform: scale(1.1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+@keyframes flash-wrong {
+  0%, 20%, 40% { transform: translateX(-3px); }
+  10%, 30% { transform: translateX(3px); }
+  50%, 100% { transform: translateX(0); }
+}
+
+/* Sequence number badge */
+.mt-cell-badge {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.mt-cell.recall-correct .mt-cell-badge,
+.mt-cell.recall-missed .mt-cell-badge {
+  opacity: 1;
+}
+
+/* ===== Study phase instruction ===== */
+.mt-study-instruction {
+  text-align: center;
+  color: var(--text-light);
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+  min-height: 28px;
+}
+
+.mt-study-counter {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+/* ===== Distractor Phase ===== */
+#mt-distractor {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.mt-distractor-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.4rem;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+}
+
+.mt-distractor-desc {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  margin-bottom: 24px;
+}
+
+.mt-math-problem {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 16px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.mt-math-input-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+#mt-math-input {
+  width: 120px;
+  padding: 12px 16px;
+  font-size: 1.3rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  text-align: center;
+  background: var(--sidebar-bg);
+  border: 2px solid var(--border-light);
+  border-radius: 10px;
+  color: var(--text-dark);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+#mt-math-input:focus {
+  border-color: var(--accent-color);
+}
+
+#mt-math-input.correct {
+  border-color: #00d68f;
+  background: rgba(0, 214, 143, 0.08);
+}
+
+#mt-math-input.wrong {
+  border-color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.08);
+}
+
+.mt-distractor-timer {
+  width: 100%;
+  max-width: 300px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 0 auto 12px;
+}
+
+[data-theme="light"] .mt-distractor-timer {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.mt-distractor-timer-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--neural-gradient);
+  transition: width 0.2s linear;
+}
+
+.mt-distractor-stats {
+  color: var(--text-light);
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* ===== Recall Phase ===== */
+.mt-recall-instruction {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.mt-recall-instruction p {
+  text-align: center;
+  color: var(--text-light);
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.mt-recall-progress {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+/* ===== Round Results ===== */
+#mt-results {
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.mt-results-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.6rem;
+  color: var(--primary-color);
+  margin-bottom: 4px;
+}
+
+.mt-results-subtitle {
+  color: var(--text-light);
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+}
+
+.mt-score-display {
+  font-size: 2.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #5b8fd9 0%, #00d68f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 8px 0 20px;
+}
+
+.mt-results-breakdown {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  max-width: 360px;
+  margin: 0 auto 24px;
+}
+
+.mt-result-stat {
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 14px 12px;
+}
+
+.mt-result-stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.mt-result-stat-value--green { color: #00d68f; }
+.mt-result-stat-value--red { color: #ff6b6b; }
+.mt-result-stat-value--blue { color: #5b8fd9; }
+
+.mt-result-stat-label {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+/* Serial position detail */
+.mt-serial-detail {
+  max-width: 420px;
+  margin: 0 auto 24px;
+}
+
+.mt-serial-detail h4 {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+
+.mt-serial-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 0.85rem;
+}
+
+.mt-serial-row:last-child {
+  border-bottom: none;
+}
+
+.mt-serial-pos {
+  width: 24px;
+  color: var(--text-light);
+  font-weight: 600;
+  text-align: center;
+}
+
+.mt-serial-word {
+  flex: 1;
+  color: var(--text-dark);
+  font-weight: 500;
+}
+
+.mt-serial-type {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.mt-serial-type--strong {
+  background: rgba(91, 143, 217, 0.15);
+  color: #5b8fd9;
+}
+
+.mt-serial-type--weak {
+  background: rgba(0, 214, 143, 0.15);
+  color: #00d68f;
+}
+
+.mt-serial-result {
+  font-size: 0.8rem;
+  font-weight: 600;
+  width: 20px;
+  text-align: center;
+}
+
+.mt-serial-result--hit { color: #00d68f; }
+.mt-serial-result--miss { color: #ff6b6b; }
+
+/* ===== Game Over ===== */
+#mt-gameover {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.mt-gameover-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2rem;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+}
+
+.mt-gameover-summary {
+  color: var(--text-light);
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+  line-height: 1.7;
+}
+
+.mt-final-score {
+  font-size: 3.2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #5b8fd9 0%, #00d68f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 24px;
+}
+
+.mt-gameover-stats {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.mt-go-stat {
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 14px 20px;
+  min-width: 100px;
+}
+
+.mt-go-stat-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.mt-go-stat-label {
+  font-size: 0.72rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+/* ===== Shared Buttons ===== */
+.mt-btn {
+  display: inline-block;
+  padding: 14px 40px;
+  background: linear-gradient(135deg, #5b8fd9 0%, #00d68f 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.mt-btn:hover {
+  opacity: 0.85;
+  transform: scale(1.02);
+}
+
+.mt-btn:active {
+  transform: scale(0.97);
+}
+
+.mt-btn--secondary {
+  background: transparent;
+  color: var(--primary-color);
+  border: 1px solid var(--border-light);
+  padding: 10px 24px;
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+.mt-btn--secondary:hover {
+  border-color: var(--primary-color);
+  opacity: 1;
+}
+
+/* ===== Lives / Fails indicator ===== */
+.mt-lives {
+  display: flex;
+  gap: 6px;
+}
+
+.mt-life {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff6b6b;
+  opacity: 0.25;
+  transition: opacity 0.3s ease;
+}
+
+.mt-life.used {
+  opacity: 1;
+}
+
+/* ===== Fade transitions ===== */
+.mt-fade-in {
+  animation: mt-fadeIn 0.4s ease;
+}
+
+@keyframes mt-fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 480px) {
+  .mt-grid--4 { width: 260px; gap: 6px; }
+  .mt-grid--5 { width: 300px; gap: 5px; }
+  .mt-grid--6 { width: 336px; gap: 4px; }
+
+  .mt-cell { border-radius: 8px; font-size: 0.7rem; }
+
+  #mt-start h2 { font-size: 1.7rem; }
+  .mt-math-problem { font-size: 2rem; }
+  .mt-score-display { font-size: 2.2rem; }
+  .mt-final-score { font-size: 2.5rem; }
+
+  .mt-results-breakdown { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .mt-gameover-stats { gap: 10px; }
+  .mt-go-stat { min-width: 80px; padding: 10px 14px; }
+
+  .mt-strength-legend { flex-direction: column; align-items: center; gap: 8px; }
+}

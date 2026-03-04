@@ -336,7 +336,8 @@ body.page-team #menu li:nth-child(3) a,
 body.page-publications #menu li:nth-child(4) a,
 body.page-courses #menu li:nth-child(5) a,
 body.page-resources #menu li:nth-child(6) a,
-body.page-contact #menu li:nth-child(7) a {
+body.page-games #menu li:nth-child(7) a,
+body.page-contact #menu li:nth-child(8) a {
   color: var(--primary-color);
   font-weight: 600;
 }
@@ -347,7 +348,8 @@ body.page-team #menu li:nth-child(3) a:before,
 body.page-publications #menu li:nth-child(4) a:before,
 body.page-courses #menu li:nth-child(5) a:before,
 body.page-resources #menu li:nth-child(6) a:before,
-body.page-contact #menu li:nth-child(7) a:before {
+body.page-games #menu li:nth-child(7) a:before,
+body.page-contact #menu li:nth-child(8) a:before {
   width: 80%;
   background: var(--text-dark);
 }
@@ -786,7 +788,8 @@ p[style*="color:red"] {
   body.page-publications #menu li:nth-child(4) a,
   body.page-courses #menu li:nth-child(5) a,
   body.page-resources #menu li:nth-child(6) a,
-  body.page-contact #menu li:nth-child(7) a {
+  body.page-games #menu li:nth-child(7) a,
+  body.page-contact #menu li:nth-child(8) a {
     background: var(--neural-gradient);
     border-color: transparent;
     color: var(--text-dark);
@@ -997,4 +1000,243 @@ body {
 
 .post .entry ul li::before {
   /* Custom triangle bullets removed - using standard circular bullets */
+}
+
+/* ===== Games Page ===== */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 32px;
+  margin-top: 32px;
+}
+
+.game-card {
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px var(--shadow-hover);
+}
+
+.game-card-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.game-card-thumb--brainwave  { background: linear-gradient(135deg, #0f2044 0%, #1a3a6e 50%, #00d68f22 100%); }
+.game-card-thumb--memory     { background: linear-gradient(135deg, #1a1230 0%, #2d1b69 50%, #7cb3f122 100%); }
+.game-card-thumb--erp        { background: linear-gradient(135deg, #0d2010 0%, #1a4020 50%, #00d68f33 100%); }
+.game-card-thumb--recall     { background: linear-gradient(135deg, #1a1020 0%, #3d1a60 50%, #f5a62322 100%); }
+
+.game-card-thumb svg {
+  width: 80%;
+  height: 80%;
+  opacity: 0.7;
+}
+
+.game-card-body {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-card-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.3rem;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+}
+
+.game-card-desc {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  flex: 1;
+  margin-bottom: 16px;
+}
+
+.game-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.game-tag {
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--bg-light);
+  color: var(--text-light);
+  border: 1px solid var(--border-light);
+}
+
+.game-card-play {
+  display: block;
+  text-align: center;
+  padding: 10px 20px;
+  background: var(--neural-gradient);
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.game-card-play:hover {
+  opacity: 0.85;
+  color: #fff;
+  text-decoration: none;
+}
+
+/* ===== Leaderboard Widget ===== */
+.leaderboard-widget {
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 24px;
+}
+
+.leaderboard-widget h3 {
+  color: var(--primary-color);
+  font-size: 1.2rem;
+  margin-bottom: 16px;
+}
+
+.leaderboard-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.leaderboard-tab {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-light);
+  background: transparent;
+  color: var(--text-light);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.leaderboard-tab.active,
+.leaderboard-tab:hover {
+  background: var(--neural-gradient);
+  border-color: transparent;
+  color: #fff;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leaderboard-table th {
+  text-align: left;
+  color: var(--text-light);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.leaderboard-table td {
+  padding: 8px;
+  color: var(--text-dark);
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.leaderboard-table tr:last-child td {
+  border-bottom: none;
+}
+
+.leaderboard-rank {
+  font-weight: 700;
+  color: var(--accent-color);
+  width: 32px;
+}
+
+.leaderboard-rank--gold   { color: #f5a623; }
+.leaderboard-rank--silver { color: #b0b8c8; }
+.leaderboard-rank--bronze { color: #cd7c4b; }
+
+.leaderboard-loading {
+  text-align: center;
+  color: var(--text-light);
+  padding: 20px;
+  font-size: 0.9rem;
+}
+
+.lb-submit-form {
+  text-align: center;
+  padding: 20px;
+}
+
+.lb-submit-form p {
+  text-align: center;
+  color: var(--text-dark);
+  font-size: 1.1rem;
+  margin-bottom: 16px;
+}
+
+.lb-submit-form input[type="text"] {
+  background: var(--bg-light);
+  border: 1px solid var(--border-light);
+  color: var(--text-dark);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  margin-right: 8px;
+  width: 200px;
+}
+
+.lb-submit-form button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  margin: 4px;
+  transition: all 0.2s ease;
+}
+
+.lb-submit-form #lb-submit-btn {
+  background: var(--neural-gradient);
+  color: #fff;
+  border-color: transparent;
+}
+
+.lb-submit-form #lb-skip-btn {
+  background: transparent;
+  color: var(--text-light);
+}
+
+@media (max-width: 768px) {
+  .games-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
 }

@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Memory Trace - Computational Memory Lab</title>
+  <meta name="keywords" content="" />
+  <meta name="description" content="Grid-based memory recall game modeling real memory experiments." />
+  <script>
+    (function() {
+      try {
+        var savedTheme = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = savedTheme || (prefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (err) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+  <link href="../../style.css" rel="stylesheet" type="text/css" media="screen" />
+  <link href="../shared/game-shell.css" rel="stylesheet" type="text/css" media="screen" />
+  <link href="style.css" rel="stylesheet" type="text/css" media="screen" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+</head>
+<body class="page-games">
+  <div id="header-wrapper">
+    <div id="header">
+      <div id="menu">
+        <ul>
+          <li><a href="../../index.html" class="first">Home</a></li>
+          <li><a href="../../research.html">Research</a></li>
+          <li><a href="../../team.html">Our Team</a></li>
+          <li><a href="../../publications.html">Publications</a></li>
+          <li><a href="../../courses.html">Courses</a></li>
+          <li><a href="../../resources.html">Resources</a></li>
+          <li><a href="../../games.html">Games</a></li>
+          <li><a href="../../contact.html">Contact Us</a></li>
+        </ul>
+      </div>
+      <!-- end #menu -->
+      <div id="search">
+        <button id="theme-toggle">Toggle Theme</button>
+      </div>
+      <!-- end #search -->
+    </div>
+  </div>
+  <!-- end #header -->
+  <div id="logo">
+    <img src="../../images/cml_logo.svg" alt="CML Logo" class="cml-logo">
+    <div class="logo-text-wrapper">
+      <h1>Computational Memory Lab</h1>
+      <p>Studying human memory through computation, behaviour, and brain imaging.</p>
+    </div>
+  </div>
+  <hr />
+  <!-- end #logo -->
+  <div id="page">
+    <div id="page-bgtop">
+      <div id="content" style="width:100%;">
+        <div class="post">
+          <h2 class="title"><a href="#">Memory Trace</a></h2>
+          <div class="entry">
+
+            <!-- ===== Game Area ===== -->
+            <div id="mt-game">
+
+              <!-- Start Screen -->
+              <div id="mt-start" class="mt-phase active">
+                <h2>Memory Trace</h2>
+                <p class="mt-subtitle">Study words on a grid, survive a distractor task, then recall the items in the order they appeared.</p>
+                <div class="mt-how-to">
+                  <h3>How to Play</h3>
+                  <ol>
+                    <li><strong>Study</strong> &mdash; Watch as words light up on the grid one at a time.</li>
+                    <li><strong>Distract</strong> &mdash; Solve quick math problems (this blocks rehearsal, just like a real experiment).</li>
+                    <li><strong>Recall</strong> &mdash; Click the grid cells in the order the words appeared.</li>
+                  </ol>
+                </div>
+                <div class="mt-strength-legend">
+                  <span class="mt-legend-item"><span class="mt-legend-dot mt-legend-dot--strong"></span> Strong encoding (longer, bright blue)</span>
+                  <span class="mt-legend-item"><span class="mt-legend-dot mt-legend-dot--weak"></span> Weak encoding (brief, dim green)</span>
+                </div>
+                <button id="mt-play-btn" class="mt-btn" type="button">Play</button>
+              </div>
+
+              <!-- Study Phase -->
+              <div id="mt-study" class="mt-phase">
+                <div class="mt-hud">
+                  <div class="mt-hud-item">
+                    <span class="mt-hud-label">Level</span>
+                    <span class="mt-hud-value" id="mt-hud-level">1</span>
+                  </div>
+                  <div class="mt-hud-item">
+                    <span class="mt-hud-label">Score</span>
+                    <span class="mt-hud-value mt-hud-value--green" id="mt-hud-score">0</span>
+                  </div>
+                  <div class="mt-hud-item">
+                    <span class="mt-hud-label">Fails</span>
+                    <div class="mt-lives" id="mt-hud-lives"></div>
+                  </div>
+                </div>
+                <p class="mt-study-instruction">Watch carefully &mdash; <span class="mt-study-counter" id="mt-study-counter"></span></p>
+                <div class="mt-grid-wrapper">
+                  <div class="mt-grid" id="mt-study-grid"></div>
+                </div>
+              </div>
+
+              <!-- Distractor Phase -->
+              <div id="mt-distractor" class="mt-phase">
+                <p class="mt-distractor-title">Distractor Task</p>
+                <p class="mt-distractor-desc">Solve the math problems. This prevents rehearsal, just like a real memory experiment.</p>
+                <div class="mt-distractor-timer">
+                  <div class="mt-distractor-timer-fill" id="mt-dist-timer-fill" style="width:100%"></div>
+                </div>
+                <div class="mt-math-problem" id="mt-math-problem">7 + 13 = ?</div>
+                <div class="mt-math-input-row">
+                  <input type="text" id="mt-math-input" inputmode="numeric" pattern="[0-9\-]*" autocomplete="off" placeholder="?" />
+                </div>
+                <p class="mt-distractor-stats" id="mt-dist-stats"></p>
+              </div>
+
+              <!-- Recall Phase -->
+              <div id="mt-recall" class="mt-phase">
+                <div class="mt-hud">
+                  <div class="mt-hud-item">
+                    <span class="mt-hud-label">Level</span>
+                    <span class="mt-hud-value" id="mt-hud-level2">1</span>
+                  </div>
+                  <div class="mt-hud-item">
+                    <span class="mt-hud-label">Score</span>
+                    <span class="mt-hud-value mt-hud-value--green" id="mt-hud-score2">0</span>
+                  </div>
+                  <div class="mt-hud-item">
+                    <span class="mt-hud-label">Fails</span>
+                    <div class="mt-lives" id="mt-hud-lives2"></div>
+                  </div>
+                </div>
+                <div class="mt-recall-instruction">
+                  <p>Click cells in the order the words appeared. <span class="mt-recall-progress" id="mt-recall-progress"></span></p>
+                </div>
+                <div class="mt-grid-wrapper">
+                  <div class="mt-grid" id="mt-recall-grid"></div>
+                </div>
+              </div>
+
+              <!-- Round Results -->
+              <div id="mt-results" class="mt-phase">
+                <p class="mt-results-title" id="mt-results-title">Round Complete</p>
+                <p class="mt-results-subtitle" id="mt-results-subtitle"></p>
+                <div class="mt-score-display" id="mt-round-score">+0</div>
+                <div class="mt-results-breakdown" id="mt-results-breakdown"></div>
+                <div class="mt-serial-detail" id="mt-serial-detail"></div>
+                <button id="mt-next-btn" class="mt-btn" type="button">Next Round</button>
+              </div>
+
+              <!-- Game Over -->
+              <div id="mt-gameover" class="mt-phase">
+                <p class="mt-gameover-title">Game Over</p>
+                <p class="mt-gameover-summary" id="mt-go-summary"></p>
+                <div class="mt-final-score" id="mt-final-score">0</div>
+                <div class="mt-gameover-stats" id="mt-go-stats"></div>
+                <button id="mt-restart-btn" class="mt-btn" type="button">Play Again</button>
+              </div>
+
+            </div>
+            <!-- end #mt-game -->
+
+            <div id="leaderboard-container"></div>
+
+          </div>
+        </div>
+      </div>
+      <!-- end #content -->
+      <div style="clear: both;">&nbsp;</div>
+    </div>
+    <!-- end #page -->
+    <div id="footer">
+      <p>&copy; CML. All rights reserved.</p>
+    </div>
+    <!-- end #footer -->
+  </div>
+  <script src="../shared/leaderboard.js"></script>
+  <script src="memory_trace.js"></script>
+  <script>
+    var themeToggle = document.getElementById('theme-toggle');
+    var root = document.documentElement;
+    var body = document.body;
+
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      body.dataset.theme = theme;
+      localStorage.setItem('theme', theme);
+    }
+
+    themeToggle.addEventListener('click', function() {
+      var currentTheme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      setTheme(currentTheme);
+    });
+
+    var savedTheme = localStorage.getItem('theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme) {
+      setTheme(savedTheme);
+    } else if (prefersDark) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        root.setAttribute('data-theme-ready', 'true');
+      });
+    });
+  </script>
+</body>
+</html>

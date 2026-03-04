@@ -1,0 +1,51 @@
+/* ERP Catcher game-specific styles */
+.erp-round-banner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #7cb3f1;
+  text-align: center;
+  z-index: 15;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.erp-round-banner.visible {
+  opacity: 1;
+}
+
+.erp-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin: 12px 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+}
+
+.erp-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-light);
+}
+
+.erp-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.erp-instructions {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-light);
+  margin: 8px 0;
+  line-height: 1.5;
+}

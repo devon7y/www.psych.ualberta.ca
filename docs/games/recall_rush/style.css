@@ -1,0 +1,494 @@
+/* ==========================================================================
+   Recall Rush - Game-Specific Styles
+   ========================================================================== */
+
+/* Game host sizing for DOM-based (non-canvas) game */
+#game-host {
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+#game-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+}
+
+/* --------------------------------------------------------------------------
+   Subtitle helper
+   -------------------------------------------------------------------------- */
+.rr-subtitle {
+  font-size: 0.85rem;
+  opacity: 0.6;
+  margin-top: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   Countdown
+   -------------------------------------------------------------------------- */
+.rr-countdown {
+  font-size: 5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #5b8fd9 0%, #00d68f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: countdown-pulse 0.8s ease-in-out infinite;
+}
+
+.rr-countdown-tick {
+  animation: countdown-tick 0.3s ease-out;
+}
+
+@keyframes countdown-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.85; }
+}
+
+@keyframes countdown-tick {
+  0% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+/* --------------------------------------------------------------------------
+   Presentation Phase
+   -------------------------------------------------------------------------- */
+.rr-presentation {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  min-height: 400px;
+}
+
+.rr-word-display {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  letter-spacing: 0.06em;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rr-word-enter {
+  animation: fadeInUp 200ms ease-out forwards;
+}
+
+.rr-word-exit {
+  animation: fadeOutUp 200ms ease-in forwards;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeOutUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+}
+
+/* Progress dots */
+.rr-progress-dots {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.rr-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(124, 179, 241, 0.2);
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.rr-dot-active {
+  background: var(--primary-color);
+  transform: scale(1.3);
+}
+
+[data-theme="light"] .rr-dot {
+  background: rgba(42, 125, 233, 0.15);
+}
+
+[data-theme="light"] .rr-dot-active {
+  background: var(--primary-color);
+}
+
+/* --------------------------------------------------------------------------
+   Recall Phase
+   -------------------------------------------------------------------------- */
+.rr-recall {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 52px 20px 20px;
+  min-height: 400px;
+}
+
+.rr-recall-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.rr-recall-prompt {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.rr-timer {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s ease;
+}
+
+.rr-timer-critical {
+  color: #ff6b6b;
+  animation: timer-shake 0.4s ease-in-out infinite;
+}
+
+.rr-timer-bonus {
+  color: #00d68f;
+  animation: timer-flash 0.4s ease-out;
+}
+
+@keyframes timer-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+@keyframes timer-flash {
+  0% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+
+/* Input */
+.rr-input-row {
+  margin: 12px 0;
+}
+
+.rr-input {
+  width: 100%;
+  padding: 14px 18px;
+  font-size: 1.2rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid var(--border-light);
+  border-radius: 10px;
+  color: var(--text-dark);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rr-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(124, 179, 241, 0.2);
+}
+
+[data-theme="light"] .rr-input {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .rr-input:focus {
+  box-shadow: 0 0 0 3px rgba(42, 125, 233, 0.15);
+}
+
+/* Chips */
+.rr-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+  min-height: 40px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.rr-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  animation: chip-pop 0.25s ease-out;
+}
+
+.rr-chip-correct {
+  background: rgba(0, 214, 143, 0.15);
+  color: #00d68f;
+  border: 1px solid rgba(0, 214, 143, 0.3);
+}
+
+.rr-chip-wrong {
+  background: rgba(255, 107, 107, 0.15);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  text-decoration: line-through;
+}
+
+[data-theme="light"] .rr-chip-correct {
+  background: rgba(0, 179, 107, 0.1);
+  color: #00875a;
+  border-color: rgba(0, 179, 107, 0.25);
+}
+
+[data-theme="light"] .rr-chip-wrong {
+  background: rgba(220, 53, 53, 0.08);
+  color: #c0392b;
+  border-color: rgba(220, 53, 53, 0.2);
+}
+
+.rr-chip-points {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+@keyframes chip-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* --------------------------------------------------------------------------
+   Power-ups
+   -------------------------------------------------------------------------- */
+.rr-powerups {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
+}
+
+.rr-powerup {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(124, 179, 241, 0.1);
+  color: var(--primary-color);
+  border: 1px solid rgba(124, 179, 241, 0.25);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease, opacity 0.2s ease;
+}
+
+.rr-powerup:hover:not(:disabled) {
+  background: rgba(124, 179, 241, 0.2);
+  transform: translateY(-1px);
+}
+
+.rr-powerup:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.rr-powerup:disabled,
+.rr-powerup-used {
+  opacity: 0.35;
+  cursor: default;
+  text-decoration: line-through;
+}
+
+[data-theme="light"] .rr-powerup {
+  background: rgba(42, 125, 233, 0.08);
+  color: var(--primary-color);
+  border-color: rgba(42, 125, 233, 0.2);
+}
+
+[data-theme="light"] .rr-powerup:hover:not(:disabled) {
+  background: rgba(42, 125, 233, 0.15);
+}
+
+/* --------------------------------------------------------------------------
+   Rehearsal Overlay
+   -------------------------------------------------------------------------- */
+.rr-rehearsal-words {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-top: 16px;
+  letter-spacing: 0.03em;
+  line-height: 2;
+}
+
+/* --------------------------------------------------------------------------
+   Round Results
+   -------------------------------------------------------------------------- */
+.rr-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto 16px;
+}
+
+.rr-result-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+}
+
+.rr-result-hit {
+  background: rgba(0, 214, 143, 0.1);
+}
+
+.rr-result-miss {
+  background: rgba(255, 255, 255, 0.04);
+  opacity: 0.55;
+}
+
+[data-theme="light"] .rr-result-hit {
+  background: rgba(0, 179, 107, 0.08);
+}
+
+[data-theme="light"] .rr-result-miss {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.rr-result-pos {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-light);
+  min-width: 24px;
+  text-align: center;
+}
+
+.rr-result-word {
+  flex: 1;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-dark);
+}
+
+.rr-result-hit .rr-result-word {
+  color: #00d68f;
+}
+
+[data-theme="light"] .rr-result-hit .rr-result-word {
+  color: #00875a;
+}
+
+.rr-result-pts {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.rr-result-hit .rr-result-pts {
+  color: #00d68f;
+}
+
+[data-theme="light"] .rr-result-hit .rr-result-pts {
+  color: #00875a;
+}
+
+.rr-round-score {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.rr-fail-notice {
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   Score Pop Animation
+   -------------------------------------------------------------------------- */
+.rr-score-pop {
+  position: absolute;
+  top: 50%;
+  right: 20px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #00d68f;
+  pointer-events: none;
+  z-index: 30;
+  animation: score-pop 0.8s ease-out forwards;
+}
+
+@keyframes score-pop {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-60px) scale(0.7);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 600px) {
+  .rr-word-display {
+    font-size: 2.5rem;
+  }
+
+  .rr-input {
+    font-size: 1rem;
+    padding: 12px 14px;
+  }
+
+  .rr-powerups {
+    flex-direction: column;
+  }
+
+  .rr-powerup {
+    font-size: 0.7rem;
+    padding: 6px 10px;
+  }
+
+  .rr-countdown {
+    font-size: 3.5rem;
+  }
+
+  .rr-rehearsal-words {
+    font-size: 1.1rem;
+  }
+}

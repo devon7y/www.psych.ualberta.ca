@@ -1,0 +1,37 @@
+/* Brainwave Surfer game-specific styles */
+.band-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+  z-index: 15;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  text-shadow: 0 0 20px currentColor;
+}
+
+.band-badge.visible {
+  opacity: 1;
+  animation: bandPulse 1.5s ease-out forwards;
+}
+
+@keyframes bandPulse {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+  20%  { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+  40%  { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.0); }
+}
+
+.surf-instructions {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-light);
+  margin: 8px 0;
+  line-height: 1.5;
+}

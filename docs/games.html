@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Games - Computational Memory Lab</title>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<script>
+	(function() {
+		try {
+			var savedTheme = localStorage.getItem('theme');
+			var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+			var theme = savedTheme || (prefersDark ? 'dark' : 'light');
+			document.documentElement.setAttribute('data-theme', theme);
+		} catch (err) {
+			document.documentElement.setAttribute('data-theme', 'dark');
+		}
+	})();
+</script>
+<link href="style.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+</head>
+<body class="page-games">
+<div id="header-wrapper">
+	<div id="header">
+		<div id="menu">
+			<ul>
+				<li><a href="index.html" class="first">Home</a></li>
+				<li><a href="research.html">Research</a></li>
+				<li><a href="team.html">Our Team</a></li>
+				<li><a href="publications.html">Publications</a></li>
+				<li><a href="courses.html">Courses</a></li>
+				<li><a href="resources.html">Resources</a></li>
+				<li><a href="games.html">Games</a></li>
+				<li><a href="contact.html">Contact Us</a></li>
+			</ul>
+		</div>
+		<!-- end #menu -->
+		<div id="search">
+			<button id="theme-toggle">Toggle Theme</button>
+		</div>
+		<!-- end #search -->
+	</div>
+</div>
+<!-- end #header -->
+<div id="logo">
+  <img src="images/cml_logo.svg" alt="CML Logo" class="cml-logo">
+  <div class="logo-text-wrapper">
+    <h1>Computational Memory Lab</h1>
+    <p>Studying human memory through computation, behaviour, and brain imaging.</p>
+  </div>
+</div>
+<hr />
+<div id="page">
+	<div id="page-bgtop">
+		<div id="content" style="width: 100%;">
+			<div class="post">
+				<h2 class="title"><a href="#">Brain Games</a></h2>
+				<div class="entry">
+					<p>Put your brain to the test with these neuroscience-inspired games! Each game is built around real EEG and memory research concepts from our lab. Compete for the highest score on the global leaderboard.</p>
+
+					<div class="games-grid">
+
+						<!-- Brainwave Surfer -->
+						<div class="game-card">
+							<div class="game-card-thumb game-card-thumb--brainwave">
+								<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+									<path d="M0,50 Q10,30 20,50 T40,50 T60,35 T80,55 T100,40 T120,60 T140,45 T160,50 T180,35 T200,50" fill="none" stroke="#5b8fd9" stroke-width="2" opacity="0.6"/>
+									<path d="M0,55 Q10,70 20,55 T40,55 T60,65 T80,45 T100,60 T120,40 T140,55 T160,50 T180,65 T200,55" fill="none" stroke="#00d68f" stroke-width="1.5" opacity="0.4"/>
+									<circle cx="100" cy="40" r="6" fill="#7cb3f1" opacity="0.9">
+										<animate attributeName="opacity" values="0.9;0.4;0.9" dur="2s" repeatCount="indefinite"/>
+									</circle>
+								</svg>
+							</div>
+							<div class="game-card-body">
+								<div class="game-card-title">Brainwave Surfer</div>
+								<p class="game-card-desc">Ride a scrolling EEG waveform and hit neural spikes to build combos. Survive as long as you can as the brainwaves shift between frequency bands.</p>
+								<div class="game-card-tags">
+									<span class="game-tag">Endless Runner</span>
+									<span class="game-tag">EEG</span>
+									<span class="game-tag">Rhythm</span>
+								</div>
+								<a href="games/brainwave_surfer/" class="game-card-play">Play Now</a>
+							</div>
+						</div>
+
+						<!-- Memory Trace -->
+						<div class="game-card">
+							<div class="game-card-thumb game-card-thumb--memory">
+								<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+									<rect x="30" y="15" width="30" height="30" rx="4" fill="#5b8fd9" opacity="0.5"/>
+									<rect x="70" y="15" width="30" height="30" rx="4" fill="#3a4254" opacity="0.3"/>
+									<rect x="110" y="15" width="30" height="30" rx="4" fill="#7cb3f1" opacity="0.7"/>
+									<rect x="150" y="15" width="30" height="30" rx="4" fill="#3a4254" opacity="0.3"/>
+									<rect x="30" y="55" width="30" height="30" rx="4" fill="#3a4254" opacity="0.3"/>
+									<rect x="70" y="55" width="30" height="30" rx="4" fill="#00d68f" opacity="0.4"/>
+									<rect x="110" y="55" width="30" height="30" rx="4" fill="#3a4254" opacity="0.3"/>
+									<rect x="150" y="55" width="30" height="30" rx="4" fill="#5b8fd9" opacity="0.6"/>
+								</svg>
+							</div>
+							<div class="game-card-body">
+								<div class="game-card-title">Memory Trace</div>
+								<p class="game-card-desc">Study items on a grid, survive a distractor task, then recall them in order. Strong and weak encodings test your memory just like real experiments.</p>
+								<div class="game-card-tags">
+									<span class="game-tag">Memory</span>
+									<span class="game-tag">Serial Recall</span>
+									<span class="game-tag">List Strength</span>
+								</div>
+								<a href="games/memory_trace/" class="game-card-play">Play Now</a>
+							</div>
+						</div>
+
+						<!-- ERP Catcher -->
+						<div class="game-card">
+							<div class="game-card-thumb game-card-thumb--erp">
+								<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+									<path d="M0,50 L20,50 L30,50 L35,50 L40,20 L45,70 L50,45 L55,50 L80,50 L90,50 L100,50 L110,50 L115,50 L120,75 L125,30 L130,50 L160,50 L200,50" fill="none" stroke="#00d68f" stroke-width="1.5" opacity="0.5"/>
+									<path d="M0,55 L30,55 L60,55 L65,55 L70,25 L75,55 L100,55 L130,55 L140,55 L145,80 L150,35 L155,55 L200,55" fill="none" stroke="#5b8fd9" stroke-width="1.5" opacity="0.5"/>
+									<circle cx="70" cy="25" r="10" fill="none" stroke="#f5a623" stroke-width="2" opacity="0.7"/>
+									<text x="70" y="29" text-anchor="middle" fill="#f5a623" font-size="10" font-weight="bold" opacity="0.8">P3</text>
+								</svg>
+							</div>
+							<div class="game-card-body">
+								<div class="game-card-title">ERP Catcher</div>
+								<p class="game-card-desc">Spot and click ERP components (P300, N400, N170) in scrolling EEG traces. Avoid artifacts! Signal-to-noise drops as difficulty increases.</p>
+								<div class="game-card-tags">
+									<span class="game-tag">ERP</span>
+									<span class="game-tag">Reaction</span>
+									<span class="game-tag">Signal Detection</span>
+								</div>
+								<a href="games/erp_catcher/" class="game-card-play">Play Now</a>
+							</div>
+						</div>
+
+						<!-- Recall Rush -->
+						<div class="game-card">
+							<div class="game-card-thumb game-card-thumb--recall">
+								<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+									<text x="100" y="35" text-anchor="middle" fill="#7cb3f1" font-size="24" font-weight="bold" font-family="serif" opacity="0.8">HOUSE</text>
+									<text x="100" y="60" text-anchor="middle" fill="#5b8fd9" font-size="16" font-family="serif" opacity="0.4">RIVER</text>
+									<text x="100" y="80" text-anchor="middle" fill="#3a4254" font-size="12" font-family="serif" opacity="0.25">CLOCK</text>
+								</svg>
+							</div>
+							<div class="game-card-body">
+								<div class="game-card-title">Recall Rush</div>
+								<p class="game-card-desc">Words flash before your eyes. Type back as many as you can remember. Scoring follows real serial position curves from memory research.</p>
+								<div class="game-card-tags">
+									<span class="game-tag">Typing</span>
+									<span class="game-tag">Free Recall</span>
+									<span class="game-tag">Serial Position</span>
+								</div>
+								<a href="games/recall_rush/" class="game-card-play">Play Now</a>
+							</div>
+						</div>
+
+					</div>
+
+					<div id="leaderboard-container"></div>
+				</div>
+			</div>
+		</div>
+		<!-- end #content -->
+	</div>
+	<!-- end #page-bgtop -->
+	<div id="footer">
+		<p>&copy; CML. All rights reserved.</p>
+	</div>
+	<!-- end #footer -->
+</div>
+<script src="games/shared/leaderboard.js"></script>
+<script>
+    // Initialize leaderboard
+    document.addEventListener('DOMContentLoaded', function() {
+        CMLLeaderboard.renderWidget('leaderboard-container', null);
+    });
+
+    // Theme toggle
+    var themeToggle = document.getElementById('theme-toggle');
+    var root = document.documentElement;
+    var body = document.body;
+
+    function setTheme(theme) {
+        root.dataset.theme = theme;
+        body.dataset.theme = theme;
+        localStorage.setItem('theme', theme);
+    }
+
+    themeToggle.addEventListener('click', function() {
+        var currentTheme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        setTheme(currentTheme);
+    });
+
+    var savedTheme = localStorage.getItem('theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme) {
+        setTheme(savedTheme);
+    } else if (prefersDark) {
+        setTheme('dark');
+    } else {
+        setTheme('light');
+    }
+
+    requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+            root.setAttribute('data-theme-ready', 'true');
+        });
+    });
+</script>
+</body>
+</html>

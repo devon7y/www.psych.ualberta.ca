@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Brainwave Surfer - CML Games</title>
+<script>
+	(function() {
+		try {
+			var savedTheme = localStorage.getItem('theme');
+			var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+			var theme = savedTheme || (prefersDark ? 'dark' : 'light');
+			document.documentElement.setAttribute('data-theme', theme);
+		} catch (err) {
+			document.documentElement.setAttribute('data-theme', 'dark');
+		}
+	})();
+</script>
+<link href="../../style.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="../shared/game-shell.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="style.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+</head>
+<body class="page-games">
+<div id="header-wrapper">
+	<div id="header">
+		<div id="menu">
+			<ul>
+				<li><a href="../../index.html" class="first">Home</a></li>
+				<li><a href="../../research.html">Research</a></li>
+				<li><a href="../../team.html">Our Team</a></li>
+				<li><a href="../../publications.html">Publications</a></li>
+				<li><a href="../../courses.html">Courses</a></li>
+				<li><a href="../../resources.html">Resources</a></li>
+				<li><a href="../../games.html">Games</a></li>
+				<li><a href="../../contact.html">Contact Us</a></li>
+			</ul>
+		</div>
+		<div id="search">
+			<button id="theme-toggle">Toggle Theme</button>
+		</div>
+	</div>
+</div>
+<div id="logo">
+  <img src="../../images/cml_logo.svg" alt="CML Logo" class="cml-logo">
+  <div class="logo-text-wrapper">
+    <h1>Computational Memory Lab</h1>
+    <p>Studying human memory through computation, behaviour, and brain imaging.</p>
+  </div>
+</div>
+<hr />
+<div id="page">
+	<div id="page-bgtop">
+		<div id="content" style="width: 100%;">
+			<div class="post">
+				<h2 class="title"><a href="#">Brainwave Surfer</a></h2>
+				<div class="entry">
+					<p>Ride a scrolling EEG waveform through different brain states! Click or tap to hit neural spikes as the wave shifts between delta, theta, alpha, beta, and gamma frequency bands. Build combos and survive as long as you can!</p>
+
+					<div class="game-host" id="surf-game-host">
+						<canvas id="game-canvas"></canvas>
+						<div class="game-hud" id="game-hud" style="display:none;">
+							<div class="hud-stat">
+								<span class="hud-label">Score</span>
+								<span class="hud-value" id="hud-score">0</span>
+							</div>
+							<div class="hud-stat">
+								<span class="hud-label">Band</span>
+								<span class="hud-value hud-value--green" id="hud-band">THETA</span>
+							</div>
+							<div class="hud-stat">
+								<span class="hud-label">Health</span>
+								<div class="health-bar-wrap">
+									<div class="health-bar-fill" id="hud-health" style="width:100%;"></div>
+								</div>
+							</div>
+							<div class="hud-stat">
+								<span class="hud-label">Combo</span>
+								<span class="hud-value hud-value--amber" id="hud-combo">0x</span>
+							</div>
+						</div>
+						<div class="game-overlay" id="game-overlay">
+							<h2>Brainwave Surfer</h2>
+							<p>Ride the EEG wave. Hit the spikes.</p>
+							<p style="font-size:0.85rem; opacity:0.7;">Click/tap to jump and catch neural spikes.<br/>Stay on the wave to keep your health up!</p>
+							<button class="btn-play" id="btn-start">Start Surfing</button>
+						</div>
+					</div>
+
+					<p class="surf-instructions" id="surf-instructions" style="display:none;">Click or tap anywhere to jump. Hit the yellow spike markers for bonus points!</p>
+
+					<div id="leaderboard-container"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="footer">
+		<p>&copy; CML. All rights reserved.</p>
+	</div>
+</div>
+<script src="../shared/leaderboard.js"></script>
+<script src="brainwave_surfer.js"></script>
+<script>
+    var themeToggle = document.getElementById('theme-toggle');
+    var root = document.documentElement;
+    var body = document.body;
+
+    function setTheme(theme) {
+        root.dataset.theme = theme;
+        body.dataset.theme = theme;
+        localStorage.setItem('theme', theme);
+    }
+
+    themeToggle.addEventListener('click', function() {
+        var currentTheme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        setTheme(currentTheme);
+    });
+
+    var savedTheme = localStorage.getItem('theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme) { setTheme(savedTheme); }
+    else if (prefersDark) { setTheme('dark'); }
+    else { setTheme('light'); }
+
+    requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+            root.setAttribute('data-theme-ready', 'true');
+        });
+    });
+</script>
+</body>
+</html>

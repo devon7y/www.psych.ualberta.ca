@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Recall Rush - Computational Memory Lab</title>
+<meta name="keywords" content="memory game, serial position, free recall, cognitive science" />
+<meta name="description" content="A fast-paced word recall game based on real memory science. How many words can you remember?" />
+<script>
+	(function() {
+		try {
+			var savedTheme = localStorage.getItem('theme');
+			var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+			var theme = savedTheme || (prefersDark ? 'dark' : 'light');
+			document.documentElement.setAttribute('data-theme', theme);
+		} catch (err) {
+			document.documentElement.setAttribute('data-theme', 'dark');
+		}
+	})();
+</script>
+<link href="../../style.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="../shared/game-shell.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="style.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+</head>
+<body class="page-games">
+<div id="header-wrapper">
+	<div id="header">
+		<div id="menu">
+			<ul>
+				<li><a href="../../index.html" class="first">Home</a></li>
+				<li><a href="../../research.html">Research</a></li>
+				<li><a href="../../team.html">Our Team</a></li>
+				<li><a href="../../publications.html">Publications</a></li>
+				<li><a href="../../courses.html">Courses</a></li>
+				<li><a href="../../resources.html">Resources</a></li>
+				<li class="current_page_item"><a href="../../games.html">Games</a></li>
+				<li><a href="../../contact.html">Contact Us</a></li>
+			</ul>
+		</div>
+		<!-- end #menu -->
+		<div id="search">
+			<button id="theme-toggle">Toggle Theme</button>
+		</div>
+		<!-- end #search -->
+	</div>
+</div>
+<!-- end #header -->
+<!-- end #header-wrapper -->
+<div id="logo">
+  <img src="../../images/cml_logo.svg" alt="CML Logo" class="cml-logo">
+  <div class="logo-text-wrapper">
+    <h1>Computational Memory Lab</h1>
+    <p>Studying human memory through computation, behaviour, and brain imaging.</p>
+  </div>
+</div>
+<hr />
+<!-- end #logo -->
+<div id="page">
+	<div id="page-bgtop">
+		<div id="content" style="width:100%">
+
+			<div class="post">
+				<h2 class="title"><a href="#">Recall Rush</a></h2>
+				<div class="entry">
+					<p>Words flash on screen one at a time. After they disappear, type back as many as you can remember before time runs out. Scoring is based on real serial position curves &mdash; middle items are harder to remember, so they earn more points.</p>
+
+					<div class="game-host" id="game-host">
+
+						<!-- HUD (visible during gameplay) -->
+						<div class="game-hud" id="game-hud" style="display:none;">
+							<div class="hud-stat">
+								<span class="hud-label">Round</span>
+								<span class="hud-value" id="hud-round">1</span>
+							</div>
+							<div class="hud-stat">
+								<span class="hud-label">Score</span>
+								<span class="hud-value hud-value--green" id="hud-score">0</span>
+							</div>
+							<div class="hud-stat">
+								<span class="hud-label">Lives</span>
+								<span class="hud-value hud-value--red" id="hud-lives">3</span>
+							</div>
+						</div>
+
+						<!-- Game area (all phases render here) -->
+						<div id="game-area">
+
+							<!-- Start screen -->
+							<div class="game-overlay" id="screen-start">
+								<h2>Recall Rush</h2>
+								<p>Words will flash on screen. Memorize them, then type them back!</p>
+								<p class="rr-subtitle">Middle items score more &mdash; just like real memory.</p>
+								<button class="btn-play" id="btn-start">Play</button>
+							</div>
+
+							<!-- Countdown screen -->
+							<div class="game-overlay" id="screen-countdown" style="display:none;">
+								<div class="rr-countdown" id="countdown-number">3</div>
+							</div>
+
+							<!-- Presentation phase -->
+							<div class="rr-presentation" id="screen-present" style="display:none;">
+								<div class="rr-word-display" id="word-display"></div>
+								<div class="rr-progress-dots" id="progress-dots"></div>
+							</div>
+
+							<!-- Recall phase -->
+							<div class="rr-recall" id="screen-recall" style="display:none;">
+								<div class="rr-recall-header">
+									<span class="rr-recall-prompt">Type the words you remember!</span>
+									<span class="rr-timer" id="recall-timer">20s</span>
+								</div>
+								<div class="timer-bar-wrap">
+									<div class="timer-bar-fill" id="timer-bar" style="width:100%"></div>
+								</div>
+								<div class="rr-input-row">
+									<input type="text" id="recall-input" class="rr-input" placeholder="Type a word and press Enter..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+								</div>
+								<div class="rr-chips" id="recall-chips"></div>
+								<div class="rr-powerups" id="powerup-bar">
+									<button class="rr-powerup" id="pu-rehearsal" title="See the words again for 2 seconds">Rehearsal</button>
+									<button class="rr-powerup" id="pu-deep" title="Next round's words shown 50% slower">Deep Encoding</button>
+									<button class="rr-powerup" id="pu-spacing" title="Add 5 extra seconds to recall timer">Spacing Effect</button>
+								</div>
+							</div>
+
+							<!-- Rehearsal flash overlay -->
+							<div class="game-overlay" id="screen-rehearsal" style="display:none;">
+								<h2>Rehearsal!</h2>
+								<div class="rr-rehearsal-words" id="rehearsal-words"></div>
+							</div>
+
+							<!-- Round results -->
+							<div class="game-overlay" id="screen-results" style="display:none;">
+								<h2>Round Complete</h2>
+								<div class="rr-results-grid" id="results-grid"></div>
+								<div class="rr-round-score" id="round-score-display"></div>
+								<button class="btn-play" id="btn-next-round">Next Round</button>
+								<button class="btn-secondary" id="btn-end-game" style="display:none;">End Game</button>
+							</div>
+
+							<!-- Game over -->
+							<div class="game-overlay" id="screen-gameover" style="display:none;">
+								<h2>Game Over</h2>
+								<p>You made it to round <span id="final-round">1</span></p>
+								<div class="final-score" id="final-score">0</div>
+								<p class="rr-subtitle" id="final-message"></p>
+								<button class="btn-play" id="btn-restart">Play Again</button>
+							</div>
+
+						</div>
+					</div>
+
+					<div id="leaderboard-container"></div>
+
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
+<div id="footer">
+  <p>&copy; CML. All rights reserved.</p>
+</div>
+<!-- end #footer -->
+<script src="../shared/leaderboard.js"></script>
+<script src="recall_rush.js"></script>
+<script>
+    var themeToggle = document.getElementById('theme-toggle');
+    var root = document.documentElement;
+    var body = document.body;
+
+    function setTheme(theme) {
+        root.dataset.theme = theme;
+        body.dataset.theme = theme;
+        localStorage.setItem('theme', theme);
+    }
+
+    themeToggle.addEventListener('click', function() {
+        var currentTheme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        setTheme(currentTheme);
+    });
+
+    var savedTheme = localStorage.getItem('theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme) {
+        setTheme(savedTheme);
+    } else if (prefersDark) {
+        setTheme('dark');
+    } else {
+        setTheme('light');
+    }
+
+    requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+            root.setAttribute('data-theme-ready', 'true');
+        });
+    });
+</script>
+</body>
+</html>
