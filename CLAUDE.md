@@ -4,60 +4,79 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the Computational Memory Lab website, a static HTML/CSS/JavaScript website for Dr. Jeremy B. Caplan's research lab at the University of Alberta. The lab studies human verbal memory behavior through mathematical modeling, behavioral measures, and brain imaging techniques.
+Static HTML/CSS/JavaScript website for the Computational Memory Lab (Dr. Jeremy B. Caplan, University of Alberta). Studies human verbal memory through mathematical modeling, cognitive psychology, and brain imaging (EEG/fMRI). Deployed via GitHub Pages from the `/docs` folder.
 
-## Site Structure
+**Live site:** https://computational-memory-lab.github.io/cml-website/index.html
 
-- `docs/` - Main website directory containing all web assets
-  - `index.html` - Homepage with lab overview and research description
-  - `research.html`, `publications.html`, `courses.html`, `team.html`, `contact.html` - Main site pages
-  - `style.css` - Global stylesheet with dark theme and theta wave background
-  - `papers/` - PDF repository of lab publications
-  - `images/` - Site images and graphics
-  - `attention_tuner/` - Interactive cognitive experiment web app
+## Development
 
-## Key Components
+No build process. Serve locally with `python3 -m http.server` from `docs/`. All changes are direct file edits with browser refresh.
 
-### Attention Tuner Application
-Located in `docs/attention_tuner/`, this is a JavaScript-based cognitive psychology experiment that demonstrates the "inverted list-strength effect":
+## Architecture
 
-- `index.html` - Main experiment interface with multiple phases
-- `script.js` - Core experiment logic with study/distractor/recognition phases
-- `style.css` - Experiment-specific styling
+### Page Structure
+All site pages live in `docs/` — `index.html`, `research.html`, `team.html`, `publications.html`, `courses.html`, `contact.html`, `resources.html`, `games.html`, `JBC.html`. Each page includes the shared nav header, theme toggle logic, and links `style.css` + `scroll-offset.js`.
 
-The app implements a memory recognition experiment with:
-- Study phase with strong (2000ms) and weak (500ms) word presentations
-- Distractor task (arithmetic problems)
-- Recognition test with attention spotlight visualization
-- Results analysis with Google Charts integration
-- Local storage for result persistence
+### Interactive Demos
+Six research demos are each a single self-contained JS file (IIFE pattern) loaded as `<script>` tags at the bottom of `research.html`. Their HTML containers and CSS are defined inline in `research.html`, not in the demo directories.
+
+| Demo | File | Purpose |
+|------|------|---------|
+| Oscillation Detection | `docs/osc_detection_demo/osc_detection_demo.js` | Transition demo: Fourier vs Wavelet transforms, why power ≠ oscillation (3 steps with animations) |
+| BOSC | `docs/bosc_demo/bosc_demo.js` | Better OSCillation Detection — 5-step walkthrough with interactive sliders |
+| ERP Memory | `docs/erp_memory_demo/erp_demo.js` | Event-Related Potentials and memory effects |
+| Classifier | `docs/clf_demo/clf_demo.js` | EEG signal classification for memory prediction (6 steps) |
+| EEG | `docs/eeg_demo/eeg_demo.js` | EEG signal visualization |
+| Subsetting | `docs/subsetting_demo/subsetting_demo.js` | Subsetting methodology |
+
+Demo ordering on the research page: EEG → Oscillation Detection → BOSC → ERP → Classifiers → Subsetting.
+
+Each demo follows the same pattern:
+- IIFE wrapping all code in `(function() { "use strict"; ... })();`
+- A start screen with a button that reveals the visualization area
+- Step-based navigation (`.{prefix}-step-btn` buttons) progressing through the concept
+- Canvas-based rendering (no external charting library except Google Charts in Attention Tuner)
+- Dark/light theme support via CSS classes and color constants
+- `getCanvasColors()` function returns theme-appropriate color palette
+
+### Oscillation Detection Demo (transition between EEG and BOSC)
+Located in `docs/osc_detection_demo/`. Three animated steps:
+1. **Fourier Transform**: Animated sweep of test sine waves across frequencies, building up the spectrum progressively
+2. **Wavelet Transform**: Animated Morlet wavelet sliding across a signal with burst + transient, building a time-frequency map
+3. **The Limitation**: Shows that both oscillations and transients produce high wavelet power — motivates BOSC
+
+Both step 1 and 2 have "Replay Animation" buttons. Step 3 has a "Continue to BOSC Demo" link that scrolls to and auto-starts the BOSC demo.
+
+### BOSC Demo
+Located in `docs/bosc_demo/`. Five interactive steps:
+1. **Signal**: Simulated EEG with 1/f colored noise + embedded oscillation bursts (default 7 Hz)
+2. **Spectrum**: Power spectrum (log-log) on left canvas, spectrogram (time-frequency heatmap) on right canvas
+3. **Background**: Spectrum with 1/f regression fit on left; "Why 1/f Background Matters" bar chart (without vs with background correction) on right; background-only trace overlay on main signal canvas
+4. **Thresholds**: Spectrum with power threshold (P_T) on left; right canvas split into compact chi-square PDF (top) + three interactive duration threshold example panels A/B/C (bottom). Both threshold sliders (P_T percentile, D_T cycles) reactively update the visuals
+5. **Detection / Pepisode**: Detected oscillations highlighted on main signal; right canvas shows two example EEG traces from a paired-associate recognition task — Remembered (Hit, PEPISODE=0.90, green) vs Forgotten (Miss, PEPISODE=0.09, red)
+
+Key implementation details:
+- `extractComponents(signal, params)` decomposes signal into background + oscillation for step 3 visual
+- `generatePepSignal()` creates synthetic EEG traces with controlled detection proportions for step 5
+- Pepisode traces are cached (`pepTraceCache`) — bump `PEP_CACHE_VER` to regenerate
+- Power threshold visualization uses a compressed visual offset (`ptLogOffset`) that responds to the P_T slider
+- Duration threshold examples dynamically adjust case cycles based on D_T slider value
+
+### Attention Tuner
+Separate from the research demos — lives in `docs/attention_tuner/` with its own `index.html`, `script.js`, and `style.css`. Implements a cognitive memory recognition experiment with study/distractor/recognition phases. Uses Google Charts and localStorage for results.
+
+### Games Hub
+Four educational games in `docs/games/` — `brainwave_surfer/`, `erp_catcher/`, `memory_trace/`, `recall_rush/`. Share `game-shell.css` for UI styling and `leaderboard.js` for a global leaderboard system. Linked from `games.html`.
 
 ### Design System
+- **Theme:** Dark-first with light mode toggle. Theme state in `localStorage`, applied before first paint via inline `<script>` in `<head>`.
+- **Colors:** Primary blue `#7cb3f1`, accent `#5b8fd9`, neural green `#00d68f`, dark bg `#06080D`/`#1A1E29`. Demo canvases use their own color constants.
+- **Fonts:** Playfair Display (headings), Inter (body) — loaded from Google Fonts.
+- **CSS:** All in `docs/style.css` using custom properties. Demo-specific styles are inline `<style>` blocks in `research.html`.
 
-The site uses a dark neuroscience-themed design with:
-- CSS custom properties for consistent theming
-- Theta wave SVG background pattern
-- Inter font family for modern typography
-- Neural-inspired color palette (blues and greens)
-
-## Development Commands
-
-Since this is a static website, development is straightforward:
-
-- **Local development**: Open any `.html` file in a web browser
-- **Testing**: Manual browser testing across different devices/browsers
-- **File serving**: Use any static file server (e.g., `python -m http.server` in the `docs/` directory)
-
-## File Organization
-
-- HTML files use semantic structure with proper navigation
-- CSS uses modern features like custom properties and flexbox
-- JavaScript in the attention tuner uses vanilla DOM manipulation
-- All assets are self-contained with no external dependencies (except Google Charts)
-
-## Important Notes
-
-- The attention tuner experiment stores results in localStorage
-- SVG backgrounds are procedurally generated for the theta wave pattern
-- Site is designed to be fully responsive across devices
-- No build process required - direct file editing and browser refresh workflow
+### Key Conventions
+- Demo JS files are large single files (50-85KB) — all logic, rendering, and math in one IIFE
+- No npm, no bundler, no dependencies beyond Google Fonts and Google Charts (Attention Tuner only)
+- Canvas rendering uses raw Canvas 2D API throughout
+- Word lists loaded from `docs/words.txt` (used by Attention Tuner)
+- Research papers served as PDFs from `docs/papers/`

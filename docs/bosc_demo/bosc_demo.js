@@ -213,6 +213,32 @@
     return signal;
   }
 
+  // Extract oscillation component from signal (for visual decomposition)
+  function extractComponents(signal, params) {
+    const { oscFreq, oscAmp } = params;
+    const oscillation = new Float64Array(N);
+    const background = new Float64Array(N);
+
+    // Reconstruct the burst waveform that was added in generateSignal
+    const bursts = [BURST1, BURST2];
+    for (const [tStart, tEnd] of bursts) {
+      const iStart = Math.round(tStart * SR);
+      const iEnd = Math.min(Math.round(tEnd * SR), N);
+      const len = iEnd - iStart;
+      for (let i = 0; i < len; i++) {
+        const env = 0.5 * (1 - Math.cos((2 * Math.PI * i) / (len - 1)));
+        oscillation[iStart + i] = oscAmp * env * Math.sin(2 * Math.PI * oscFreq * (i / SR));
+      }
+    }
+
+    // Background = signal minus oscillation
+    for (let i = 0; i < N; i++) {
+      background[i] = signal[i] - oscillation[i];
+    }
+
+    return { background, oscillation };
+  }
+
   // =====================================================================
   // BOSC ANALYSIS
   // =====================================================================
@@ -543,6 +569,21 @@
       }
     }
 
+    // Draw background-only trace at step 3 (dim, behind the full signal)
+    if (step === 3 && state.components) {
+      ctx.beginPath();
+      ctx.strokeStyle = c.background1f;
+      ctx.globalAlpha = 0.4;
+      ctx.lineWidth = 1;
+      for (let i = 0; i < N; i++) {
+        const x = margin.left + (i / N) * plotW;
+        const y = margin.top + plotH / 2 - ((state.components.background[i] - mid) / padRange) * plotH;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1.0;
+    }
+
     // Draw signal trace
     ctx.beginPath();
     ctx.strokeStyle = step >= 4 ? c.signalDim : c.signal;
@@ -626,6 +667,20 @@
         font: '10px "Inter", sans-serif',
         color: c.axesLabel,
       });
+      if (step === 3) {
+        ctx.strokeStyle = c.background1f;
+        ctx.globalAlpha = 0.4;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(margin.left + plotW - 175, margin.top + 24);
+        ctx.lineTo(margin.left + plotW - 163, margin.top + 24);
+        ctx.stroke();
+        ctx.globalAlpha = 1.0;
+        drawText(ctx, "Background only (1/f)", margin.left + plotW - 160, margin.top + 24, {
+          font: '10px "Inter", sans-serif',
+          color: c.background1f,
+        });
+      }
     }
 
     // P_episode annotation (step 5)
@@ -697,7 +752,7 @@
       if (lp < pMin) pMin = lp;
       if (lp > pMax) pMax = lp;
     }
-    // Include threshold in range if showing
+    // Include threshold in range if showing, but only expand modestly
     if (step >= 4) {
       for (let fi = 0; fi < FREQUENCIES.length; fi++) {
         const lt = Math.log10(detection.thresholds[fi]);
@@ -746,20 +801,27 @@
       ctx.setLineDash([]);
     }
 
-    // Threshold line (step 4+)
+    // Threshold line (step 4+) — extends across full plot width
     if (step >= 4) {
-      // Fill region above threshold
+      // Threshold = background * ptMultiplier, so in log space:
+      // log10(threshold) = log10(bg) + log10(ptMultiplier)
+      // This is a straight line parallel to the background fit, shifted up
+      // Visual offset responds to PT slider: higher percentile = further from background
+      // Map percentile range (0.80–0.99) to a visible but compact offset
+      const ptPct = state.params.ptPercentile;
+      const ptLogOffset = 0.03 + (ptPct - 0.80) * (0.15 / 0.19); // 0.80→0.03, 0.99→0.18
+      const f0 = FREQUENCIES[0] * 0.8;
+      const f1 = FREQUENCIES[FREQUENCIES.length - 1] * 1.2;
+      const thP0 = bg.slope * Math.log10(f0) + bg.intercept + ptLogOffset;
+      const thP1 = bg.slope * Math.log10(f1) + bg.intercept + ptLogOffset;
+
+      // Fill region above threshold to top of plot
       ctx.fillStyle = c.thresholdFill;
       ctx.beginPath();
-      for (let fi = 0; fi < FREQUENCIES.length; fi++) {
-        const x = toX(Math.log10(FREQUENCIES[fi]));
-        const y = toY(Math.log10(detection.thresholds[fi]));
-        if (fi === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      // Close to top of plot
-      ctx.lineTo(toX(Math.log10(FREQUENCIES[FREQUENCIES.length - 1])), margin.top);
-      ctx.lineTo(toX(Math.log10(FREQUENCIES[0])), margin.top);
+      ctx.moveTo(toX(Math.log10(f0)), toY(thP0));
+      ctx.lineTo(toX(Math.log10(f1)), toY(thP1));
+      ctx.lineTo(toX(Math.log10(f1)), margin.top);
+      ctx.lineTo(toX(Math.log10(f0)), margin.top);
       ctx.closePath();
       ctx.fill();
 
@@ -768,12 +830,8 @@
       ctx.lineWidth = 2;
       ctx.setLineDash([4, 2]);
       ctx.beginPath();
-      for (let fi = 0; fi < FREQUENCIES.length; fi++) {
-        const x = toX(Math.log10(FREQUENCIES[fi]));
-        const y = toY(Math.log10(detection.thresholds[fi]));
-        if (fi === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
+      ctx.moveTo(toX(Math.log10(f0)), toY(thP0));
+      ctx.lineTo(toX(Math.log10(f1)), toY(thP1));
       ctx.stroke();
       ctx.setLineDash([]);
     }
@@ -837,9 +895,15 @@
     });
     ctx.restore();
 
-    // Legend
+    // Legend — positioned at top-right to avoid covering the spectral lines
+    const legendW = 150;
+    const legendH = step >= 4 ? 46 : (step >= 3 ? 32 : 16);
+    const legendX = margin.left + plotW - legendW - 4;
     let legendY = margin.top + 8;
-    const legendX = margin.left + 8;
+    ctx.fillStyle = c.canvasBg;
+    ctx.globalAlpha = 0.85;
+    ctx.fillRect(legendX - 4, legendY - 10, legendW + 8, legendH);
+    ctx.globalAlpha = 1.0;
     ctx.fillStyle = c.spectrum;
     ctx.fillRect(legendX, legendY - 4, 14, 3);
     drawText(ctx, "Power spectrum", legendX + 18, legendY, {
@@ -925,11 +989,11 @@
     if (!analysis || step < 5) {
       // Before step 5, show the chi-square explanation (step 4) or placeholder
       if (step === 4 && analysis) {
-        drawChi2Explanation(ctx, W, H, analysis);
+        drawThresholdsPanel(ctx, W, H, analysis);
       } else if (step === 3) {
-        drawBackgroundExplanation(ctx, W, H);
-      } else if (step === 2) {
         draw1fExplanation(ctx, W, H);
+      } else if (step === 2 && analysis) {
+        drawSpectrogram(ctx, W, H, analysis);
       } else {
         drawText(ctx, "Progress through steps to see results", W / 2, H / 2, {
           align: "center",
@@ -943,144 +1007,259 @@
     const plotW = W - margin.left - margin.right;
     const plotH = H - margin.top - margin.bottom;
 
-    {
-      const baseFont = 'bold 12px "Inter", sans-serif';
-      const baseSize = getFontSizePx(baseFont);
-      const subFont = withFontSize(baseFont, Math.max(8, Math.round(baseSize * 0.75)));
-      const subDy = Math.max(2, baseSize * 0.35);
-      drawInlineText(
-        ctx,
-        [
-          { text: "P", font: baseFont },
-          { text: "episode", font: subFont, dy: subDy },
-          { text: ": Proportion of Oscillation Time", font: baseFont },
-        ],
-        margin.left + plotW / 2,
-        14,
-        {
-          font: baseFont,
-          align: "center",
-        }
-      );
-    }
+    // ---------------------------------------------------------------
+    // Two stacked signal traces: Remembered (hit) vs Forgotten (miss)
+    // Recreates the style of Whitten et al. / Caplan lab P_episode figure
+    // ---------------------------------------------------------------
+    drawPepisodeTraces(ctx, W, H, analysis);
+  }
 
-    const pepisode = analysis.detection.pepisode;
+  // Seeded PRNG for reproducible example traces
+  function pepRng(seed) {
+    let s = seed | 0;
+    return function () {
+      s = (s + 0x6d2b79f5) | 0;
+      let t = Math.imul(s ^ (s >>> 15), 1 | s);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
 
-    // Bar chart
-    const barW = plotW / FREQUENCIES.length * 0.7;
-    const gap = plotW / FREQUENCIES.length * 0.3;
+  // Generate a realistic-looking EEG snippet with controllable oscillation proportion
+  function generatePepSignal(nSamples, sr, oscFreq, oscProportion, seed) {
+    const rng = pepRng(seed);
+    const sig = new Float64Array(nSamples);
+    const detected = new Uint8Array(nSamples);
 
-    for (let fi = 0; fi < FREQUENCIES.length; fi++) {
-      const x = margin.left + (fi / FREQUENCIES.length) * plotW + gap / 2;
-      const barH = pepisode[fi] * plotH;
-      const y = margin.top + plotH - barH;
-
-      // Color bars: highlight the target frequency
-      const isTarget = fi === analysis.targetFi;
-      ctx.fillStyle = isTarget ? c.pepisodePeak : c.pepisodeBar;
-      ctx.globalAlpha = isTarget ? 1.0 : 0.6;
-      ctx.fillRect(x, y, barW, barH);
-      ctx.globalAlpha = 1.0;
-
-      // Bar outline
-      ctx.strokeStyle = isTarget ? c.detected : c.spectrum;
-      ctx.lineWidth = isTarget ? 2 : 0.5;
-      ctx.strokeRect(x, y, barW, barH);
-    }
-
-    // Horizontal line at expected false-positive rate (5% for 95th percentile)
-    const baselineY = margin.top + plotH - 0.05 * plotH;
-    ctx.strokeStyle = c.threshold;
-    ctx.lineWidth = 1;
-    ctx.setLineDash([3, 3]);
-    ctx.beginPath();
-    ctx.moveTo(margin.left, baselineY);
-    ctx.lineTo(margin.left + plotW, baselineY);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    drawText(ctx, "5% baseline", margin.left + plotW - 5, baselineY - 6, {
-      font: '9px "Inter", sans-serif',
-      align: "right",
-      color: c.threshold,
-    });
-
-    // Axes
-    ctx.strokeStyle = c.axes;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(margin.left, margin.top);
-    ctx.lineTo(margin.left, margin.top + plotH);
-    ctx.lineTo(margin.left + plotW, margin.top + plotH);
-    ctx.stroke();
-
-    // X axis labels
-    const labelFreqs = [2, 4, 8, 16, 32];
-    for (const f of labelFreqs) {
-      let closestFi = 0;
-      let closestDist = Infinity;
-      for (let fi = 0; fi < FREQUENCIES.length; fi++) {
-        const d = Math.abs(FREQUENCIES[fi] - f);
-        if (d < closestDist) {
-          closestDist = d;
-          closestFi = fi;
-        }
+    // 1/f-ish background using summed sine waves at random phases
+    const phases = [];
+    for (let h = 0; h < 12; h++) phases.push(rng() * 6.28);
+    for (let i = 0; i < nSamples; i++) {
+      let v = 0;
+      // Low-frequency drift
+      v += 2.5 * Math.sin(2 * Math.PI * 0.8 * i / sr + phases[0]);
+      v += 1.8 * Math.sin(2 * Math.PI * 2.1 * i / sr + phases[1]);
+      v += 1.2 * Math.sin(2 * Math.PI * 3.5 * i / sr + phases[2]);
+      // Higher freq components
+      for (let h = 0; h < 6; h++) {
+        const f = 7 + h * 5.1;
+        v += (0.6 / (1 + h * 0.4)) * Math.sin(2 * Math.PI * f * i / sr + phases[3 + h]);
       }
-      const x = margin.left + (closestFi / FREQUENCIES.length) * plotW + (barW + gap) / 2;
-      drawText(ctx, f + "", x, margin.top + plotH + 14, {
-        align: "center",
-        color: c.axesLabel,
-        font: '10px "Inter", sans-serif',
-      });
+      // White-ish noise
+      v += (rng() - 0.5) * 1.5;
+      sig[i] = v;
     }
-    drawText(ctx, "Frequency (Hz)", margin.left + plotW / 2, margin.top + plotH + 28, {
-      align: "center",
-      color: c.axesLabel,
-      font: '10px "Inter", sans-serif',
-    });
 
-    // Y axis labels
-    for (let p = 0; p <= 1; p += 0.25) {
-      const y = margin.top + plotH - p * plotH;
-      drawText(ctx, p.toFixed(2), margin.left - 8, y, {
-        align: "right",
-        color: c.axesLabel,
-        font: '9px "Inter", sans-serif',
-      });
-      if (p > 0 && p < 1) {
-        ctx.strokeStyle = c.gridLine;
-        ctx.lineWidth = 0.5;
-        ctx.beginPath();
-        ctx.moveTo(margin.left, y);
-        ctx.lineTo(margin.left + plotW, y);
-        ctx.stroke();
+    // Place oscillation bursts to fill exactly oscProportion of total time
+    // For the "hit" case (high proportion): many bursts spread throughout
+    // For the "miss" case (low proportion): one small burst near the end
+    const totalOscSamples = Math.round(oscProportion * nSamples);
+
+    if (oscProportion > 0.5) {
+      // High detection: one contiguous detected block from the start
+      // with only the tail portion undetected
+      const phase = rng() * 6.28;
+      for (let i = 0; i < totalOscSamples && i < nSamples; i++) {
+        // Varying amplitude oscillation to look natural
+        const ampMod = 3.5 + 3.5 * Math.sin(2 * Math.PI * 0.7 * i / sr + phase * 0.5);
+        sig[i] += ampMod * Math.sin(2 * Math.PI * oscFreq * i / sr + phase);
+        detected[i] = 1;
+      }
+    } else {
+      // Low detection: place one small burst near the end of the signal
+      const burstLen = Math.min(totalOscSamples, nSamples);
+      const startPos = nSamples - burstLen - Math.round(0.02 * sr);
+      const phase = rng() * 6.28;
+      for (let i = 0; i < burstLen; i++) {
+        const env = 0.5 * (1 - Math.cos(2 * Math.PI * i / (burstLen - 1)));
+        sig[startPos + i] += 3.0 * env * Math.sin(2 * Math.PI * oscFreq * i / sr + phase);
+        detected[startPos + i] = 1;
       }
     }
 
-    // Y axis label
-    ctx.save();
-    ctx.translate(14, margin.top + plotH / 2);
-    ctx.rotate(-Math.PI / 2);
-    {
-      const baseFont = '10px "Inter", sans-serif';
-      const baseSize = getFontSizePx(baseFont);
-      const subFont = withFontSize(baseFont, Math.max(7, Math.round(baseSize * 0.75)));
-      const subDy = Math.max(2, baseSize * 0.35);
-      drawInlineText(
-        ctx,
-        [
-          { text: "P", font: baseFont },
-          { text: "episode", font: subFont, dy: subDy },
-        ],
-        0,
-        0,
-        {
-          font: baseFont,
-          align: "center",
-          color: c.axesLabel,
+    return { signal: sig, detected: detected };
+  }
+
+  // Cache the example traces so they don't regenerate on every render
+  let pepTraceCache = null;
+  const PEP_CACHE_VER = 4; // bump to regenerate
+
+  function getPepTraces() {
+    if (pepTraceCache && pepTraceCache._ver === PEP_CACHE_VER) return pepTraceCache;
+    const sr = 256;
+    const durMs = 1500;
+    const nSamples = Math.round(durMs / 1000 * sr);
+    const hitData = generatePepSignal(nSamples, sr, 4, 0.90, 1009);
+    const missData = generatePepSignal(nSamples, sr, 6.73, 0.09, 1059);
+    pepTraceCache = {
+      _ver: PEP_CACHE_VER,
+      sr: sr,
+      durMs: durMs,
+      nSamples: nSamples,
+      hit: hitData,
+      miss: missData,
+    };
+    return pepTraceCache;
+  }
+
+  function drawPepisodeTraces(ctx, W, H, analysis) {
+    const c = getCanvasColors();
+    const traces = getPepTraces();
+    const headerH = 18;
+    const margin = { top: headerH + 4, right: 10, bottom: 8, left: 48 };
+    const totalW = W - margin.left - margin.right;
+    const panelGap = 14;
+    const titleH = 14;
+    const traceH = (H - margin.top - margin.bottom - panelGap - titleH * 2 - 12) / 2;
+
+    // Section title
+    drawText(ctx, "Examples from Paired-Associate Recognition Task Trials", W / 2, headerH / 2 + 2, {
+      font: 'bold 10px "Inter", sans-serif', align: "center",
+    });
+
+    // Helper to draw one trace panel
+    function drawTrace(data, label, pepValue, detColor, rx, ry, rw, rh) {
+      const sig = data.signal;
+      const det = data.detected;
+      const n = traces.nSamples;
+
+      // Find range
+      let minV = Infinity, maxV = -Infinity;
+      for (let i = 0; i < n; i++) {
+        if (sig[i] < minV) minV = sig[i];
+        if (sig[i] > maxV) maxV = sig[i];
+      }
+      const range = (maxV - minV) || 1;
+      const mid = (maxV + minV) / 2;
+      const pad = range * 0.1;
+
+      // Title line
+      const pepStr = "PEPISODE = " + pepValue.toFixed(2);
+      drawText(ctx, label + ",  ", rx + 4, ry + 6, {
+        font: '8px "Inter", sans-serif', color: c.axesLabel,
+      });
+      // Measure label width to place PEPISODE value
+      ctx.font = '8px "Inter", sans-serif';
+      const labelW = ctx.measureText(label + ",  ").width;
+      drawText(ctx, pepStr, rx + 4 + labelW, ry + 6, {
+        font: 'bold 9px "Inter", sans-serif', color: detColor,
+      });
+
+      const plotTop = ry + titleH;
+      const plotH = rh - titleH - 14;
+      const plotW = rw;
+
+      // Grid lines
+      ctx.strokeStyle = c.gridLine; ctx.lineWidth = 0.3;
+      for (let ms = 150; ms <= traces.durMs; ms += 150) {
+        const gx = rx + (ms / traces.durMs) * plotW;
+        ctx.beginPath(); ctx.moveTo(gx, plotTop); ctx.lineTo(gx, plotTop + plotH); ctx.stroke();
+      }
+
+      // Zero line
+      const zeroY = plotTop + plotH / 2 - ((-mid) / (range + 2 * pad)) * plotH;
+      ctx.strokeStyle = c.gridLine; ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(rx, zeroY); ctx.lineTo(rx + plotW, zeroY);
+      ctx.stroke();
+
+      // Draw signal: non-detected in dim, detected in color
+      // We draw in segments to switch colors
+      function toY(v) {
+        return plotTop + plotH / 2 - ((v - mid) / (range + 2 * pad)) * plotH;
+      }
+      function toX(i) {
+        return rx + (i / n) * plotW;
+      }
+
+      // Draw signal as continuous line, switching color at detected boundaries
+      // This avoids gaps at transition points
+      let prevDet = det[0];
+      ctx.strokeStyle = prevDet ? detColor : c.signal;
+      ctx.lineWidth = prevDet ? 1.5 : 1;
+      ctx.beginPath();
+      ctx.moveTo(toX(0), toY(sig[0]));
+
+      for (let i = 1; i < n; i++) {
+        const x = toX(i), y = toY(sig[i]);
+        const curDet = det[i];
+
+        if (curDet !== prevDet) {
+          // Draw up to this point with current color, ending at this sample
+          ctx.lineTo(x, y);
+          ctx.stroke();
+          // Start new segment from this same point with new color
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.strokeStyle = curDet ? detColor : c.signal;
+          ctx.lineWidth = curDet ? 1.5 : 1;
+          prevDet = curDet;
+        } else {
+          ctx.lineTo(x, y);
         }
-      );
+      }
+      ctx.stroke();
+
+      // Axes
+      ctx.strokeStyle = c.axes; ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(rx, plotTop);
+      ctx.lineTo(rx, plotTop + plotH);
+      ctx.lineTo(rx + plotW, plotTop + plotH);
+      ctx.stroke();
+
+      // Y axis label
+      ctx.save();
+      ctx.translate(rx - 30, plotTop + plotH / 2);
+      ctx.rotate(-Math.PI / 2);
+      drawText(ctx, "Voltage [\u00B5V]", 0, 0, {
+        align: "center", color: c.axesLabel, font: '7px "Inter", sans-serif',
+      });
+      ctx.restore();
+
+      // Y ticks
+      const vStep = Math.ceil(range / 4 / 5) * 5 || 5;
+      for (let v = -vStep * 3; v <= vStep * 3; v += vStep) {
+        const ty = toY(v);
+        if (ty < plotTop || ty > plotTop + plotH) continue;
+        drawText(ctx, v + "", rx - 4, ty, {
+          align: "right", color: c.axesLabel, font: '7px "Inter", sans-serif',
+        });
+      }
+
+      // X axis labels (ms)
+      for (let ms = 150; ms <= traces.durMs; ms += 150) {
+        const tx = rx + (ms / traces.durMs) * plotW;
+        drawText(ctx, ms + "", tx, plotTop + plotH + 8, {
+          align: "center", color: c.axesLabel, font: '7px "Inter", sans-serif',
+        });
+      }
     }
-    ctx.restore();
+
+    // --- Top: Remembered (Hit) ---
+    const topY = margin.top;
+    drawTrace(
+      traces.hit,
+      "Electrode Fz, 4 Hz oscillations, Remembered Pair (Hit)",
+      0.90,
+      c.detected,
+      margin.left, topY, totalW, traceH + titleH
+    );
+
+    // --- Bottom: Forgotten (Miss) ---
+    const botY = topY + traceH + titleH + panelGap;
+    drawTrace(
+      traces.miss,
+      "Electrode Fz, 6.73 Hz oscillations, Forgotten Pair (Miss)",
+      0.09,
+      c.background1f,
+      margin.left, botY, totalW, traceH + titleH
+    );
+
+    // X axis title at very bottom
+    drawText(ctx, "Time [ms]", margin.left + totalW / 2, H - 2, {
+      align: "center", color: c.axesLabel, font: '8px "Inter", sans-serif',
+    });
   }
 
   // =====================================================================
@@ -1132,14 +1311,14 @@
     // Legend
     ctx.fillStyle = "rgba(255, 107, 107, 0.5)";
     ctx.fillRect(margin.left, margin.top + 5, 10, 10);
-    drawText(ctx, "Naive (biased)", margin.left + 14, margin.top + 10, {
+    drawText(ctx, "Without background correction", margin.left + 14, margin.top + 10, {
       font: '9px "Inter", sans-serif',
       color: c.background1f,
     });
 
     ctx.fillStyle = "rgba(76, 175, 80, 0.5)";
-    ctx.fillRect(margin.left + 100, margin.top + 5, 10, 10);
-    drawText(ctx, "BOSC (unbiased)", margin.left + 114, margin.top + 10, {
+    ctx.fillRect(margin.left, margin.top + 19, 10, 10);
+    drawText(ctx, "With background correction (BOSC)", margin.left + 14, margin.top + 24, {
       font: '9px "Inter", sans-serif',
       color: c.detected,
     });
@@ -1151,148 +1330,534 @@
     });
   }
 
-  function drawBackgroundExplanation(ctx, W, H) {
+  // Spectrogram (time-frequency heatmap) using wavelet power from BOSC analysis
+  function drawSpectrogram(ctx, W, H, analysis) {
     const c = getCanvasColors();
-
-    drawText(ctx, "The 1/f Background Spectrum", W / 2, 20, {
-      font: 'bold 12px "Inter", sans-serif',
-      align: "center",
-    });
-
-    const lines = [
-      "Brain signals have a characteristic shape:",
-      "power decreases as frequency increases,",
-      "following a 1/f\u1D43 pattern (colored noise).",
-      "",
-      "In log-log coordinates, this becomes a",
-      "straight line. BOSC fits this line to",
-      "estimate the non-oscillatory background.",
-      "",
-      "Anything significantly above this line",
-      "is a candidate for a real oscillation.",
-    ];
-
-    for (let i = 0; i < lines.length; i++) {
-      drawText(ctx, lines[i], W / 2, 48 + i * 16, {
-        font: '11px "Inter", sans-serif',
-        align: "center",
-        color: c.axesLabel,
-      });
-    }
-  }
-
-  function drawChi2Explanation(ctx, W, H, analysis) {
-    const c = getCanvasColors();
-    const margin = { top: 28, right: 15, bottom: 30, left: 55 };
+    const margin = { top: 28, right: 15, bottom: 35, left: 50 };
     const plotW = W - margin.left - margin.right;
     const plotH = H - margin.top - margin.bottom;
 
-    drawText(ctx, "Power Threshold from \u03C7\u00B2(2) Distribution", margin.left + plotW / 2, 14, {
-      font: 'bold 11px "Inter", sans-serif',
-      align: "center",
+    drawText(ctx, "Spectrogram (Wavelet Power)", margin.left + plotW / 2, 14, {
+      font: 'bold 12px "Inter", sans-serif', align: "center",
     });
 
-    // Draw chi-square(2) PDF
-    const xMax = 12;
-    const yMax = 0.55;
+    const power = analysis.power; // power[freqIdx][timeIdx]
+    const nFreqs = FREQUENCIES.length;
 
-    function toX(val) {
-      return margin.left + (val / xMax) * plotW;
+    // Find power range (use log scale)
+    let logMin = Infinity, logMax = -Infinity;
+    for (let fi = 0; fi < nFreqs; fi++) {
+      for (let t = 0; t < N; t++) {
+        const lp = Math.log10(power[fi][t] + 1e-20);
+        if (lp < logMin) logMin = lp;
+        if (lp > logMax) logMax = lp;
+      }
     }
-    function toY(val) {
-      return margin.top + plotH - (val / yMax) * plotH;
+    const logRange = logMax - logMin || 1;
+
+    // Draw heatmap: each frequency band gets a row, time across columns
+    const cellH = plotH / nFreqs;
+    const colW = plotW / N;
+
+    // Use ImageData for performance if canvas is large enough
+    for (let fi = 0; fi < nFreqs; fi++) {
+      for (let t = 0; t < N; t += Math.max(1, Math.floor(N / plotW))) {
+        const lp = Math.log10(power[fi][t] + 1e-20);
+        const norm = (lp - logMin) / logRange; // 0..1
+
+        // Color map: dark blue → cyan → yellow → red
+        let r, g, b;
+        if (norm < 0.25) {
+          const p = norm / 0.25;
+          r = Math.round(20 + p * 0);
+          g = Math.round(25 + p * 80);
+          b = Math.round(80 + p * 100);
+        } else if (norm < 0.5) {
+          const p = (norm - 0.25) / 0.25;
+          r = Math.round(20 + p * 50);
+          g = Math.round(105 + p * 100);
+          b = Math.round(180 - p * 50);
+        } else if (norm < 0.75) {
+          const p = (norm - 0.5) / 0.25;
+          r = Math.round(70 + p * 185);
+          g = Math.round(205 - p * 50);
+          b = Math.round(130 - p * 130);
+        } else {
+          const p = (norm - 0.75) / 0.25;
+          r = 255;
+          g = Math.round(155 - p * 115);
+          b = Math.round(0 + p * 20);
+        }
+
+        ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+        // Freq axis: bottom = low freq (fi=0), top = high freq (fi=nFreqs-1)
+        const y = margin.top + (nFreqs - 1 - fi) / nFreqs * plotH;
+        const x = margin.left + (t / N) * plotW;
+        const w = Math.ceil(colW * Math.max(1, Math.floor(N / plotW))) + 1;
+        ctx.fillRect(x, y, w, Math.ceil(cellH) + 1);
+      }
     }
 
-    // Fill area above threshold
-    const thresh95 = chi2Inv(0.95);
-    ctx.fillStyle = c.chi2Fill;
-    ctx.beginPath();
-    ctx.moveTo(toX(thresh95), toY(0));
-    for (let x = thresh95; x <= xMax; x += 0.1) {
-      ctx.lineTo(toX(x), toY(chi2Pdf(x)));
+    // Burst region outlines
+    ctx.strokeStyle = "rgba(255,255,255,0.3)";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 3]);
+    for (const [tStart, tEnd] of [BURST1, BURST2]) {
+      const x1 = margin.left + (tStart / DURATION) * plotW;
+      const x2 = margin.left + (tEnd / DURATION) * plotW;
+      ctx.strokeRect(x1, margin.top, x2 - x1, plotH);
     }
-    ctx.lineTo(toX(xMax), toY(0));
-    ctx.closePath();
-    ctx.fill();
-
-    // PDF curve
-    ctx.strokeStyle = c.chi2Line;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    for (let x = 0; x <= xMax; x += 0.1) {
-      const px = toX(x),
-        py = toY(chi2Pdf(x));
-      if (x === 0) ctx.moveTo(px, py);
-      else ctx.lineTo(px, py);
-    }
-    ctx.stroke();
-
-    // Threshold line
-    ctx.strokeStyle = c.chi2Threshold;
-    ctx.lineWidth = 2;
-    ctx.setLineDash([4, 2]);
-    ctx.beginPath();
-    ctx.moveTo(toX(thresh95), margin.top);
-    ctx.lineTo(toX(thresh95), margin.top + plotH);
-    ctx.stroke();
     ctx.setLineDash([]);
 
-    // Label
-    drawText(ctx, "95th %ile", toX(thresh95) + 4, margin.top + 10, {
-      font: '9px "Inter", sans-serif',
-      color: c.chi2Threshold,
-    });
-
-    {
-      const baseFont = 'bold 9px "Inter", sans-serif';
-      const baseSize = getFontSizePx(baseFont);
-      const subFont = withFontSize(baseFont, Math.max(7, Math.round(baseSize * 0.75)));
-      const subDy = Math.max(2, baseSize * 0.35);
-      drawInlineText(
-        ctx,
-        [
-          { text: "P", font: baseFont },
-          { text: "T", font: subFont, dy: subDy },
-        ],
-        toX(thresh95) + 4,
-        margin.top + 22,
-        {
-          font: baseFont,
-          color: c.chi2Threshold,
-        }
-      );
-    }
-
     // Axes
-    ctx.strokeStyle = c.axes;
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = c.axes; ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(margin.left, margin.top);
     ctx.lineTo(margin.left, margin.top + plotH);
     ctx.lineTo(margin.left + plotW, margin.top + plotH);
     ctx.stroke();
 
-    // Labels
-    drawText(ctx, "Power", margin.left + plotW / 2, margin.top + plotH + 14, {
-      align: "center",
-      color: c.axesLabel,
-      font: '10px "Inter", sans-serif',
-    });
-    drawText(ctx, "\u03C7\u00B2(2) distribution", margin.left + plotW / 2, margin.top + plotH + 26, {
-      align: "center",
-      font: '9px "Inter", sans-serif',
-      color: c.axesLabel,
+    // X axis
+    for (let t = 0; t <= DURATION; t += 2) {
+      const x = margin.left + (t / DURATION) * plotW;
+      drawText(ctx, t + "s", x, margin.top + plotH + 14, {
+        align: "center", color: c.axesLabel, font: '10px "Inter", sans-serif',
+      });
+    }
+    drawText(ctx, "Time", margin.left + plotW / 2, margin.top + plotH + 28, {
+      align: "center", color: c.axesLabel, font: '10px "Inter", sans-serif',
     });
 
+    // Y axis: frequency labels
+    const labelFreqs = [2, 4, 8, 16, 32];
+    for (const f of labelFreqs) {
+      let closestFi = 0, closestDist = Infinity;
+      for (let fi = 0; fi < nFreqs; fi++) {
+        const d = Math.abs(FREQUENCIES[fi] - f);
+        if (d < closestDist) { closestDist = d; closestFi = fi; }
+      }
+      const y = margin.top + (nFreqs - 1 - closestFi) / nFreqs * plotH + cellH / 2;
+      drawText(ctx, f + "", margin.left - 8, y, {
+        align: "right", color: c.axesLabel, font: '9px "Inter", sans-serif',
+      });
+    }
     ctx.save();
-    ctx.translate(16, margin.top + plotH / 2);
+    ctx.translate(14, margin.top + plotH / 2);
     ctx.rotate(-Math.PI / 2);
-    drawText(ctx, "Probability", 0, 0, {
-      align: "center",
-      color: c.axesLabel,
-      font: '10px "Inter", sans-serif',
+    drawText(ctx, "Frequency (Hz)", 0, 0, {
+      align: "center", color: c.axesLabel, font: '10px "Inter", sans-serif',
     });
     ctx.restore();
+
+    // Color bar legend (small, right side)
+    const cbX = margin.left + plotW - 8;
+    const cbW = 6;
+    const cbH = plotH * 0.4;
+    const cbY = margin.top + (plotH - cbH) / 2;
+    for (let i = 0; i < cbH; i++) {
+      const norm = 1 - i / cbH;
+      let r, g, b2;
+      if (norm < 0.25) {
+        const p = norm / 0.25;
+        r = Math.round(20); g = Math.round(25 + p * 80); b2 = Math.round(80 + p * 100);
+      } else if (norm < 0.5) {
+        const p = (norm - 0.25) / 0.25;
+        r = Math.round(20 + p * 50); g = Math.round(105 + p * 100); b2 = Math.round(180 - p * 50);
+      } else if (norm < 0.75) {
+        const p = (norm - 0.5) / 0.25;
+        r = Math.round(70 + p * 185); g = Math.round(205 - p * 50); b2 = Math.round(130 - p * 130);
+      } else {
+        const p = (norm - 0.75) / 0.25;
+        r = 255; g = Math.round(155 - p * 115); b2 = Math.round(0 + p * 20);
+      }
+      ctx.fillStyle = "rgb(" + r + "," + g + "," + b2 + ")";
+      ctx.fillRect(cbX, cbY + i, cbW, 1);
+    }
+    drawText(ctx, "High", cbX + cbW + 2, cbY + 4, {
+      font: '7px "Inter", sans-serif', color: c.axesLabel,
+    });
+    drawText(ctx, "Low", cbX + cbW + 2, cbY + cbH - 2, {
+      font: '7px "Inter", sans-serif', color: c.axesLabel,
+    });
+  }
+
+  function drawBackgroundDecomposition(ctx, W, H) {
+    const c = getCanvasColors();
+    if (!state.signal || !state.components) {
+      drawText(ctx, "Generate a signal first", W / 2, H / 2, { align: "center", color: c.axesLabel });
+      return;
+    }
+
+    const bg = state.components.background;
+    const osc = state.components.oscillation;
+    const margin = { top: 14, right: 10, bottom: 8, left: 40 };
+    const totalH = H - margin.top - margin.bottom;
+    const plotH = totalH * 0.38;
+    const gap = totalH * 0.12;
+    const plotW = W - margin.left - margin.right;
+
+    // Find ranges
+    let bgMin = Infinity, bgMax = -Infinity;
+    let oscMin = Infinity, oscMax = -Infinity;
+    for (let i = 0; i < N; i++) {
+      if (bg[i] < bgMin) bgMin = bg[i];
+      if (bg[i] > bgMax) bgMax = bg[i];
+      if (osc[i] < oscMin) oscMin = osc[i];
+      if (osc[i] > oscMax) oscMax = osc[i];
+    }
+    const bgRange = (bgMax - bgMin) || 1;
+    const bgMid = (bgMax + bgMin) / 2;
+    const oscRange = (oscMax - oscMin) || 1;
+    const oscMid = (oscMax + oscMin) / 2;
+
+    // --- Top: Background (1/f noise) ---
+    const bgTop = margin.top;
+    drawText(ctx, "Background (1/f colored noise)", margin.left + plotW / 2, bgTop + 2, {
+      font: 'bold 10px "Inter", sans-serif', align: "center", color: c.axesLabel,
+    });
+
+    // Burst regions
+    ctx.fillStyle = "rgba(85, 102, 119, 0.08)";
+    for (const [tStart, tEnd] of [BURST1, BURST2]) {
+      const x1 = margin.left + (tStart / DURATION) * plotW;
+      const x2 = margin.left + (tEnd / DURATION) * plotW;
+      ctx.fillRect(x1, bgTop + 12, x2 - x1, plotH);
+    }
+
+    ctx.strokeStyle = c.signalDim;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let i = 0; i < N; i++) {
+      const x = margin.left + (i / N) * plotW;
+      const y = bgTop + 12 + plotH / 2 - ((bg[i] - bgMid) / (bgRange * 1.1)) * plotH;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Axes
+    ctx.strokeStyle = c.axes; ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(margin.left, bgTop + 12);
+    ctx.lineTo(margin.left, bgTop + 12 + plotH);
+    ctx.lineTo(margin.left + plotW, bgTop + 12 + plotH);
+    ctx.stroke();
+
+    // --- "+" sign between traces ---
+    const plusY = bgTop + 12 + plotH + gap * 0.45;
+    drawText(ctx, "+", W / 2, plusY, {
+      font: 'bold 16px "Inter", sans-serif', align: "center", color: c.axesLabel,
+    });
+
+    // --- Bottom: Oscillation component ---
+    const oscTop = bgTop + 12 + plotH + gap;
+    drawText(ctx, "Oscillation component (embedded bursts)", margin.left + plotW / 2, oscTop + 2, {
+      font: 'bold 10px "Inter", sans-serif', align: "center", color: c.detected,
+    });
+
+    // Burst regions
+    ctx.fillStyle = c.burstRegion;
+    for (const [tStart, tEnd] of [BURST1, BURST2]) {
+      const x1 = margin.left + (tStart / DURATION) * plotW;
+      const x2 = margin.left + (tEnd / DURATION) * plotW;
+      ctx.fillRect(x1, oscTop + 12, x2 - x1, plotH);
+    }
+
+    ctx.strokeStyle = c.detected;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let i = 0; i < N; i++) {
+      const x = margin.left + (i / N) * plotW;
+      const y = oscTop + 12 + plotH / 2 - ((osc[i] - oscMid) / (oscRange * 1.1 || bgRange * 1.1)) * plotH;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Axes
+    ctx.strokeStyle = c.axes; ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(margin.left, oscTop + 12);
+    ctx.lineTo(margin.left, oscTop + 12 + plotH);
+    ctx.lineTo(margin.left + plotW, oscTop + 12 + plotH);
+    ctx.stroke();
+
+    // "= full signal" at bottom
+    drawText(ctx, "= Full signal (shown left)", W / 2, oscTop + 12 + plotH + 12, {
+      font: '10px "Inter", sans-serif', align: "center", color: c.axesLabel,
+    });
+  }
+
+  // Compact chi-square explanation drawn within a sub-region
+  function drawChi2Compact(ctx, rx, ry, rw, rh) {
+    const c = getCanvasColors();
+    const pad = { top: 16, right: 8, bottom: 18, left: 40 };
+    const plotW = rw - pad.left - pad.right;
+    const plotH = rh - pad.top - pad.bottom;
+
+    drawText(ctx, "Power Threshold: \u03C7\u00B2(2) at 95th %ile", rx + rw / 2, ry + 8, {
+      font: 'bold 10px "Inter", sans-serif', align: "center",
+    });
+
+    const xMax = 12, yMax = 0.55;
+    function toX(v) { return rx + pad.left + (v / xMax) * plotW; }
+    function toY(v) { return ry + pad.top + plotH - (v / yMax) * plotH; }
+
+    const thresh95 = chi2Inv(0.95);
+    ctx.fillStyle = c.chi2Fill;
+    ctx.beginPath();
+    ctx.moveTo(toX(thresh95), toY(0));
+    for (let x = thresh95; x <= xMax; x += 0.2) ctx.lineTo(toX(x), toY(chi2Pdf(x)));
+    ctx.lineTo(toX(xMax), toY(0));
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.strokeStyle = c.chi2Line; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let x = 0; x <= xMax; x += 0.2) {
+      const px = toX(x), py = toY(chi2Pdf(x));
+      if (x === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+
+    ctx.strokeStyle = c.chi2Threshold; ctx.lineWidth = 1.5;
+    ctx.setLineDash([3, 2]);
+    ctx.beginPath();
+    ctx.moveTo(toX(thresh95), ry + pad.top);
+    ctx.lineTo(toX(thresh95), ry + pad.top + plotH);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    drawText(ctx, "95th %ile \u2192 P\u1D40", toX(thresh95) + 3, ry + pad.top + 8, {
+      font: '8px "Inter", sans-serif', color: c.chi2Threshold,
+    });
+
+    ctx.strokeStyle = c.axes; ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(rx + pad.left, ry + pad.top);
+    ctx.lineTo(rx + pad.left, ry + pad.top + plotH);
+    ctx.lineTo(rx + pad.left + plotW, ry + pad.top + plotH);
+    ctx.stroke();
+
+    drawText(ctx, "Power", rx + rw / 2, ry + pad.top + plotH + 10, {
+      align: "center", color: c.axesLabel, font: '8px "Inter", sans-serif',
+    });
+  }
+
+  // Draw three duration threshold example cases
+  // Draw three duration threshold example cases (style after Whitten et al. Fig 1)
+  // Interactive: responds to current dtCycles from the slider
+  function drawDurationExamples(ctx, rx, ry, rw, rh, params) {
+    const c = getCanvasColors();
+    const freq = params.oscFreq || 10;
+    const dtCycles = params.dtCycles || 3;
+
+    // Case A: always has dtCycles + 1 cycles and strong power → detected
+    // Case B: always has dtCycles - 1.5 cycles and strong power → too short
+    // Case C: always has dtCycles + 2 cycles but weak power → too weak
+    const aCycles = dtCycles + 1;
+    const bCycles = Math.max(1, dtCycles - 1.5);
+    const cCycles = dtCycles + 2;
+
+    const cases = [
+      { letter: "A", oscCycles: aCycles, aboveThresh: true,
+        durPass: aCycles >= dtCycles, pwrPass: true },
+      { letter: "B", oscCycles: bCycles, aboveThresh: true,
+        durPass: bCycles >= dtCycles, pwrPass: true },
+      { letter: "C", oscCycles: cCycles, aboveThresh: false,
+        durPass: cCycles >= dtCycles, pwrPass: false },
+    ];
+    // Derive overall pass from both checks
+    for (const cs of cases) cs.pass = cs.durPass && cs.pwrPass;
+
+    const gap = 6;
+    const panelW = (rw - gap * (cases.length + 1)) / cases.length;
+    const panelTop = ry + 4;
+    const panelH = rh - 8;
+
+    for (let ci = 0; ci < cases.length; ci++) {
+      const cs = cases[ci];
+      const px = rx + gap + ci * (panelW + gap);
+      const headerH = 18;
+      const plotTop = panelTop + headerH;
+      const plotH = panelH - headerH - 32;
+      const plotW = panelW;
+      const midY = plotTop + plotH * 0.5;
+
+      // --- Header: letter + pass/fail label ---
+      const letterColor = cs.pass ? c.detected : c.background1f;
+      const subtitle = cs.pass ? "(Oscillatory)" : "(Non-oscillatory)";
+      drawText(ctx, cs.letter, px + 4, panelTop + 7, {
+        font: 'bold 11px "Inter", sans-serif', color: letterColor,
+      });
+      drawText(ctx, subtitle, px + 16, panelTop + 7, {
+        font: '9px "Inter", sans-serif', color: c.axesLabel,
+      });
+
+      // --- Power threshold: two bold red dashed horizontal lines ---
+      // Threshold height responds to ptPercentile (0.80–0.99)
+      // Map percentile to visual threshold: higher percentile = stricter = lines further out
+      const ptPct = params.ptPercentile || 0.95;
+      const ptFrac = 0.15 + (ptPct - 0.80) * (0.35 / 0.19); // maps 0.80→0.15, 0.99→0.50
+      const ptColor = c.background1f;
+      const ptLineW = 2;
+      const ptY_top = midY - plotH * ptFrac;
+      const ptY_bot = midY + plotH * ptFrac;
+      // Signal amplitude: "above" cases exceed threshold, "below" cases don't
+      const amp = cs.aboveThresh ? plotH * (ptFrac + 0.10) : plotH * (ptFrac - 0.12);
+
+      ctx.strokeStyle = ptColor;
+      ctx.lineWidth = ptLineW;
+      ctx.setLineDash([6, 3]);
+      ctx.beginPath();
+      ctx.moveTo(px, ptY_top);
+      ctx.lineTo(px + plotW, ptY_top);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(px, ptY_bot);
+      ctx.lineTo(px + plotW, ptY_bot);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Red double-arrow for power threshold (left side)
+      const arrowX = px + 6;
+      ctx.strokeStyle = ptColor; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(arrowX, ptY_top + 2);
+      ctx.lineTo(arrowX, ptY_bot - 2);
+      ctx.stroke();
+      // Arrow heads
+      ctx.beginPath();
+      ctx.moveTo(arrowX - 2.5, ptY_top + 5); ctx.lineTo(arrowX, ptY_top + 1); ctx.lineTo(arrowX + 2.5, ptY_top + 5);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(arrowX - 2.5, ptY_bot - 5); ctx.lineTo(arrowX, ptY_bot - 1); ctx.lineTo(arrowX + 2.5, ptY_bot - 5);
+      ctx.stroke();
+      // Label
+      ctx.save();
+      ctx.translate(arrowX - 4, midY);
+      ctx.rotate(-Math.PI / 2);
+      drawText(ctx, "Power", 0, 0, {
+        font: '6px "Inter", sans-serif', align: "center", color: ptColor,
+      });
+      ctx.restore();
+
+      // --- Duration threshold: two green dashed vertical lines ---
+      const dtColor = c.detected;
+      // Duration window spans the oscillation cycles (centered)
+      const cycleDur = cs.oscCycles / freq; // seconds
+      const totalDur = 6 / freq; // total visible window in seconds
+      const dtStartFrac = 0.5 - (cycleDur / totalDur) / 2;
+      const dtEndFrac = 0.5 + (cycleDur / totalDur) / 2;
+      const dtX1 = px + 14 + dtStartFrac * (plotW - 18);
+      const dtX2 = px + 14 + dtEndFrac * (plotW - 18);
+
+      ctx.strokeStyle = dtColor;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 3]);
+      ctx.beginPath();
+      ctx.moveTo(dtX1, plotTop);
+      ctx.lineTo(dtX1, plotTop + plotH);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(dtX2, plotTop);
+      ctx.lineTo(dtX2, plotTop + plotH);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Green double-arrow for duration threshold (below signal)
+      const darrowY = plotTop + plotH - 4;
+      ctx.strokeStyle = dtColor; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(dtX1 + 2, darrowY);
+      ctx.lineTo(dtX2 - 2, darrowY);
+      ctx.stroke();
+      // Arrow heads
+      ctx.beginPath();
+      ctx.moveTo(dtX1 + 5, darrowY - 2); ctx.lineTo(dtX1 + 1, darrowY); ctx.lineTo(dtX1 + 5, darrowY + 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(dtX2 - 5, darrowY - 2); ctx.lineTo(dtX2 - 1, darrowY); ctx.lineTo(dtX2 - 5, darrowY + 2);
+      ctx.stroke();
+
+      // Duration label below arrow
+      drawText(ctx, "Duration", (dtX1 + dtX2) / 2, darrowY + 8, {
+        font: '6px "Inter", sans-serif', align: "center", color: dtColor,
+      });
+
+      // --- Signal: sinusoid extending across the full panel ---
+      const sigColor = cs.pass ? c.spectrum : c.spectrum;
+      const totalSamples = Math.round(totalDur * 256);
+      const burstStart = Math.round(dtStartFrac * totalSamples);
+      const burstEnd = Math.round(dtEndFrac * totalSamples);
+
+      ctx.strokeStyle = sigColor;
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      let started = false;
+      for (let s = 0; s < totalSamples; s++) {
+        const t = s / 256;
+        const inBurst = s >= burstStart && s < burstEnd;
+        // Signal: full-amplitude sine inside burst, small noise outside
+        let val;
+        if (inBurst) {
+          val = amp * Math.sin(2 * Math.PI * freq * t);
+        } else {
+          // Small wandering signal outside the burst
+          val = plotH * 0.06 * Math.sin(2 * Math.PI * 1.5 * t + ci * 2)
+              + plotH * 0.04 * Math.sin(2 * Math.PI * 4.2 * t + ci);
+        }
+        const sx = px + 14 + (s / totalSamples) * (plotW - 18);
+        const sy = midY - val;
+        if (!started) { ctx.moveTo(sx, sy); started = true; } else ctx.lineTo(sx, sy);
+      }
+      ctx.stroke();
+
+      // --- Result labels at bottom: Duration check, Power check, then Detected/Not ---
+      const lblX = px + 14;
+      const lblBaseY = plotTop + plotH + 2;
+      const lineH = 9;
+
+      // Duration line
+      const durIcon = cs.durPass ? "\u2713" : "\u2717";
+      const durColor = cs.durPass ? c.detected : c.background1f;
+      const durLabel = cs.durPass ? "Duration \u2713" : "Duration \u2717 too short";
+      drawText(ctx, durLabel, lblX, lblBaseY, {
+        font: '7px "Inter", sans-serif', color: durColor,
+      });
+
+      // Power line
+      const pwrIcon = cs.pwrPass ? "\u2713" : "\u2717";
+      const pwrColor = cs.pwrPass ? c.detected : c.background1f;
+      const pwrLabel = cs.pwrPass ? "Power \u2713" : "Power \u2717 too weak";
+      drawText(ctx, pwrLabel, lblX, lblBaseY + lineH, {
+        font: '7px "Inter", sans-serif', color: pwrColor,
+      });
+
+      // Overall result
+      const resultColor = cs.pass ? c.detected : c.background1f;
+      const resultLabel = cs.pass ? "\u2713 Detected!" : "\u2717 Not Detected!";
+      drawText(ctx, resultLabel, px + plotW / 2, lblBaseY + lineH * 2 + 2, {
+        font: 'bold 8px "Inter", sans-serif', align: "center", color: resultColor,
+      });
+    }
+  }
+
+  // Combined thresholds panel: compact chi-square + duration examples
+  function drawThresholdsPanel(ctx, W, H, analysis) {
+    const c = getCanvasColors();
+    const topH = H * 0.42;
+    const botH = H * 0.52;
+    const sepY = topH + H * 0.03;
+
+    drawChi2Compact(ctx, 0, 0, W, topH);
+
+    // Separator
+    ctx.strokeStyle = c.gridLine; ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(10, sepY);
+    ctx.lineTo(W - 10, sepY);
+    ctx.stroke();
+
+    drawDurationExamples(ctx, 0, sepY + 4, W, botH, state.params);
   }
 
   // =====================================================================
@@ -1303,7 +1868,7 @@
     step: 0, // 0 = start screen, 1-5 = steps
     seed: 42,
     params: {
-      oscFreq: 10,
+      oscFreq: 7,
       oscAmp: 2.0,
       alpha: 1.5,
       ptPercentile: 0.95,
@@ -1321,11 +1886,11 @@
     // Step 2: Power Spectrum
     '<strong>Step 2: The Power Spectrum.</strong> The power spectrum shows how much energy is at each frequency. Notice power naturally decreases with frequency (the 1/f shape). A naive approach would find "oscillations" everywhere at low frequencies simply because power is always higher there \u2014 a frequency bias.',
     // Step 3: Background Fit
-    '<strong>Step 3: Fitting the Background.</strong> BOSC fits the 1/f background with a linear regression in log-log coordinates (red dashed line). This models what the signal would look like with <em>no</em> oscillations \u2014 just colored noise. The peak rising above this line is a candidate oscillation.',
+    '<strong>Step 3: Fitting the Background.</strong> BOSC fits the 1/f background with a linear regression in log-log coordinates (red dashed line). The <span style="color:#ff6b6b">red trace</span> on the signal shows the background-only component (colored noise). The right panel decomposes the signal into background + oscillation. Anything rising above the fitted line is a candidate oscillation.',
     // Step 4: Thresholds
-    '<strong>Step 4: Two Thresholds.</strong> BOSC applies a <em>power threshold</em> (P<sub>T</sub>) derived from the 95th percentile of the \u03C7\u00B2(2) distribution scaled to the background estimate. It also requires a <em>duration threshold</em> (D<sub>T</sub>) of at least 3 complete cycles \u2014 rejecting brief transients that aren\'t truly rhythmic.',
-    // Step 5: Detection
-    '<strong>Step 5: BOSC Detection.</strong> Segments where <em>both</em> thresholds are exceeded are tagged as oscillatory (green). P<sub>episode</sub> shows the proportion of time oscillations are detected at each frequency. Notice how non-oscillatory frequencies stay near the 5% false-positive baseline \u2014 BOSC removes the frequency bias. Adjust the sliders to explore!',
+    '<strong>Step 4: Two Thresholds.</strong> BOSC applies a <em>power threshold</em> (P<sub>T</sub>) \u2014 the 95th percentile of the \u03C7\u00B2(2) distribution scaled to the background. It also requires a <em>duration threshold</em> (D<sub>T</sub>) of at least 3 complete cycles, rejecting brief transients. Signals must exceed <em>both</em> to be classified as oscillatory.',
+    // Step 5: Detection / P_episode
+    '<strong>Step 5: Detection / P<sub>episode</sub>.</strong> P<sub>episode</sub>(f) is the proportion of time BOSC detected oscillations at frequency f. The chart compares a "remembered" condition (with strong frontal midline theta, FMT) to a "forgotten" condition (less FMT). More detected oscillations in theta (4\u201310 Hz) for remembered trials reflects the role of theta in memory encoding. Adjust the sliders to explore!',
   ];
 
   function getEl(id) {
@@ -1507,6 +2072,9 @@
       alpha: state.params.alpha,
       seed: state.seed,
     });
+
+    // Decompose signal into background + oscillation components
+    state.components = extractComponents(state.signal, state.params);
 
     // Run BOSC analysis
     state.analysis = runBOSC(state.signal, state.params);

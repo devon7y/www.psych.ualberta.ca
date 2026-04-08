@@ -140,6 +140,109 @@
       color: #2c3e50;
   }
 
+  /* Oscillation Detection Issues Demo Styles */
+  .osc-step-nav {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+  }
+  .osc-step-btn {
+      background-color: #2d3447 !important;
+      color: #8899aa !important;
+      border: 1px solid #3a4254 !important;
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s ease;
+  }
+  .osc-step-btn:hover {
+      background-color: #3a4254 !important;
+      color: #c8d8e8 !important;
+  }
+  .osc-step-btn.active {
+      background-color: #5b8fd9 !important;
+      color: #fff !important;
+      border-color: #5b8fd9 !important;
+  }
+  .osc-canvas-row {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 14px;
+      gap: 14px;
+      flex-wrap: wrap;
+  }
+  .osc-canvas-row canvas {
+      border-radius: 6px;
+      border: 1px solid #3a4254;
+  }
+  .osc-info-text {
+      background: #2d3447;
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #c8d8e8;
+  }
+  .osc-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      padding-top: 10px;
+      border-top: 1px solid #3a4254;
+      margin-top: 10px;
+  }
+  #osc-container {
+      display: flex;
+      flex-direction: column;
+  }
+  #osc-container.osc-active {
+      height: 680px;
+  }
+  #osc-start-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+  }
+  #osc-viz-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+  }
+  .osc-viz-spacer {
+      flex: 1;
+  }
+
+  [data-theme="light"] .osc-step-btn {
+      background-color: #e2e8f0 !important;
+      color: #4a5568 !important;
+      border: 1px solid #e0e6ed !important;
+  }
+  [data-theme="light"] .osc-step-btn:hover {
+      background-color: #cbd5e0 !important;
+      color: #2d3748 !important;
+  }
+  [data-theme="light"] .osc-step-btn.active {
+      background-color: #4a90e2 !important;
+      color: #fff !important;
+      border-color: #4a90e2 !important;
+  }
+  [data-theme="light"] .osc-canvas-row canvas {
+      border: 1px solid #e0e6ed;
+  }
+  [data-theme="light"] .osc-info-text {
+      background: #edf2f7;
+      color: #2d3748;
+  }
+  [data-theme="light"] .osc-controls {
+      border-top: 1px solid #e0e6ed;
+  }
+
   /* BOSC Demo Styles */
   .bosc-step-nav {
       display: flex;
@@ -1065,6 +1168,9 @@
       #eeg-container.eeg-active {
           height: 1280px;
       }
+      #osc-container.osc-active {
+          height: 900px;
+      }
       #bosc-container.bosc-active,
       #sub-container.sub-active {
           height: 1160px;
@@ -1077,6 +1183,7 @@
       }
 
       .eeg-bottom-row,
+      .osc-canvas-row,
       .bosc-bottom-row,
       .sub-canvas-row,
       .erp-bottom-row,
@@ -1088,6 +1195,7 @@
       }
 
       .eeg-bottom-row canvas,
+      .osc-canvas-row canvas,
       .bosc-bottom-row canvas,
       .sub-canvas-row canvas,
       .erp-bottom-row canvas,
@@ -1097,6 +1205,7 @@
       }
 
       .eeg-viz-spacer,
+      .osc-viz-spacer,
       .bosc-viz-spacer,
       .sub-viz-spacer,
       .erp-viz-spacer,
@@ -1231,6 +1340,43 @@
 			</div>
 
 			<div class="post">
+				<h2 class="title"><a href="#">Classic Oscillation Detection &mdash; The Problem</a></h2>
+				<div class="entry">
+					<p>Brain signals contain oscillations that play key roles in cognition. But how do we detect them? The Fourier transform reveals which frequencies are present, yet discards all timing information. Wavelet transforms recover time resolution, but even they can be fooled &mdash; a sharp transient produces high power that looks just like a real oscillation. Explore the demo below to see why a smarter method is needed.</p>
+
+					<div class="game-embed" id="osc-container">
+						<div id="osc-start-screen" style="text-align: center; padding: 20px;">
+							<h1 style="font-size: 1.8rem; margin-bottom: 10px;">Classic Oscillation Detection</h1>
+							<p style="margin-bottom: 5px;">Why standard spectral methods are not enough for detecting brain oscillations.</p>
+							<p style="font-size: 0.85em; margin-bottom: 15px; opacity: 0.7;">Fourier &amp; Wavelet Transforms: Power &ne; Oscillation</p>
+							<button id="osc-start-btn">Start Demo</button>
+						</div>
+
+						<div id="osc-viz-area" style="display: none;">
+							<div class="osc-step-nav">
+								<button class="osc-step-btn" data-step="1">1. Fourier Transform</button>
+								<button class="osc-step-btn" data-step="2">2. Wavelet Transform</button>
+								<button class="osc-step-btn" data-step="3">3. The Limitation</button>
+							</div>
+
+							<div class="osc-canvas-row" id="osc-bottom-row">
+								<canvas id="osc-canvas-main"></canvas>
+								<canvas id="osc-canvas-right"></canvas>
+							</div>
+
+							<p id="osc-info-text" class="osc-info-text" style="display: none;"></p>
+							<div class="osc-viz-spacer"></div>
+						</div>
+
+						<div id="osc-controls-area" class="osc-controls" style="display: none;">
+							<button id="osc-replay-btn" style="display: none;">Replay Animation</button>
+							<a id="osc-bosc-link" href="#bosc-container" style="display: none; padding: 6px 16px; background: #4CAF50; color: #fff; border-radius: 4px; text-decoration: none; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.2s ease;">&#x1F447; Continue to BOSC Demo</a>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="post">
 				<h2 class="title"><a href="#">Better OSCillation Detection (BOSC)</a></h2>
 				<div class="entry">
 					<p>Brain signals contain rhythmic activity (oscillations) that are thought to play key roles in cognition. But detecting these oscillations is surprisingly tricky: brain signals naturally have more power at low frequencies (a "1/f" pattern), so naive methods are biased toward finding oscillations at low frequencies even when none exist. BOSC solves this. Explore the interactive demo below to see how.</p>
@@ -1249,7 +1395,7 @@
 								<button class="bosc-step-btn" data-step="2">2. Spectrum</button>
 								<button class="bosc-step-btn" data-step="3">3. Background</button>
 								<button class="bosc-step-btn" data-step="4">4. Thresholds</button>
-								<button class="bosc-step-btn" data-step="5">5. Detection</button>
+								<button class="bosc-step-btn" data-step="5">5. Detection / Pepisode</button>
 							</div>
 
 							<div class="bosc-canvas-row">
@@ -1266,8 +1412,8 @@
 
 						<div id="bosc-controls-area" class="bosc-controls" style="display: none;">
 								<div class="bosc-control-group">
-									<label>Oscillation Freq: <span id="bosc-freq-val">10</span> Hz</label>
-									<input type="range" id="bosc-freq" min="4" max="24" step="1" value="10" />
+									<label>Oscillation Freq: <span id="bosc-freq-val">7</span> Hz</label>
+									<input type="range" id="bosc-freq" min="4" max="24" step="1" value="7" />
 								</div>
 								<div class="bosc-control-group">
 									<label>Oscillation Power: <span id="bosc-amp-val">4.0</span></label>
@@ -1532,6 +1678,7 @@
 <script src="erp_memory_demo/erp_demo.js"></script>
 <script src="clf_demo/clf_demo.js"></script>
 <script src="attention_tuner/script.js"></script>
+<script src="osc_detection_demo/osc_detection_demo.js"></script>
 <script src="bosc_demo/bosc_demo.js"></script>
 <script src="subsetting_demo/subsetting_demo.js"></script>
 <script src="eeg_demo/eeg_demo.js"></script>
