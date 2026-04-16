@@ -1,6 +1,6 @@
 /**
  * BOSC Interactive Demo
- * Better OSCillation Detection - Computational Memory Lab
+ * Better OSCillation detection - Computational Memory Lab
  * University of Alberta
  *
  * Implements a browser-based interactive demonstration of the BOSC method
@@ -30,9 +30,18 @@
     FREQUENCIES.push(Math.pow(2, n / 4));
   }
 
-  // Burst locations (in seconds) - two oscillation bursts
-  const BURST1 = [1.0, 3.5]; // 2.5 seconds
-  const BURST2 = [5.0, 7.0]; // 2.0 seconds
+  // Signal ground-truth regions (in seconds)
+  // BURST1: a true sustained oscillation (rhythmic activity)
+  // BURST2: a region of intermittent transient bursts — high power, no sustained rhythm
+  //         (what a naive power measure flags as "oscillation" but BOSC correctly rejects)
+  const BURST1 = [1.0, 3.5];  // 2.5 seconds, sustained
+  const BURST2 = [5.65, 6.35]; // narrow region highlighting a single sharp transient
+  // A monophasic Gaussian spike (no sinusoidal modulation) — broadband, visibly
+  // non-rhythmic. Produces strong wavelet power at many frequencies for a brief
+  // instant, but its duration is far below BOSC's 3-cycle threshold.
+  const TRANSIENT_CENTERS = [6.0];   // seconds (absolute time)
+  const TRANSIENT_SIGMA = 0.045;     // envelope std dev in seconds (spike width)
+  const TRANSIENT_AMP_SCALE = 2.4;   // peak amplitude relative to oscAmp
 
   // Colors
   const COLORS = {
@@ -53,6 +62,7 @@
     text: "#c8d8e8",
     gridLine: "rgba(60, 75, 95, 0.5)",
     burstRegion: "rgba(76, 175, 80, 0.08)",
+    burstRegionTransient: "rgba(255, 183, 130, 0.18)",
     canvasBg: "#141924",
     chi2Fill: "rgba(255, 107, 107, 0.3)",
     chi2Line: "#ff6b6b",
@@ -197,20 +207,45 @@
     rms = Math.sqrt(rms / N);
     for (let i = 0; i < N; i++) signal[i] /= rms;
 
-    // Add oscillation bursts with Hann window envelopes
-    const bursts = [BURST1, BURST2];
-    for (const [tStart, tEnd] of bursts) {
-      const iStart = Math.round(tStart * SR);
-      const iEnd = Math.min(Math.round(tEnd * SR), N);
-      const len = iEnd - iStart;
-      for (let i = 0; i < len; i++) {
-        // Hann window envelope
-        const env = 0.5 * (1 - Math.cos((2 * Math.PI * i) / (len - 1)));
-        signal[iStart + i] += oscAmp * env * Math.sin(2 * Math.PI * oscFreq * (i / SR));
-      }
-    }
+    // Add the sustained oscillation burst (BURST1) with a Hann-window envelope
+    addSustainedBurst(signal, BURST1[0], BURST1[1], oscAmp, oscFreq);
+
+    // Add the intermittent transient bursts inside the BURST2 region
+    addTransientBursts(signal, oscAmp, oscFreq);
 
     return signal;
+  }
+
+  // Hann-windowed sustained oscillation added in-place
+  function addSustainedBurst(target, tStart, tEnd, oscAmp, oscFreq) {
+    const iStart = Math.round(tStart * SR);
+    const iEnd = Math.min(Math.round(tEnd * SR), N);
+    const len = iEnd - iStart;
+    for (let i = 0; i < len; i++) {
+      const env = 0.5 * (1 - Math.cos((2 * Math.PI * i) / (len - 1)));
+      target[iStart + i] += oscAmp * env * Math.sin(2 * Math.PI * oscFreq * (i / SR));
+    }
+  }
+
+  // Monophasic Gaussian spike(s) added in-place — a broadband transient event.
+  // No sine modulation, so the spike visually reads as a single sharp peak.
+  // It still contains power at the target frequency (wide-band Gaussian spectrum),
+  // but its duration is far below BOSC's 3-cycle threshold.
+  // The oscFreq parameter is intentionally unused (shape is purely envelope).
+  function addTransientBursts(target, oscAmp, _oscFreq) {
+    const halfWidth = Math.round(5 * TRANSIENT_SIGMA * SR);
+    const twoSigma2 = 2 * TRANSIENT_SIGMA * TRANSIENT_SIGMA;
+    const amp = TRANSIENT_AMP_SCALE * oscAmp;
+    for (const t0 of TRANSIENT_CENTERS) {
+      const i0 = Math.round(t0 * SR);
+      const iLo = Math.max(0, i0 - halfWidth);
+      const iHi = Math.min(N, i0 + halfWidth);
+      for (let i = iLo; i < iHi; i++) {
+        const dt = (i - i0) / SR;
+        const env = Math.exp(-(dt * dt) / twoSigma2);
+        target[i] += amp * env;
+      }
+    }
   }
 
   // Extract oscillation component from signal (for visual decomposition)
@@ -219,17 +254,9 @@
     const oscillation = new Float64Array(N);
     const background = new Float64Array(N);
 
-    // Reconstruct the burst waveform that was added in generateSignal
-    const bursts = [BURST1, BURST2];
-    for (const [tStart, tEnd] of bursts) {
-      const iStart = Math.round(tStart * SR);
-      const iEnd = Math.min(Math.round(tEnd * SR), N);
-      const len = iEnd - iStart;
-      for (let i = 0; i < len; i++) {
-        const env = 0.5 * (1 - Math.cos((2 * Math.PI * i) / (len - 1)));
-        oscillation[iStart + i] = oscAmp * env * Math.sin(2 * Math.PI * oscFreq * (i / SR));
-      }
-    }
+    // Reconstruct the exact waveform that was added in generateSignal
+    addSustainedBurst(oscillation, BURST1[0], BURST1[1], oscAmp, oscFreq);
+    addTransientBursts(oscillation, oscAmp, oscFreq);
 
     // Background = signal minus oscillation
     for (let i = 0; i < N; i++) {
@@ -427,6 +454,7 @@
         canvasBg: "#f7fafc",
         pepisodeBg: "#e2e8f0",
         burstRegion: "rgba(76, 175, 80, 0.1)",
+        burstRegionTransient: "rgba(255, 160, 90, 0.22)",
       };
     }
     return COLORS;
@@ -527,12 +555,16 @@
     const padRange = range * 1.1;
     const mid = (maxVal + minVal) / 2;
 
-    // Draw burst regions (ground truth)
+    // Draw burst regions (ground truth): green = rhythmic, pink = non-rhythmic
     if (step >= 1) {
-      ctx.fillStyle = c.burstRegion;
-      for (const [tStart, tEnd] of [BURST1, BURST2]) {
+      const regions = [
+        { range: BURST1, color: c.burstRegion },
+        { range: BURST2, color: c.burstRegionTransient },
+      ];
+      for (const { range: [tStart, tEnd], color } of regions) {
         const x1 = margin.left + (tStart / DURATION) * plotW;
         const x2 = margin.left + (tEnd / DURATION) * plotW;
+        ctx.fillStyle = color;
         ctx.fillRect(x1, margin.top, x2 - x1, plotH);
       }
     }
@@ -569,15 +601,27 @@
       }
     }
 
-    // Draw background-only trace at step 3 (dim, behind the full signal)
+    // Draw background-only trace at step 3 UNDER the signal. We display a circularly-
+    // shifted copy of the oscillation-subtracted background, scaled down so it reads
+    // as a faint, smaller-amplitude colored-noise reference line. It preserves the
+    // 1/f spectral character (so it looks like spectra, not a smooth line) while
+    // staying visually secondary to the blue signal.
     if (step === 3 && state.components) {
+      const bg = state.components.background;
+      const shift = Math.round(0.85 * SR); // 0.85 s circular shift
+      const ampScale = 0.3;                // scale down amplitude — barely noticeable
+      // Anchor the pink trace at the blue signal's starting y-value, so it sits along
+      // the same baseline the signal begins at and stays there (with small colored-
+      // noise wiggles) instead of following the signal's ups and downs.
+      const bgCenterY = margin.top + plotH / 2 - ((signal[0] - mid) / padRange) * plotH - 0.2 * plotH;
       ctx.beginPath();
       ctx.strokeStyle = c.background1f;
-      ctx.globalAlpha = 0.4;
-      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.45;
+      ctx.lineWidth = 0.7;
       for (let i = 0; i < N; i++) {
+        const j = (i + shift) % N;
         const x = margin.left + (i / N) * plotW;
-        const y = margin.top + plotH / 2 - ((state.components.background[i] - mid) / padRange) * plotH;
+        const y = bgCenterY - (ampScale * (bg[j] - mid) / padRange) * plotH;
         if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
       }
       ctx.stroke();
@@ -636,7 +680,7 @@
     // X axis labels
     for (let t = 0; t <= DURATION; t += 2) {
       const x = margin.left + (t / DURATION) * plotW;
-      drawText(ctx, t + "s", x, margin.top + plotH + 14, {
+      drawText(ctx, t + " s", x, margin.top + plotH + 14, {
         align: "center",
         color: c.axesLabel,
         font: '10px "Inter", sans-serif',
@@ -659,27 +703,45 @@
     });
     ctx.restore();
 
-    // Legend for burst regions
+    // Legend for burst regions — left-aligned block anchored so the longest label's
+    // right edge sits against the plot's right axis. All swatches line up vertically.
     if (step >= 1 && step < 4) {
-      ctx.fillStyle = c.burstRegion;
-      ctx.fillRect(margin.left + plotW - 175, margin.top + 5, 12, 12);
-      drawText(ctx, "Embedded oscillations", margin.left + plotW - 160, margin.top + 11, {
-        font: '10px "Inter", sans-serif',
-        color: c.axesLabel,
-      });
-      if (step === 3) {
-        ctx.strokeStyle = c.background1f;
-        ctx.globalAlpha = 0.4;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(margin.left + plotW - 175, margin.top + 24);
-        ctx.lineTo(margin.left + plotW - 163, margin.top + 24);
-        ctx.stroke();
-        ctx.globalAlpha = 1.0;
-        drawText(ctx, "Background only (1/f)", margin.left + plotW - 160, margin.top + 24, {
-          font: '10px "Inter", sans-serif',
-          color: c.background1f,
+      const legendFont = '10px "Inter", sans-serif';
+      const rightEdge = margin.left + plotW - 4;
+      const swatchW = 12;
+      const swatchGap = 4;
+      ctx.font = legendFont;
+      const widest = Math.max(
+        ctx.measureText("Embedded rhythmic activity").width,
+        ctx.measureText("Embedded non-rhythmic activity").width,
+        step === 3 ? ctx.measureText("Background only (1/f)").width : 0
+      );
+      const startX = rightEdge - swatchW - swatchGap - widest;
+
+      const drawLegendEntry = (label, y, swatchColor, textColor, asLine) => {
+        if (asLine) {
+          ctx.strokeStyle = swatchColor;
+          ctx.globalAlpha = 0.4;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(startX, y);
+          ctx.lineTo(startX + swatchW, y);
+          ctx.stroke();
+          ctx.globalAlpha = 1.0;
+        } else {
+          ctx.fillStyle = swatchColor;
+          ctx.fillRect(startX, y - 6, swatchW, 12);
+        }
+        drawText(ctx, label, startX + swatchW + swatchGap, y, {
+          font: legendFont,
+          color: textColor,
         });
+      };
+
+      drawLegendEntry("Embedded rhythmic activity", margin.top + 11, c.burstRegion, c.axesLabel, false);
+      drawLegendEntry("Embedded non-rhythmic activity", margin.top + 27, c.burstRegionTransient, c.axesLabel, false);
+      if (step === 3) {
+        drawLegendEntry("Background only (1/f)", margin.top + 43, c.background1f, c.background1f, true);
       }
     }
 
@@ -1420,7 +1482,7 @@
     // X axis
     for (let t = 0; t <= DURATION; t += 2) {
       const x = margin.left + (t / DURATION) * plotW;
-      drawText(ctx, t + "s", x, margin.top + plotH + 14, {
+      drawText(ctx, t + " s", x, margin.top + plotH + 14, {
         align: "center", color: c.axesLabel, font: '10px "Inter", sans-serif',
       });
     }
@@ -1882,7 +1944,7 @@
     // Step 0: Start
     "",
     // Step 1: Signal
-    '<strong>Step 1: The Signal.</strong> This is a simulated brain signal with 1/f\u1D43 colored-noise background (like real EEG). We embedded oscillation bursts at your chosen frequency in the shaded regions. In real data, we wouldn\'t know where oscillations are \u2014 that\'s what BOSC finds.',
+    '<strong>Step 1: The Signal.</strong> This is a simulated brain signal with 1/f\u1D43 colored-noise background (like real EEG). The first shaded region (~1\u20133.5&nbsp;s) contains a <em>sustained</em> oscillation at your chosen frequency \u2014 a real rhythm. The second shaded region (~6&nbsp;s) contains a single <em>sharp transient</em>: a brief, high-amplitude event (think of a movement artefact or an evoked spike). It inflates the power spectrum, but it isn\'t rhythmic \u2014 BOSC should reject it. In real data we wouldn\'t know which is which; that\'s what BOSC decides.',
     // Step 2: Power Spectrum
     '<strong>Step 2: The Power Spectrum.</strong> The power spectrum shows how much energy is at each frequency. Notice power naturally decreases with frequency (the 1/f shape). A naive approach would find "oscillations" everywhere at low frequencies simply because power is always higher there \u2014 a frequency bias.',
     // Step 3: Background Fit

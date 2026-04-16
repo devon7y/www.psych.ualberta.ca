@@ -1626,7 +1626,7 @@
       var ttFrac = tTicks[tti] / OSC_DUR;
       var ttx = margins.left + ttFrac * plotW;
       if (ttx > margins.left + plotW + 2) continue;
-      drawText(ctx, tTicks[tti] + "s", ttx, margins.top + plotH + 12, {
+      drawText(ctx, tTicks[tti] + " s", ttx, margins.top + plotH + 12, {
         font: '8px "Inter", sans-serif', align: "center", color: c.axesLabel
       });
     }
